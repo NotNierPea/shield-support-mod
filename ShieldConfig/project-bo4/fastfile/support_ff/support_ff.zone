@@ -1,0 +1,24 @@
+// command: .\acts.exe fastfilelinker ShieldConfig\project-bo4\fastfile\support_ff\support_ff.zone -o 'C:\Program Files (x86)\Call of Duty Black Ops 4\project-bo4'
+// example and test file for the fastfile linker
+
+// fastfile options
+>game=bo4              // the game to use
+>name=support        // fastfile name
+>compression=zlib      // compression type, by default no compression is used
+>compression.high=true // use high compression
+
+// images, the file will be searched in the images directory. the file extension will be removed
+image,wanted_cred.png
+image,eagle_cred.png
+image,peawhatever_cred.png
+image,bodnjenie_cred.png
+image,ate47_cred.png
+image,mod_manager_rush.png
+image,mod_manager_french.png
+image,mod_manager_surv.png
+image,mod_manager_kim.png
+image,mod_manager_abom.png
+image,mod_manager_synergy.png
+image,mod_manager_timers.png
+image,mm_icon.png
+image,shield_public_banner.png
