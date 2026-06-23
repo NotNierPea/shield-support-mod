@@ -8,6 +8,11 @@ CoD.ShieldInitLuaFile()
 
 ---------------------------
 
+-- dvars
+Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_dw_ip demonware ipv4 string")
+
+---------------------------
+
 -- Buttons in Extra Main
 DataSources.DirectorExtraHomeButtonsCustom = ListHelper_SetupDataSource( "DirectorExtraHomeButtonsCustom", function ( f85_arg0, f85_arg1 )
 	local f85_local0 = {}
