@@ -31,7 +31,7 @@ CoD.directorCustom.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4,
 	self:addElement( CustomGamePlayers )
 	self.CustomGamePlayers = CustomGamePlayers
 
-	local ShieldOptionsButtonZM = CoD.DirectorPreGameButtonOption.new( f1_arg0, f1_arg1, 0.00, 0.00, 69.00, 423.00, 1.00, 1.00, 9.49 - 185, 56.49 - 185 ) 
+	local ShieldOptionsButtonZM = CoD.DirectorPreGameButtonOption.new( f1_arg0, f1_arg1, 0.0000, 0.0000, 68.0000, 423.0000, 1.0000, 1.0000, -272.0000, -225.0000 ) 
 	ShieldOptionsButtonZM.DirectorSelectButtonMiniInternal.MiddleText:setText( "SHIELD OPTIONS" )
 	ShieldOptionsButtonZM.DirectorSelectButtonMiniInternal.MiddleTextFocus:setText( "SHIELD OPTIONS" )
 	

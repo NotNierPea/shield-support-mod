@@ -908,8 +908,8 @@ CoD.DirectorLobbySettingList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3
 	self:addElement( LaunchGameButton )
 	self.LaunchGameButton = LaunchGameButton
 
-	local SetMaxHighClients = CoD.DirectorConfigButton.new( f1_arg0, f1_arg1, 0, 1, 0, 0, 0, 0, 96 + 100, 136 + 100 )
-	SetMaxHighClients:mergeStateConditions( {
+	local SetOldMapGamemode = CoD.DirectorConfigButton.new( f1_arg0, f1_arg1, 0, 1, 0, 0, 0, 0, 96 + 100, 136 + 100 )
+	SetOldMapGamemode:mergeStateConditions( {
 		{
 			stateName = "invisible",
 			condition = function ( menu, element, event )
@@ -918,22 +918,22 @@ CoD.DirectorLobbySettingList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3
 		}
 	} )
 
-	SetMaxHighClients.ButtonName:setText( LocalizeToUpperString( @"hash_39F579200DA477FE" ) ) 
+	SetOldMapGamemode.ButtonName:setText( "SET OLD MAP/GAMEMODE" ) 
 
-	SetMaxHighClients:appendEventHandler( "on_session_start", function ( f23_arg0, f23_arg1 )
+	SetOldMapGamemode:appendEventHandler( "on_session_start", function ( f23_arg0, f23_arg1 )
 		f23_arg1.menu = f23_arg1.menu or f1_arg0
 		CoD.Menu.UpdateButtonShownState( f23_arg0, f1_arg0, f1_arg1, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"] )
 	end )
-	SetMaxHighClients:appendEventHandler( "on_session_end", function ( f24_arg0, f24_arg1 )
+	SetOldMapGamemode:appendEventHandler( "on_session_end", function ( f24_arg0, f24_arg1 )
 		f24_arg1.menu = f24_arg1.menu or f1_arg0
 		CoD.Menu.UpdateButtonShownState( f24_arg0, f1_arg0, f1_arg1, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"] )
 	end )
-	SetMaxHighClients:appendEventHandler( "input_source_changed", function ( f28_arg0, f28_arg1 )
+	SetOldMapGamemode:appendEventHandler( "input_source_changed", function ( f28_arg0, f28_arg1 )
 		f28_arg1.menu = f28_arg1.menu or f1_arg0
 		CoD.Menu.UpdateButtonShownState( f28_arg0, f1_arg0, f1_arg1, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"] )
 	end )
 
-	SetMaxHighClients:registerEventHandler( "gain_focus", function ( element, event )
+	SetOldMapGamemode:registerEventHandler( "gain_focus", function ( element, event )
 		local f56_local6 = nil
 		if element.gainFocus then
 			f56_local6 = element:gainFocus( event )
@@ -944,24 +944,16 @@ CoD.DirectorLobbySettingList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3
 		return f56_local6
 	end )
 
-	f1_arg0:AddButtonCallbackFunction( SetMaxHighClients, f1_arg1, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"], "ui_confirm", function ( element, menu, controller, model )
+	f1_arg0:AddButtonCallbackFunction( SetOldMapGamemode, f1_arg1, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"], "ui_confirm", function ( element, menu, controller, model )
 		if IsLobbyHostOfCurrentMenu() and IsMouseOrKeyboard( controller ) then
 			-- set max clients
 			PlaySoundAlias( "uin_toggle_generic" )
-			Engine[@"setlobbymaxclients"](Enum[@"lobbytype"][@"lobby_type_game"], 18) 
-			Engine[@"setlobbymaxclients"](Enum[@"lobbytype"][@"lobby_type_private"], 18)
-			Engine[@"setlobbymaxclients"](Engine[@"getprimarycontroller"](), 18)
-			Dvar[@"hash_4FF45B41C6046F8"]:set(18)
-			Engine[@"setmodelvalue"](Engine[@"createmodel"]( Engine[@"createmodel"]( Engine[@"getglobalmodel"](), "PartyPrivacy" ), "maxPlayers" ), 18)
+			CoD.ChangeToOldMapGameType(controller)
 			return true
 		elseif IsLobbyHostOfCurrentMenu() then
 			-- set max clients
 			PlaySoundAlias( "uin_toggle_generic" )
-			Engine[@"setlobbymaxclients"](Enum[@"lobbytype"][@"lobby_type_game"], 18)
-			Engine[@"setlobbymaxclients"](Enum[@"lobbytype"][@"lobby_type_private"], 18)
-			Engine[@"setlobbymaxclients"](Engine[@"getprimarycontroller"](), 18)
-			Dvar[@"hash_4FF45B41C6046F8"]:set(18)
-			Engine[@"setmodelvalue"](Engine[@"createmodel"]( Engine[@"createmodel"]( Engine[@"getglobalmodel"](), "PartyPrivacy" ), "maxPlayers" ), 18)
+			CoD.ChangeToOldMapGameType(controller)
 			return true
 		else
 			-- no
@@ -977,8 +969,8 @@ CoD.DirectorLobbySettingList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3
 			return false
 		end
 	end, false )
-	self:addElement( SetMaxHighClients )
-	self.SetMaxHighClients = SetMaxHighClients
+	self:addElement( SetOldMapGamemode )
+	self.SetOldMapGamemode = SetOldMapGamemode
 	
 	self:mergeStateConditions( {
 		{
@@ -995,7 +987,7 @@ CoD.DirectorLobbySettingList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3
 	AddBotButton.id = "AddBotButton"
 	RemoveBotButton.id = "RemoveBotButton"
 	LaunchGameButton.id = "LaunchGameButton" 
-	SetMaxHighClients.id = "SetMaxHighClients"
+	SetOldMapGamemode.id = "SetOldMapGamemode"
 
 	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
 	
@@ -1055,6 +1047,10 @@ CoD.DirectorLobbySettingList.__onClose = function ( f63_arg0 )
 	f63_arg0.BotSettingsButton:close()
 	f63_arg0.AddBotButton:close()
 	f63_arg0.RemoveBotButton:close()
+
+	-- save old map + gamemode
+	Dvar[@"shield_old_map"]:set(Engine[@"lobbygetmap"]())
+	Dvar[@"shield_old_gametype"]:set(Engine[@"lobbygetgametype"]())
 end
 
 -- Custom Bots Settings..
