@@ -37,8 +37,8 @@ CoD.PrestigeUtility.EnterPrestigeAction = function ( f13_arg0, f13_arg1, f13_arg
 	local PrestigeCurrent = Engine[@"getstatbyname"]( Engine[@"getprimarycontroller"](), "PLEVEL" )
 
 	if PrestigeCurrent then
-		RankUtils.SetRank(0)
-		RankUtils.SetPrestige(PrestigeCurrent + 1)
+		CoD.RankUtils.SetRank(0)
+		CoD.RankUtils.SetPrestige(PrestigeCurrent + 1)
 
 		OpenSystemOverlay(f13_arg0, f13_arg0, f13_arg1, "ShieldPrestigeActivate", nil)
 		CoD.EnhPrintInfo("Next Prestige Success!")
@@ -54,8 +54,8 @@ CoD.PrestigeUtility.FreshStartAction = function ( f18_arg0, f18_arg1, f18_arg2 )
 	Engine[@"exec"](Engine[@"getprimarycontroller"](), "exec gamedata/stats/mp/playerstats_reset.cfg")
 
 	-- live stats
-	RankUtils.SetRank(0)
-	RankUtils.SetPrestige(0)
+	CoD.RankUtils.SetRank(0)
+	CoD.RankUtils.SetPrestige(0)
 
 	OpenSystemOverlay(f18_arg0, f18_arg0, f18_arg1, "ShieldFreshStartActivate", nil)
 
