@@ -382,6 +382,7 @@ CoD.ReloadOverrides = function()
 	CoD.UnlockReload()
 	CoD.DirectorSelectOverride()
 	CoD.ChatOverride()
+	CoD.ReactivesReload()
 end
 
 CoD.RefreshShieldShit = function()
