@@ -514,6 +514,15 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/GameReactiveRequest",
+            "path": "Lua\\Game\\ReactiveRequest.luac",
+            "hooks_post": [
+                "x64:46f417a74d9ab424",
+                "x64:57d27ab8e2f7a9d0"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/GameDiscordRPC",
             "path": "Lua\\Game\\DiscordRPC.luac",
             "hooks_post": [
@@ -1381,9 +1390,33 @@
             "type": "localizeentry",
             "name": "shield/stage_8",
             "value": "Last Stage"
+        },
+        {
+            "type": "localizeentry",
+            "name": "hash_63da6ea5d502cf7d",
+            "value": "Gamepad aim assist is available in Shield Client."
         }
     ],
-    "cache": [],
+    "cache": [
+        {
+            "type": "menu",
+            "name": "shield_support_menu",
+            "mode": [
+                "wz",
+                "mp",
+                "zm"
+            ]
+        },
+        {
+            "type": "eventstring",
+            "name": "reactive_apply",
+            "mode": [
+                "wz",
+                "mp",
+                "zm"
+            ]
+        }
+    ],
     "redirect": [
         {
             "type": "image",

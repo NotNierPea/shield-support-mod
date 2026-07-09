@@ -32,13 +32,27 @@ CoD.LoadOveridesSpawn = function()
 		  -- flash hashes (zm only)
 		  CoD.FlashHashes(f58_arg1.controller)
 
+		  -- fix for zm fast restart
 	      CoD.FixSubtitles(f58_arg1.controller)
+		  
 	      HUD_FirstSnapshot_Common_Original(f58_arg0, f58_arg1)
 	end
 
 	CoD.ApplyRoundPatches()
+
+	-- send reactive force stage dvar
+	CoD.SentReativeForceStage(Engine[@"getprimarycontroller"]())
 end
 
+-- for wz
+CoD.PCUtility.AreUIShortcutInputLocked = function ( f18_arg0 )
+	CoD.LoadOveridesSpawn()
+
+	local f18_local0 = Engine[@"getmodelforcontroller"]( f18_arg0 )
+	return f18_local0.LockUIShortcutInput:get()
+end
+
+-- other modes
 CoD.PCUtility.MenuChatToggleShouldBeVisible = function ( f388_arg0, f388_arg1, f388_arg2 )
 	CoD.EnhPrintInfo("Returned True", "MenuChat and Load Overides")
 

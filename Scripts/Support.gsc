@@ -56,7 +56,7 @@ Init()
 
 PostInit() 
 {
-    
+    callback::on_connect(&AddMenuReponses);
 }
 
 WZChanges()

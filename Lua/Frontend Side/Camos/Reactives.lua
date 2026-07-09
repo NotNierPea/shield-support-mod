@@ -12,10 +12,6 @@ Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_active_camo_
 
 ---------------------------
 
-local GlobalMenu = nil
-
----------------------------
-
 -- add our setting in camo menu
 CoD.ReactivesReload = function()
 	-- override datasource buttons to have 4
@@ -129,6 +125,49 @@ CoD.ReactivesReload = function()
 	end
 end
 
+local function PreviewReactiveWeaponCamo( camo_index, rob_stage, controller, menu )
+	local f109_local0, f109_local1, f109_local2 = CoD.BaseUtility.GetMenuModelModeLoadoutSlot( menu )
+	local f109_local3 = CoD.GetCustomization( controller, "weapon_index" )
+	local f109_local4 = CoD.GetCustomization( controller, "weaponRefHash" )
+	local f109_local5 = CoD.CraftUtility.GetLoadoutSlot( controller )
+	local f109_local6 = "select01"
+	local f109_local7 = ""
+	local f109_local8 = ""
+	if f109_local1 == Enum[@"emodes"][@"mode_zombies"] then
+		f109_local8 = CoD.ZMLoadoutUtility.GetArmoryAttachmentStringForWeaponIndex( controller, f109_local3, f109_local1 )
+	end
+	local f109_local9 = camo_index
+	if not f109_local9 then
+		f109_local9 = f109_local0.weaponOptionSubIndex:get() or 0
+	end
+	local f109_local10 = menu._baseWeaponModelSlot or 0
+	if menu._weaponOptionCategory == "theme" then
+		f109_local10 = f109_local0.signatureWeaponModelSlot:get()
+	end
+	local f109_local11 = rob_stage
+	local f109_local12 = 0
+	if f109_local1 == Enum[@"emodes"][@"mode_zombies"] then
+		f109_local12 = CoD.ZMLoadoutUtility.GetArmoryCharmItemFromWeapon( controller, f109_local3 )
+	elseif f109_local1 == Enum[@"emodes"][@"mode_warzone"] then
+		f109_local12 = CoD.WZUtility.GetArmoryCharmItemFromWeapon( controller, f109_local3 )
+	else
+		local f109_local13 = menu._classModel
+		local f109_local14 = f109_local13 and f109_local13[f109_local5]
+		local f109_local15 = f109_local14 and f109_local14.charmIndex
+		if f109_local15 then
+			local f109_local16 = f109_local15:get()
+		end
+		f109_local12 = f109_local16 or 0
+	end
+	Engine[@"sendclientscriptnotify"]( controller, "CustomClass_update" .. CoD.GetLocalClientAdjustedNum( controller ), {
+		base_weapon_slot = f109_local5,
+		weapon = f109_local4,
+		attachments = f109_local8,
+		camera = f109_local6,
+		options = CoD.WeaponOptionsUtility.GetWeaponOptionsString( f109_local9, 0, 1, f109_local10, f109_local11, f109_local12 )
+	} )
+end
+
 local function OnExtraDataChange ( f137_arg0, f137_arg1, f137_arg2, f137_arg3, f137_arg4 )
 	local dvar_name = f137_arg3
 	local dvar_val = Engine[@"getdvarint"]( dvar_name )
@@ -145,6 +184,98 @@ local function OnExtraDataChange ( f137_arg0, f137_arg1, f137_arg2, f137_arg3, f
 
 	if dvar_name == "shield_active_camo_last" then	
 		Engine[@"exec"](Engine[@"getprimarycontroller"](), "writejson lua active_camo_last " .. dvar_val_new .. " uint64_t")
+	end
+
+	if CoD.CamosGlobalMenu == nil then
+		return
+	end
+
+	-- preview it
+	local dvar_to_view = (dvar_val_new - 1)
+	local camo_index_get = 0
+	local f61_local2, f61_local3, f61_local4 = CoD.BaseUtility.GetMenuModelModeLoadoutSlot( CoD.CamosGlobalMenu )
+	local session_mode = CoD.BaseUtility.GetMenuSessionMode( CoD.CamosGlobalMenu )
+	local f361_local1 = nil
+
+	if session_mode == Enum[@"emodes"][@"mode_multiplayer"] then
+		camo_index_get = f61_local2[f61_local4]["camoIndex"]:get()
+	elseif session_mode == Enum[@"emodes"][@"mode_warzone"] then
+		local f361_local0 = CoD.CamosGlobalMenu._model
+		if f361_local0 then
+			f361_local0 = CoD.CamosGlobalMenu._model.itemIndex:get()
+		end
+
+		local f361_local1 = CoD.WZUtility.GetVariantSlot( Controller, f361_local0, false )
+		camo_index_get = f361_local1["camoIndex"]:get()
+	elseif session_mode == Enum[@"emodes"][@"mode_zombies"] then
+		local f361_local0 = CoD.CamosGlobalMenu._model
+		if f361_local0 then
+			f361_local0 = CoD.CamosGlobalMenu._model.itemIndex:get()
+		end
+
+		local f361_local1 = CoD.ZMLoadoutUtility.GetVariantSlot( Controller, f361_local0, false )
+		camo_index_get = f361_local1["camoIndex"]:get()
+	end
+
+	local f42_local0 = {}
+	local f42_local1 = CoD.BaseUtility.GetMenuSessionMode( CoD.CamosGlobalMenu )
+	local f42_local2 = CoD.BaseUtility.GetMenuModel( CoD.CamosGlobalMenu )
+	local f42_local4 = CoD.WeaponOptionsUtility.GetActiveCamoRefForBaseCamoIndex(Engine[@"currentsessionmode"](), camo_index_get)
+	local b_found = false
+	if f42_local4 and f42_local4 ~= @"hash_0" then
+		local f42_local5 = Engine[@"hash_2E00B2F29271C60B"]( f42_local4 )
+		if f42_local5 and f42_local5.stages then
+			local f42_local6 = 0
+			local f42_local7 = CoD.CACUtility.BaseUnwrappedStageForActiveCamo
+			if CoD.CamosGlobalMenu._weaponOptionCategory == "theme" then
+				f42_local7 = CoD.CACUtility.MastercraftCamoStartStage
+			elseif CoD.CamosGlobalMenu._weaponOptionCategory == "mstr" then
+				f42_local7 = CoD.CACUtility.MasteryCamoStartStage
+			end
+
+			if dvar_to_view >= (#f42_local5.stages - f42_local7) then
+				dvar_to_view = (#f42_local5.stages - f42_local7)
+			end
+
+			for f42_local8 = f42_local7, #f42_local5.stages, 1 do
+				local f42_local11
+				if f42_local8 - 1 >= 0 then
+					f42_local11 = f42_local5.stages[f42_local8 - 1]
+				else
+					f42_local11 = false
+				end
+				local f42_local12 = f42_local5.stages[f42_local8]
+				if not f42_local12[@"disabled"] or f42_local12[@"disabled"] ~= 1 then
+					local f42_local13 = Engine[@"tablelookup"]( CoD.CACUtility.CamoOptionsTable, Enum[@"hash_25DD5CC8AEA7314B"][@"hash_6A6342D60A0D5AAE"], Enum[@"hash_25DD5CC8AEA7314B"][@"hash_3AA94CABDA68EB21"], f42_local12[@"camooption"] )
+					local f42_local14 = Engine[@"hash_4F9F1239CFD921FE"]( @"hash_455472550AF1CAB2" )
+					if f42_local11 and f42_local7 < f42_local8 then
+						if f42_local11[@"hash_2581C6C8958C02BB"] then
+							local f42_local15 = Engine[@"hash_4F9F1239CFD921FE"]( f42_local11[@"hash_2581C6C8958C02BB"], f42_local6 )
+						end
+						f42_local14 = f42_local15 or ""
+					end
+					table.insert( f42_local0, {
+						models = {
+							displayText = f42_local14,
+							stageCamoIndex = f42_local13,
+							robStage = f42_local8 - 1
+						}
+					} )
+
+					CoD.EnhPrintInfo("Compare: " .. f42_local8 .. " - " .. (dvar_to_view + f42_local7) .. " - " .. f42_local13 .. " - " .. (f42_local8 - 1))
+					if f42_local8 == (dvar_to_view + f42_local7) then
+						PreviewReactiveWeaponCamo(f42_local13, (f42_local8 - 1), Engine[@"getprimarycontroller"](), CoD.CamosGlobalMenu)
+						b_found = true
+					end
+
+					f42_local6 = f42_local6 + f42_local12[@"hash_5181D2404B77545F"]
+				end
+			end
+		end
+	end
+
+	if b_found == false then
+		PreviewReactiveWeaponCamo(camo_index_get, 0, Engine[@"getprimarycontroller"](), CoD.CamosGlobalMenu) -- default
 	end
 end
 
@@ -220,6 +351,8 @@ CoD.ShieldReativesSettingsTab.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg
 	self.anyChildUsesUpdateState = true
 	f1_arg0:addElementToPendingUpdateStateList( self )
 	
+	CoD.CamosGlobalMenu = f1_arg0
+
 	local Backing = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
 	Backing:setRGB( 0, 0, 0 )
 	Backing:setAlpha( 0 )
@@ -231,8 +364,6 @@ CoD.ShieldReativesSettingsTab.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg
 	ShieldReactiveSettingsList.Label:setText( "REACTIVE STAGES SETTINGS" )
 	self:addElement( ShieldReactiveSettingsList )
 	self.ShieldReactiveSettingsList = ShieldReactiveSettingsList
-
-	GlobalMenu = f1_arg0
 	
 	self:mergeStateConditions( {
 		{

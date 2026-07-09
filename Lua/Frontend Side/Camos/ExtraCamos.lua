@@ -107,7 +107,7 @@ DataSources.WeaponOptionsCamoCategories = DataSourceHelpers.ListSetup( "WeaponOp
 		models = {
 			name = @"shield/reactive_settings_tab",
 			frameWidget = "CoD.ShieldReativesSettingsTab",
-			breadcrumb = f41_local1.breadcrumb
+			breadcrumb = nil
 		},
 		properties = {
 			refHash = f41_local1.refHash,
@@ -119,7 +119,7 @@ DataSources.WeaponOptionsCamoCategories = DataSourceHelpers.ListSetup( "WeaponOp
 		models = {
 			name = @"shield/extra_camos_tab",
 			frameWidget = "CoD.ShieldExtraCamos",
-			breadcrumb = f41_local1.breadcrumb
+			breadcrumb = nil
 		},
 		properties = {
 			refHash = f41_local1.refHash,
