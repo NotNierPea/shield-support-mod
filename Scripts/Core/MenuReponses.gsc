@@ -41,7 +41,7 @@ TryReactiveCamo(params) {
             level flag::wait_till("initial_blackscreen_passed");
 
             weapon = self getCurrentWeapon();
-            if (isdefined(weapon))
+            if (isdefined(weapon) && isdefined(self.pers) && isdefined(self.pers[#"activecamo"]))
             {
                 self setcamo(weapon, 0);
 
