@@ -565,6 +565,16 @@ CoD.ShieldReactiveSettingsList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_ar
 	Label:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
 	self:addElement( Label )
 	self.Label = Label
+
+	local Desc1 = LUI.UIText.new( 0.0000, 0.0000, 0.0000, 553.0000, 0.0000, 0.0000, 132.0000, 151.0000 )
+	Desc1:setRGB( ColorSet.T8__OFF__GRAY.r, ColorSet.T8__OFF__GRAY.g, ColorSet.T8__OFF__GRAY.b )
+	Desc1:setText( "Forces the reactive camo to never change and always apply to the selected stage (this applys to every reactive camo)" )
+	Desc1:setTTF( "default" )
+	Desc1:setLetterSpacing( 4 )
+	Desc1:setAlignment( Enum[@"luialignment"][@"lui_alignment_center"] )
+	Desc1:setAlignment( Enum[@"luialignment"][@"lui_alignment_middle"] )
+	self:addElement( Desc1 )
+	self.Desc1 = Desc1
 	
 	local BottomBracket9Slice = LUI.UIImage.new( 0, 0, 0, 1214, 0, 0, 28, 37 )
 	BottomBracket9Slice:setAlpha( 0.5 )
