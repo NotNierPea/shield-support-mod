@@ -507,7 +507,7 @@ CoD.ReactiveSettingContainer.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3
 	SettingsList:setVerticalCount(11)
 	SettingsList:setHorizontalCount(1)
 	SettingsList:setSpacing( 5 )
-	SettingsList:setWidgetType( CoD.CustomGames_SettingSliderNoCustom_Enh )
+	SettingsList:setWidgetType( CoD.CustomGames_SettingSliderNoCustom )
 	SettingsList:setVerticalCounter( CoD.verticalCounter )
 	SettingsList:setDataSource( "ReactiveSettings" )
 	SettingsList:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
