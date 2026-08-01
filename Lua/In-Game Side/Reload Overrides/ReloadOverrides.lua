@@ -22,26 +22,26 @@ CoD.LoadOveridesSpawn = function()
 	-- subtitles fixes, and other
 	local HUD_FirstSnapshot_Common_Original = HUD_FirstSnapshot_Common
 	function HUD_FirstSnapshot_Common(f58_arg0, f58_arg1)
-	      Engine[@"PrintInfo"](0, "^3Reseted Subtitles!")
+		Engine[@"PrintInfo"](0, "^3Reseted Subtitles!")
 
-		  CoD.ResetRoundPatch()
+		CoD.ResetRoundPatch()
 
-		  -- reset rpc too
-		  CoD.ResetRPC()
+		-- reset rpc too
+		CoD.ResetRPC()
 
-		  -- flash hashes (zm only)
-		  CoD.FlashHashes(f58_arg1.controller)
+		-- flash hashes (zm only)
+		CoD.FlashHashes(f58_arg1.controller)
 
-		  -- fix for zm fast restart
-	      CoD.FixSubtitles(f58_arg1.controller)
-		  
-	      HUD_FirstSnapshot_Common_Original(f58_arg0, f58_arg1)
+		-- fix for zm fast restart
+		CoD.FixSubtitles(f58_arg1.controller)
+
+		-- send reactive force stage dvar
+		CoD.SentReativeForceStage(Engine[@"getprimarycontroller"]())
+		
+		HUD_FirstSnapshot_Common_Original(f58_arg0, f58_arg1)
 	end
 
 	CoD.ApplyRoundPatches()
-
-	-- send reactive force stage dvar
-	CoD.SentReativeForceStage(Engine[@"getprimarycontroller"]())
 end
 
 -- for wz

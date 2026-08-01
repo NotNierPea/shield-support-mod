@@ -1,7 +1,7 @@
 
 detour activecamo<scripts\core_common\activecamo_shared.gsc>::set_stage_activecamo(activecamo, stagenum)
 {
-    if (!isdefined(level.reactive_camos_force))
+    if (!isdefined(self.reactive_stage))
     {
         return [[ @activecamo<scripts\core_common\activecamo_shared.gsc>::set_stage_activecamo ]](activecamo, stagenum);
     }
@@ -12,7 +12,7 @@ detour activecamo<scripts\core_common\activecamo_shared.gsc>::set_stage_activeca
 // fix kills error in zm
 detour activecamo<scripts\core_common\activecamo_shared.gsc>::function_896ac347(oweapon, statname, value)
 {
-    if (!isdefined(self.forced_reactive))
+    if (!isdefined(self.reactive_stage))
     {
         return [[ @activecamo<scripts\core_common\activecamo_shared.gsc>::function_896ac347 ]](oweapon, statname, value);
     }
@@ -20,27 +20,16 @@ detour activecamo<scripts\core_common\activecamo_shared.gsc>::function_896ac347(
     return;
 }
 
-
 SetReactiveForcedStage(activecamo, stagenum)
 {
     // check if player has a force option for stage
-    request = undefined;
-    b_found = false;
-    foreach(player_request in level.reactive_camos_force)
+    if (!isdefined(self.reactive_stage))
     {
-        if (player_request.player === self)
-        {
-            request = player_request;
-            b_found = true;
-        }
+        return [[ @activecamo<scripts\core_common\activecamo_shared.gsc>::set_stage_activecamo ]](activecamo, stagenum);
     }
 
-    // not in array
-    if (!b_found)
-        return [[ @activecamo<scripts\core_common\activecamo_shared.gsc>::set_stage_activecamo ]](activecamo, stagenum);
-
     // get the player's dvar from lua menu's response
-    dvar_val = request.reactive_stage;
+    dvar_val = self.reactive_stage;
     if (dvar_val == 0)
     {
         return [[ @activecamo<scripts\core_common\activecamo_shared.gsc>::set_stage_activecamo ]](activecamo, stagenum);
@@ -58,4 +47,25 @@ SetReactiveForcedStage(activecamo, stagenum)
     }
 
     return [[ @activecamo<scripts\core_common\activecamo_shared.gsc>::set_stage_activecamo ]](activecamo, dvar_val); // exact stage key
+}
+
+ZMReactiveFix()
+{
+    level flag::wait_till("initial_blackscreen_passed");
+
+    // force it to refresh
+    if (isalive(self) && isdefined(self.reactive_stage)) {
+        weapon = self getCurrentWeapon();
+        if (isdefined(weapon) && isdefined(self.pers) && isdefined(self.pers[#"activecamo"]))
+        {
+            self setcamo(weapon, 0);
+
+            wait 0.5;
+
+            foreach (activecamo in self.pers[#"activecamo"])
+            {
+                SetReactiveForcedStage(activecamo, self.reactive_stage);
+            }
+        }
+    }
 }

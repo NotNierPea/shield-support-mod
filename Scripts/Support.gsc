@@ -79,7 +79,8 @@ MPChanges()
 
 ZMChanges()
 {
-    
+    // for zm reactive camo fix
+    callback::on_spawned(&ZMReactiveFix);
 }
 
 ZMOnSpawned()
