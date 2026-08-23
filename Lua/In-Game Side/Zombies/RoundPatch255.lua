@@ -2055,30 +2055,33 @@ CoD.ApplyRoundPatches = function()
 
 		-- GET ROUNDS FOR RPC
 		ZmRndDigitWidget0:linkToElementModel( ZmRndDigitWidget0, "roundsPlayed", true, function ( model )
-			if Engine[@"getdvarint"](@"shield_diff_rounds") == 1 and not IsDemoPlaying() then
-				local currentRound = model:get() - 1
+			local modelGet = model:get() -- can be nil sometimes?
+			if modelGet ~= nil then
+				if Engine[@"getdvarint"](@"shield_diff_rounds") == 1 and not IsDemoPlaying() then
+					local currentRound = modelGet - 1
 
-				if currentRound < CoD.lastRound then
-					CoD.roundOffset = CoD.roundOffset + 256
+					if currentRound < CoD.lastRound then
+						CoD.roundOffset = CoD.roundOffset + 256
+					end
+					
+					local adjustedRound = currentRound + CoD.roundOffset
+					
+					CoD.lastRound = currentRound
+		
+					CoD.adjustedRoundGlobal = adjustedRound + 1
+					
+					CoD.EnhPrintInfo("Rounds, currentRound -> " .. currentRound, "Rounds, adjustedRound -> " .. adjustedRound)
+					CoD.SetRoundRPC(adjustedRound)
+				else
+					local currentRound = modelGet - 1
+
+					local adjustedRound = currentRound
+					
+					CoD.adjustedRoundGlobal = adjustedRound + 1
+					
+					CoD.EnhPrintInfo("Rounds, currentRound -> " .. currentRound, "Rounds, adjustedRound -> " .. adjustedRound)
+					CoD.SetRoundRPC(adjustedRound)
 				end
-				
-				local adjustedRound = currentRound + CoD.roundOffset
-				
-				CoD.lastRound = currentRound
-	
-				CoD.adjustedRoundGlobal = adjustedRound + 1
-				
-				CoD.EnhPrintInfo("Rounds, currentRound -> " .. currentRound, "Rounds, adjustedRound -> " .. adjustedRound)
-				CoD.SetRoundRPC(adjustedRound)
-			else
-				local currentRound = model:get() - 1
-
-				local adjustedRound = currentRound
-				
-				CoD.adjustedRoundGlobal = adjustedRound + 1
-				
-				CoD.EnhPrintInfo("Rounds, currentRound -> " .. currentRound, "Rounds, adjustedRound -> " .. adjustedRound)
-				CoD.SetRoundRPC(adjustedRound)
 			end
 			
 			f1_arg0:updateElementState( ZmRndDigitWidget0, {
