@@ -4,6 +4,9 @@
 # How to Compile (Scripts):
 - ### Download the latest Shield Client update [here](https://github.com/NotNierPea/shield-launcher), and Extract it in bo4 directory. or Use the ``shield-support-mod/ShieldConfig/project-bo4/mods/T8ShieldSupport`` and copy it to bo4 directory: ``project-bo4/mods``.
 - ### Then you can modify anything in this project, run ``compile_and_copy_lua.bat`` for lua, or ``compile_and_copy_scripts.bat`` for gsc/csc.
+- ### Compiler to use
+- #### For client gsc/csc detours: https://github.com/ate47/t7-compiler-custom
+- #### You can also use acts cod tools: https://github.com/ate47/atian-cod-tools (does not support shield client's detours!)
 
 # How to Compile (Fast File):
 - ### Download the latest Shield Client update [here](https://github.com/NotNierPea/shield-launcher), and Extract it in bo4 directory. or Use the ``ShieldConfig/project-bo4/fastfile/T8ShieldSupport_FF`` and copy it to bo4 directory: ``project-bo4/zone_mods``.
