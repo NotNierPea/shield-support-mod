@@ -91,3 +91,20 @@ if CoD.SocialUtility.GetFriendsButtonOptions and not CoD.ShieldGetFriendsButtonO
 		return options
 	end
 end
+
+-- A dedicated server hosts the lobby and is no player: it is left out of the list of the lobby
+if CoD.LobbyUtility and CoD.LobbyUtility.GetClientList and not CoD.ShieldGetClientList then
+	CoD.ShieldGetClientList = CoD.LobbyUtility.GetClientList
+	CoD.LobbyUtility.GetClientList = function ()
+		local clients = CoD.ShieldGetClientList()
+		if Engine[@"lobbyconnectedtodedicatedhost"]() == true then
+			local host = Engine[@"getlobbyhostxuid"]( Enum[@"lobbytype"][@"lobby_type_game"] )
+			for index = #clients, 1, -1 do
+				if clients[index].xuid == host then
+					table.remove( clients, index )
+				end
+			end
+		end
+		return clients
+	end
+end

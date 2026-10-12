@@ -17,23 +17,7 @@ end
 ---------------------------
 
 
-CoD.MatchmakingDvarsReload = function()
-	-- Dvars for Matchmaking..
-	Dvar[@"party_minplayers"]:set(1)
-	--Dvar[@"hash_68827F6EDED32B08"]:set(true)
-	Dvar[@"lobbytimerstartinterval"]:set(0)
-	Dvar[@"lobbycptimerstartinterval"]:set(0)
-	Dvar[@"lobbycpzmtimerstartinterval"]:set(0)
-
-	-- time to choose before custom
-	Dvar[@"lobbytimerstatusvotinginterval"]:set(0)
-
-	Dvar[@"lobbytimerstatusbegininterval"]:set(0)
-	Dvar[@"lobbytimerstatusstartinterval"]:set(0)
-
-	-- after match, WE DONT WANT THAT
-	Dvar[@"lobbytimerstatuspostgameinterval"]:set(200000)
-end
+-- the lobby timers and the players a lobby waits for are the game's own now: a server runs its lobby by them
 
 CoD.ChangeToOldMapGameType = function(controller)
 	if IsLobbyHostOfCurrentMenu() then

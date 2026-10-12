@@ -389,7 +389,6 @@ CoD.RefreshShieldShit = function()
 	-- reset lock lobby lol
 	Dvar[@"shield_lock_lobby"]:set(0)
 
-	CoD.MatchmakingDvarsReload()
 	CoD.RefreshRPCDvars()
 	CoD.ReloadOverrides()
 end
