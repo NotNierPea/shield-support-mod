@@ -231,3 +231,66 @@ table.insert(CoD.ChatClientUtility.ChatCommands,
 	},
 	fct = TryUnmuteChat
 })
+
+---------------------------
+
+-- The whisper of the client, see chat.cpp. The game has /all, /r and /w for the chat channels of its servers,
+-- which are gone: its three entries are given these. A command is also asked while the line is being typed
+-- (typing is true then), and does nothing until the line is sent.
+local function TryWhisperOff( controller, text, typing )
+	if typing then
+		return false, false, false
+	end
+
+	Engine[@"exec"]( Engine[@"getprimarycontroller"](), "whisper_off" )
+
+	-- "/all hello": the line goes where the box is back to
+	if text ~= nil and text ~= "" then
+		Engine[@"exec"]( Engine[@"getprimarycontroller"](), "sendchatmessage " .. text )
+	end
+
+	return false, true, false, nil
+end
+
+local function TryWhisperReply( controller, text, typing )
+	if typing then
+		return false, false, false
+	end
+
+	if text ~= nil and text ~= "" then
+		Engine[@"exec"]( Engine[@"getprimarycontroller"](), "whisper_reply " .. text )
+	else
+		Engine[@"exec"]( Engine[@"getprimarycontroller"](), "whisper_reply" )
+	end
+
+	return false, true, false, nil
+end
+
+-- "/w name line": one line to that player. "/w name": the box turns to that player.
+local function TryWhisperName( controller, text, typing )
+	if typing then
+		return false, false, false
+	end
+
+	if text == nil or text == "" then
+		Engine[@"exec"]( Engine[@"getprimarycontroller"](), "whisper" )
+	elseif string.find( text, " " ) then
+		Engine[@"exec"]( Engine[@"getprimarycontroller"](), "whisper " .. text )
+	else
+		Engine[@"exec"]( Engine[@"getprimarycontroller"](), "whisper_to " .. text )
+	end
+
+	return false, true, false, nil
+end
+
+for _, command in ipairs( CoD.ChatClientUtility.ChatCommands ) do
+	for _, name in ipairs( command.strings ) do
+		if name == "all" then
+			command.fct = TryWhisperOff
+		elseif name == "reply" then
+			command.fct = TryWhisperReply
+		elseif name == "whisper" then
+			command.fct = TryWhisperName
+		end
+	end
+end

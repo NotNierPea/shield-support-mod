@@ -306,6 +306,14 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/BlackoutJoinInProgress",
+            "path": "Lua\\Frontend\\BlackoutJoinInProgress.luac",
+            "hooks_post": [
+                "x64:222503cffc39f501"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/ServerORLobbyBrowserSelect",
             "path": "Lua\\Frontend\\ServerORLobbyBrowserSelect.luac",
             "hooks_post": [

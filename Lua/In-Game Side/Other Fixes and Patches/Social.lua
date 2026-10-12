@@ -58,3 +58,49 @@ if CoD.SocialUtility.GetFriendsButtonOptions and not CoD.ShieldGetFriendsButtonO
 		return options
 	end
 end
+
+-- "Whisper" in the menu of a right click on a player. The game's own asks its servers for a chat channel, which
+-- are gone: here the chat box of the client is turned to that player (whisper_to), and opened as the game opens it.
+-- The menu keeps the functions it was made with, so they are put into its list, not only over the old ones.
+
+CoD.PCWidgetUtility.WhisperPlayer = function ( self, element, controller, params, menu, keepMenu )
+	local xuid = params and params.xuid
+	if not xuid then
+		return
+	end
+
+	local name = ""
+	if params.gamertag ~= nil and params.gamertag ~= "" then
+		name = CoD.SocialUtility.CleanGamerTag( params.gamertag )
+	end
+
+	Engine[@"exec"]( controller, "whisper_to " .. Engine[@"uint64tostring"]( xuid ) .. " " .. name )
+
+	local chatting = CoD.ChatClientUtility.GetCurrentChattingModel( controller )
+	if chatting and not chatting:get() then
+		chatting:set( true )
+	end
+
+	CoD.PCBattlenetUtility.CloseBattlenetMenu( element, menu, controller, false )
+
+	if not keepMenu and menu then
+		menu:goBack( controller )
+	end
+end
+
+-- anyone but the player itself and those it blocked
+CoD.PCWidgetUtility.ShowWhisperPlayer = function ( controller, element, xuid )
+	if Engine[@"getxuid64"]( controller ) == xuid then
+		return false
+	end
+	return not Engine[@"isplayerblocked"]( xuid )
+end
+
+if CoD.PCWidgetUtility.PlayerContextualMenuExtraOptionsData then
+	for _, option in pairs( CoD.PCWidgetUtility.PlayerContextualMenuExtraOptionsData ) do
+		if option.id == "whisperPlayer" then
+			option.clickFct = CoD.PCWidgetUtility.WhisperPlayer
+			option.visibilityFct = CoD.PCWidgetUtility.ShowWhisperPlayer
+		end
+	end
+end

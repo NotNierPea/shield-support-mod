@@ -109,7 +109,7 @@ DataSources.DirectorExtraHomeButtonsCustom = ListHelper_SetupDataSource( "Direct
 			},
 			properties = {
 				action = CoD.DirectorUtility.DirectorSelectOpenPopup,
-				actionParam = "ShieldLobbyServerBrowserOverlay_Select"
+				actionParam = "ShieldLobbyServerBrowserOverlay"
 			}
 		} )
 		local f85_local6 = @"ui_icon_blackmarket_store_tile_default_01"
@@ -737,7 +737,7 @@ CoD.DirectorSelectOverride = function()
 			PathNotesButton.id = "PathNotesButton"
 			sizePathNotesButton.id = "sizePathNotesButton"
 
-			local MusicManager = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 0.5, 0.5, -140 + 770, 160 + 770, 0.88, 0.88, 15 - 55 - 110, 55 - 55 - 110 )
+			local MusicManager = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 0.5, 0.5, -140 + 770, 160 + 770, 0.88, 0.88, 15 - 110, 55 - 110 )
 			
 			MusicManager.MiddleText:setTTF( "ttmussels_regular" )
 			MusicManager.MiddleText:setText("MUSIC MANAGER")
@@ -804,57 +804,6 @@ CoD.DirectorSelectOverride = function()
 			end, false )
 
 			FeaturedModsButton.id = "FeaturedModsButton"
-
-			local ShieldFriendsButton = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 0.5, 0.5, -140 + 770, 160 + 770, 0.88, 0.88, 15 - 110, 55 - 110 )
-
-			ShieldFriendsButton:mergeStateConditions( {
-				{
-					stateName = "Locked",
-					condition = function ( menu, element, event )
-						return Engine[@"getdvarint"](@"shield_is_offline") == 1
-					end
-				},
-				{
-					stateName = "Disabled",
-					condition = function ( menu, element, event )
-						return AlwaysFalse()
-					end
-				}
-			} )
-			
-			ShieldFriendsButton.MiddleText:setTTF( "ttmussels_regular" )
-			ShieldFriendsButton.MiddleText:setText("SHIELD FRIENDS")
-
-			ShieldFriendsButton.MiddleTextFocus:setText("SHIELD FRIENDS")
-			ShieldFriendsButton.MiddleTextFocus:setTTF( "ttmussels_regular" )
-
-			ShieldFriendsButton:linkToElementModel( self, nil, false, function ( model )
-				ShieldFriendsButton:setModel( model, f1_arg1 )
-			end )
-			self:addElement( ShieldFriendsButton )
-			self.ShieldFriendsButton = ShieldFriendsButton
-
-			f1_arg0:AddButtonCallbackFunction( ShieldFriendsButton, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-				CoD.EnhPrintInfo("ShieldFriendsButton")
-
-				if Engine[@"getdvarint"](@"shield_is_offline") == 0 then
-					PlaySoundAlias( "uin_paint_image_flip_toggle" )
-					OpenOverlay( self, "ShieldFriendsMenu", controller )
-				end
-
-			end, function ( element, menu, controller )
-				if IsGamepad( controller ) then
-					CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
-					return true
-				elseif IsMouseOrKeyboard( controller ) then
-					CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-					return false
-				else
-					return false
-				end
-			end, false )
-
-			ShieldFriendsButton.id = "ShieldFriendsButton"
 
 			local Shield_Nat = LUI.UIText.new( 0.5, 0.5, -70 - 870, 1500 - 870, 0.9, 0.9, 10, 30 )
 			Shield_Nat:setText("Unknown Info")
@@ -1538,7 +1487,7 @@ CoD.DirectorSelectOverride = function()
 				},
 				properties = {
 					action = CoD.DirectorUtility.DirectorSelectOpenPopup,
-					actionParam = "ShieldLobbyServerBrowserOverlay_Select"
+					actionParam = "ShieldLobbyServerBrowserOverlay"
 				}
 			} )
 
@@ -2400,7 +2349,7 @@ CoD.DirectorSelectOverride = function()
 			PathNotesButton.id = "PathNotesButton"
 			sizePathNotesButton.id = "sizePathNotesButton"
 
-			local MusicManager = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 1, 1, -380, -50, 0.88, 0.88, 15 - 55 - 110, 55 - 55 - 110 )
+			local MusicManager = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 1, 1, -380, -50, 0.88, 0.88, 15 - 110, 55 - 110 )
 			
 			MusicManager.MiddleText:setTTF( "ttmussels_regular" )
 			MusicManager.MiddleText:setText("MUSIC MANAGER")
@@ -2467,57 +2416,6 @@ CoD.DirectorSelectOverride = function()
 			end, false )
 
 			FeaturedModsButton.id = "FeaturedModsButton"
-
-			local ShieldFriendsButton = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 1, 1, -380, -50, 0.88, 0.88, 15 - 110, 55 - 110 )
-			
-			ShieldFriendsButton:mergeStateConditions( {
-				{
-					stateName = "Locked",
-					condition = function ( menu, element, event )
-						return Engine[@"getdvarint"](@"shield_is_offline") == 1
-					end
-				},
-				{
-					stateName = "Disabled",
-					condition = function ( menu, element, event )
-						return AlwaysFalse()
-					end
-				}
-			} )
-			
-			ShieldFriendsButton.MiddleText:setTTF( "ttmussels_regular" )
-			ShieldFriendsButton.MiddleText:setText("SHIELD FRIENDS")
-
-			ShieldFriendsButton.MiddleTextFocus:setText("SHIELD FRIENDS")
-			ShieldFriendsButton.MiddleTextFocus:setTTF( "ttmussels_regular" )
-
-			ShieldFriendsButton:linkToElementModel( self, nil, false, function ( model )
-				ShieldFriendsButton:setModel( model, f1_arg1 )
-			end )
-			self:addElement( ShieldFriendsButton )
-			self.ShieldFriendsButton = ShieldFriendsButton
-
-			f1_arg0:AddButtonCallbackFunction( ShieldFriendsButton, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-				CoD.EnhPrintInfo("ShieldFriendsButton")
-				
-				if Engine[@"getdvarint"](@"shield_is_offline") == 0 then
-					PlaySoundAlias( "uin_paint_image_flip_toggle" )
-					OpenOverlay( self, "ShieldFriendsMenu", controller )
-				end
-
-			end, function ( element, menu, controller )
-				if IsGamepad( controller ) then
-					CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
-					return true
-				elseif IsMouseOrKeyboard( controller ) then
-					CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-					return false
-				else
-					return false
-				end
-			end, false )
-
-			ShieldFriendsButton.id = "ShieldFriendsButton"
 
 			local Shield_Nat = LUI.UIText.new( 0, 0, 385, 1500, 0.9, 0.9, 10, 30 )
 			Shield_Nat:setText("Unknown Info")
