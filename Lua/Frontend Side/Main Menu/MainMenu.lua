@@ -8,8 +8,75 @@ CoD.ShieldInitLuaFile()
 
 ---------------------------
 
--- dvars
-Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_dw_ip demonware ipv4 string")
+-- the connection line of the main menu, the client sets these every second (master.cpp publish_status)
+local function ShieldMasterModel( name )
+	return Engine[@"createmodel"]( Engine[@"getglobalmodel"](), "ShieldMaster." .. name )
+end
+
+local function ShieldMasterText()
+	if Engine[@"getdvarint"](@"shield_is_offline") == 1 then
+		return "OFFLINE MODE"
+	end
+
+	-- an older client tells nothing
+	local state = ShieldMasterModel( "state" ):get()
+	if state == nil then
+		return ""
+	end
+
+	-- the host alone, the port of the master server says nothing to a player
+	local address = string.gsub( ShieldMasterModel( "address" ):get() or "", ":%d+$", "" )
+
+	local text = "MASTER "
+	if address ~= "" then
+		text = text .. address .. " "
+	end
+
+	if state == 1 then
+		text = text .. "^2ONLINE"
+	elseif state == 2 then
+		return text .. "^1DOWN"
+	else
+		return text .. "^3CONNECTING"
+	end
+
+	-- the server checks the port, so it is only known while it answers
+	local port = ShieldMasterModel( "port" ):get() or 0
+	local portText = "^3CHECKING"
+	if port == 1 then
+		portText = "^1CLOSED"
+	elseif port == 2 then
+		portText = "^2OPEN"
+	end
+
+	return text .. "^7 | PORT " .. ( ShieldMasterModel( "portNumber" ):get() or 0 ) .. " " .. portText
+end
+
+-- where the NAT type line was
+local function CreateShieldMasterLine( anchor, left, right )
+	local Shield_Master = LUI.UIText.new( anchor, anchor, left, right, 0.9, 0.9, 10, 30 )
+	Shield_Master:setText( "" )
+	Shield_Master:setTTF( "ttmussels_regular" )
+	Shield_Master:setBackingType( 2 )
+	Shield_Master:setBackingColor( 0.04, 0.81, 1 )
+	Shield_Master:setBackingAlpha( 0.01 )
+	Shield_Master:setBackingXPadding( 12 )
+	Shield_Master:setBackingYPadding( 6 )
+	Shield_Master:setLetterSpacing( 6 )
+	Shield_Master:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_558C8A85F2048829"] )
+	Shield_Master:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
+
+	local function Update()
+		Shield_Master:setText( ShieldMasterText() )
+	end
+
+	for _, name in ipairs( { "state", "port", "address", "portNumber" } ) do
+		Shield_Master:subscribeToModel( ShieldMasterModel( name ), Update )
+	end
+
+	Update()
+	return Shield_Master
+end
 
 ---------------------------
 
@@ -805,27 +872,9 @@ CoD.DirectorSelectOverride = function()
 
 			FeaturedModsButton.id = "FeaturedModsButton"
 
-			local Shield_Nat = LUI.UIText.new( 0.5, 0.5, -70 - 870, 1500 - 870, 0.9, 0.9, 10, 30 )
-			Shield_Nat:setText("Unknown Info")
-			Shield_Nat:setTTF( "ttmussels_regular" )
-			Shield_Nat:setBackingType( 2 )
-			Shield_Nat:setBackingColor( 0.04, 0.81, 1 )
-			Shield_Nat:setBackingAlpha( 0.01 )
-			Shield_Nat:setBackingXPadding( 12 )
-			Shield_Nat:setBackingYPadding( 6 )
-			Shield_Nat:setLetterSpacing( 6 )
-			Shield_Nat:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_558C8A85F2048829"] )
-			Shield_Nat:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-			Shield_Nat:subscribeToGlobalModel( f1_arg1, "LobbyRoot", "lobbyNatType", function ( model )
-				local nattype = model:get()
-				if nattype ~= nil and Engine[@"getdvarint"](@"shield_is_offline") == 0 then
-					Shield_Nat:setText(ConvertToUpperString(LocalizeWithNatType(nattype)) .. " | SERVER IP: " .. Engine[@"getdvarstring"]("shield_dw_ip"))
-				else
-					Shield_Nat:setText("OFFLINE MODE")
-				end
-			end )
-			self:addElement( Shield_Nat )
-			self.Shield_Nat = Shield_Nat
+			local Shield_Master = CreateShieldMasterLine( 0.5, -70 - 870, 1500 - 870 )
+			self:addElement( Shield_Master )
+			self.Shield_Master = Shield_Master
 			
 			local PurchaseButton2 = nil
 			
@@ -1255,7 +1304,7 @@ CoD.DirectorSelectOverride = function()
 			f76_arg0.PurchaseButton2:close()
 			f76_arg0.PathNotesButton:close()
 			f76_arg0.sizePathNotesButton:close()
-			f76_arg0.Shield_Nat:close()
+			f76_arg0.Shield_Master:close()
 			f76_arg0.DirectorTierSkipNotification:close()
 			f76_arg0.DirectorTierSkipNotification2:close()
 			f76_arg0.IGREventButton:close()
@@ -2417,27 +2466,9 @@ CoD.DirectorSelectOverride = function()
 
 			FeaturedModsButton.id = "FeaturedModsButton"
 
-			local Shield_Nat = LUI.UIText.new( 0, 0, 385, 1500, 0.9, 0.9, 10, 30 )
-			Shield_Nat:setText("Unknown Info")
-			Shield_Nat:setBackingType( 2 )
-			Shield_Nat:setBackingColor( 0.04, 0.81, 1 )
-			Shield_Nat:setBackingAlpha( 0.01 )
-			Shield_Nat:setBackingXPadding( 12 )
-			Shield_Nat:setBackingYPadding( 6 )
-			Shield_Nat:setTTF( "ttmussels_regular" )
-			Shield_Nat:setLetterSpacing( 6 )
-			Shield_Nat:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_558C8A85F2048829"] )
-			Shield_Nat:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-			Shield_Nat:subscribeToGlobalModel( f1_arg1, "LobbyRoot", "lobbyNatType", function ( model )
-				local nattype = model:get()
-				if nattype ~= nil and Engine[@"getdvarint"](@"shield_is_offline") == 0 then
-					Shield_Nat:setText(ConvertToUpperString(LocalizeWithNatType(nattype)) .. " | SERVER IP: " .. Engine[@"getdvarstring"]("shield_dw_ip"))
-				else
-					Shield_Nat:setText("OFFLINE MODE")
-				end
-			end )
-			self:addElement( Shield_Nat )
-			self.Shield_Nat = Shield_Nat
+			local Shield_Master = CreateShieldMasterLine( 0, 385, 1500 )
+			self:addElement( Shield_Master )
+			self.Shield_Master = Shield_Master
 			
 			local PurchaseButton2 = nil
 			
@@ -2871,7 +2902,7 @@ CoD.DirectorSelectOverride = function()
 			f76_arg0.PurchaseButton2:close()
 			f76_arg0.PathNotesButton:close()
 			f76_arg0.sizePathNotesButton:close()
-			f76_arg0.Shield_Nat:close()
+			f76_arg0.Shield_Master:close()
 			f76_arg0.DirectorTierSkipNotification:close()
 			f76_arg0.DirectorTierSkipNotification2:close()
 			f76_arg0.IGREventButton:close()
