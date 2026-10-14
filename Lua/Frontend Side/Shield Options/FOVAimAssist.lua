@@ -147,19 +147,21 @@ LUI.createMenu.Shield_AimAssist_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	self.anyChildUsesUpdateState = true
 	f1_local1:addElementToPendingUpdateStateList( self )
 	
-	local CommomCenteredPopup = CoD.CommonCenteredPopup.new( f1_local1, f1_arg0, 0, 1, 0, 0, 0, 1, 0, 0 )
-	CommomCenteredPopup.TitleText:setText("FOV & Aim Assist Settings")
-	CommomCenteredPopup.HeaderBackground:setAlpha( 0 )
-	CommomCenteredPopup.HeaderTopBar:setAlpha( 0 )
-	CommomCenteredPopup.HeaderBottomBar:setAlpha( 0 )
+	-- the card of the settings menus, see ShieldOptions.lua
+	local CommomCenteredPopup = CoD.ShieldSettingsFrame.new( f1_local1, f1_arg0, {
+		title = "FOV & Aim Assist",
+		caption = "HOW YOU SEE AND AIM",
+		color = { r = 0.45, g = 0.9, b = 0.45 },
+		rows = 6
+	} )
 	self:addElement( CommomCenteredPopup )
 	self.CommomCenteredPopup = CommomCenteredPopup
 	
 	local AimSettingsList = LUI.UIList.new( f1_local1, f1_arg0, 3, 3, nil, false, false, false, false )
-	AimSettingsList:setLeftRight( 0.5, 0.5, -250, 250 )
-	AimSettingsList:setTopBottom( 0.55, 0.55, -380 + 90, -320 + 90 )
+	AimSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT )
+	AimSettingsList:setTopBottom( 0.5, 0.5, CommomCenteredPopup.listTop, CommomCenteredPopup.listTop + CommomCenteredPopup.listHeight )
 	AimSettingsList:setAutoScaleContent( true )
-	AimSettingsList:setVerticalCount(6) -- fix
+	AimSettingsList:setVerticalCount( 6 )
 	AimSettingsList:setHorizontalCount(1)
 	AimSettingsList:setWidgetType( CoD.CustomGames_SettingSliderNoCustom )
 	AimSettingsList:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
@@ -175,7 +177,7 @@ LUI.createMenu.Shield_AimAssist_SettingsPopup = function ( f1_arg0, f1_arg1 )
 		AimSettingsList:setRGB(0, 1, 0)
 	end
 	
-	local SettingDescription = LUI.UIText.new( 0.5, 0.5, -250, 250, 0.60, 0.60, -284 + 195, -263 + 195 )
+	local SettingDescription = LUI.UIText.new( 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, 0.5, 0.5, CommomCenteredPopup.descTop, CommomCenteredPopup.descTop + 21 )
 	SettingDescription:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
 	SettingDescription:setTTF( "notosans_regular" )
 	SettingDescription:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
@@ -286,8 +288,8 @@ end
 CoD.Shield_AimAssist_SettingsPopup.__resetProperties = function ( f13_arg0 )
 	f13_arg0.AimSettingsList:completeAnimation()
 	f13_arg0.SettingDescription:completeAnimation()
-	f13_arg0.AimSettingsList:setLeftRight( 0.5, 0.5, -250, 250 )
-	f13_arg0.SettingDescription:setLeftRight( 0.5, 0.5, -250, 250 )
+	f13_arg0.AimSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT )
+	f13_arg0.SettingDescription:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT )
 end
 
 CoD.Shield_AimAssist_SettingsPopup.__clipsPerState = {
@@ -302,10 +304,10 @@ CoD.Shield_AimAssist_SettingsPopup.__clipsPerState = {
 			f15_arg0:__resetProperties()
 			f15_arg0:setupElementClipCounter( 2 )
 			f15_arg0.AimSettingsList:completeAnimation()
-			f15_arg0.AimSettingsList:setLeftRight( 0.5, 0.5, -290, 290 )
+			f15_arg0.AimSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT_KBM )
 			f15_arg0.clipFinished( f15_arg0.AimSettingsList )
 			f15_arg0.SettingDescription:completeAnimation()
-			f15_arg0.SettingDescription:setLeftRight( 0.5, 0.5, -290, 290 )
+			f15_arg0.SettingDescription:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT )
 			f15_arg0.clipFinished( f15_arg0.SettingDescription )
 		end
 	}

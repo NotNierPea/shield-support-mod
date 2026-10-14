@@ -293,19 +293,22 @@ LUI.createMenu.Shield_Misc_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	self.anyChildUsesUpdateState = true
 	f1_local1:addElementToPendingUpdateStateList( self )
 	
-	local CommomCenteredPopup = CoD.CommonCenteredPopup.new( f1_local1, f1_arg0, 0, 1, 0, 0, 0, 1, 0, 0 )
-	CommomCenteredPopup.TitleText:setText("Misc Settings")
-	CommomCenteredPopup.HeaderBackground:setAlpha( 0 )
-	CommomCenteredPopup.HeaderTopBar:setAlpha( 0 )
-	CommomCenteredPopup.HeaderBottomBar:setAlpha( 0 )
+	-- the card of the settings menus, see ShieldOptions.lua
+	local CommomCenteredPopup = CoD.ShieldSettingsFrame.new( f1_local1, f1_arg0, {
+		title = "Misc Settings",
+		caption = "EVERYTHING ELSE",
+		color = { r = 0.35, g = 0.75, b = 1 },
+		rows = 10,
+		extra = 2
+	} )
 	self:addElement( CommomCenteredPopup )
 	self.CommomCenteredPopup = CommomCenteredPopup
 	
 	local MiscSettingsList = LUI.UIList.new( f1_local1, f1_arg0, 3, 3, nil, false, false, false, false )
-	MiscSettingsList:setLeftRight( 0.5, 0.5, -250, 250 )
-	MiscSettingsList:setTopBottom( 0.5, 0.5, -380 + 280, -320 + 280 )
+	MiscSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT )
+	MiscSettingsList:setTopBottom( 0.5, 0.5, CommomCenteredPopup.listTop, CommomCenteredPopup.listTop + CommomCenteredPopup.listHeight )
 	MiscSettingsList:setAutoScaleContent( true )
-	MiscSettingsList:setVerticalCount(10)
+	MiscSettingsList:setVerticalCount( 10 )
 	MiscSettingsList:setHorizontalCount(1)
 	MiscSettingsList:setWidgetType( CoD.CustomGames_SettingSliderNoCustom )
 	MiscSettingsList:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
@@ -321,7 +324,7 @@ LUI.createMenu.Shield_Misc_SettingsPopup = function ( f1_arg0, f1_arg1 )
 		MiscSettingsList:setRGB(0, 1, 0)
 	end
 	
-	local SettingDescription = LUI.UIText.new( 0.5, 0.5, -250, 250, 0.55, 0.55, -284 + 320 + 180, -263 + 320 + 180 )
+	local SettingDescription = LUI.UIText.new( 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, 0.5, 0.5, CommomCenteredPopup.descTop, CommomCenteredPopup.descTop + 21 )
 	SettingDescription:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
 	SettingDescription:setTTF( "notosans_regular" )
 	SettingDescription:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
@@ -337,7 +340,7 @@ LUI.createMenu.Shield_Misc_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	end )
 
 	-- rules options
-	local RulesSettings = CoD.DirectorSelectButtonMiniInternal.new( f1_local1, f1_arg0, 0.50, 0.50, 28.28 - 20, 338.28 - 20, 0.50, 0.50, 338.01, 388.01 )
+	local RulesSettings = CoD.DirectorSelectButtonMiniInternal.new( f1_local1, f1_arg0, 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, 0.5, 0.5, CommomCenteredPopup.extraTop + 62, CommomCenteredPopup.extraTop + 112 )
 	
 	RulesSettings.MiddleText:setTTF( "notosans_bold" )
 	RulesSettings.MiddleText:setText("Saved Custom Rules")
@@ -374,7 +377,7 @@ LUI.createMenu.Shield_Misc_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	--LUI_DebugElement(f1_local1, f1_arg0, self, RulesSettings, "RulesSettings", 10)
 
 	-- blackout options
-	local BlackoutSettings = CoD.DirectorSelectButtonMiniInternal.new( f1_local1, f1_arg0, 0.50, 0.50, -315.24, -5.24, 0.50, 0.50, 338.01, 388.01 )
+	local BlackoutSettings = CoD.DirectorSelectButtonMiniInternal.new( f1_local1, f1_arg0, 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, 0.5, 0.5, CommomCenteredPopup.extraTop, CommomCenteredPopup.extraTop + 50 )
 	
 	BlackoutSettings.MiddleText:setTTF( "notosans_bold" )
 	BlackoutSettings.MiddleText:setText("Blackout Settings")
@@ -472,8 +475,8 @@ end
 CoD.Shield_Misc_SettingsPopup.__resetProperties = function ( f13_arg0 )
 	f13_arg0.MiscSettingsList:completeAnimation()
 	f13_arg0.SettingDescription:completeAnimation()
-	f13_arg0.MiscSettingsList:setLeftRight( 0.5, 0.5, -250, 250 )
-	f13_arg0.SettingDescription:setLeftRight( 0.5, 0.5, -250, 250 )
+	f13_arg0.MiscSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT )
+	f13_arg0.SettingDescription:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT )
 end
 
 CoD.Shield_Misc_SettingsPopup.__clipsPerState = {
@@ -488,10 +491,10 @@ CoD.Shield_Misc_SettingsPopup.__clipsPerState = {
 			f15_arg0:__resetProperties()
 			f15_arg0:setupElementClipCounter( 2 )
 			f15_arg0.MiscSettingsList:completeAnimation()
-			f15_arg0.MiscSettingsList:setLeftRight( 0.5, 0.5, -290, 290 )
+			f15_arg0.MiscSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT_KBM )
 			f15_arg0.clipFinished( f15_arg0.MiscSettingsList )
 			f15_arg0.SettingDescription:completeAnimation()
-			f15_arg0.SettingDescription:setLeftRight( 0.5, 0.5, -290, 290 )
+			f15_arg0.SettingDescription:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT )
 			f15_arg0.clipFinished( f15_arg0.SettingDescription )
 		end
 	}

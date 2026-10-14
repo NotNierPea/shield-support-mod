@@ -174,6 +174,8 @@ table.insert(CoD.ChatClientUtility.ChatCommands, {
 		  "fovscale",
 		  "fov",
 	},
+	usage = "/fov <scale>",
+	help = "field of view scale",
 	fct = TryFovScale
 })
 
@@ -182,6 +184,8 @@ table.insert(CoD.ChatClientUtility.ChatCommands, {
 		  "viewmodel",
 		  "view",
 	},
+	usage = "/viewmodel <scale>",
+	help = "viewmodel scale",
 	fct = TryFovViewmodel
 })
 
@@ -190,6 +194,8 @@ table.insert(CoD.ChatClientUtility.ChatCommands, {
 		  "aspect",
 		  "ratio",
 	},
+	usage = "/aspect <scale>",
+	help = "aspect ratio scale",
 	fct = TryFovAspectratio
 })
 
@@ -199,6 +205,8 @@ table.insert(CoD.ChatClientUtility.ChatCommands,
 		  "gunscale_x",
 		  "gunx",
 	},
+	usage = "/gunx, /guny, /gunz <number>",
+	help = "gun position",
 	fct = TryGunScaleX
 })
 
@@ -208,6 +216,9 @@ table.insert(CoD.ChatClientUtility.ChatCommands,
 		  "gunscale_z",
 		  "gunz",
 	},
+	usage = "/gunz <number>",
+	help = "gun position, up and down",
+	hidden = true,
 	fct = TryGunScaleZ
 })
 
@@ -215,8 +226,11 @@ table.insert(CoD.ChatClientUtility.ChatCommands,
 {
 	strings = {
 		  "gunscale_y",
-		  "guny",	
+		  "guny",
 	},
+	usage = "/guny <number>",
+	help = "gun position, left and right",
+	hidden = true,
 	fct = TryGunScaleY
 })
 
@@ -225,6 +239,8 @@ table.insert(CoD.ChatClientUtility.ChatCommands,
 	strings = {
 		  "mute"
 	},
+	usage = "/mute, /unmute",
+	help = "hide or show the chat of others",
 	fct = TryMuteChat
 })
 
@@ -233,6 +249,9 @@ table.insert(CoD.ChatClientUtility.ChatCommands,
 	strings = {
 		  "unmute"
 	},
+	usage = "/unmute",
+	help = "show the chat of others again",
+	hidden = true,
 	fct = TryUnmuteChat
 })
 
@@ -291,10 +310,82 @@ for _, command in ipairs( CoD.ChatClientUtility.ChatCommands ) do
 	for _, name in ipairs( command.strings ) do
 		if name == "all" then
 			command.fct = TryWhisperOff
+			command.usage = "/all [message]"
+			command.help = "stop whispering"
 		elseif name == "reply" then
 			command.fct = TryWhisperReply
+			command.usage = "/r [message]"
+			command.help = "answer the last whisper"
 		elseif name == "whisper" then
 			command.fct = TryWhisperName
+			command.usage = "/w <name> [message]"
+			command.help = "whisper to a player"
+		elseif name == "team" or name == "party" then
+			-- the client picks party or lobby by itself
+			command.hidden = true
 		end
 	end
 end
+
+---------------------------
+
+-- /help: the commands of the list with what they do, shown in the chat box to this player alone.
+-- A command is listed by its "usage" and "help", one without them by its first name, one with
+-- "hidden" only when it is asked for: "/help guny".
+local function ShowCommandHelp( command )
+	local line = "^3" .. ( command.usage or ( "/" .. command.strings[1] ) )
+	if command.help then
+		line = line .. "^7 - " .. command.help
+	end
+	CoD.PCUtility.ShowGameEvent( line )
+end
+
+local function TryHelp( controller, text, typing )
+	if typing then
+		return false, false, false
+	end
+
+	local asked = text and string.match( text, "(%a+)" )
+
+	if asked then
+		asked = string.lower( asked )
+
+		for _, command in ipairs( CoD.ChatClientUtility.ChatCommands ) do
+			for _, name in ipairs( command.strings ) do
+				if name == asked then
+					ShowCommandHelp( command )
+					if #command.strings > 1 then
+						CoD.PCUtility.ShowGameEvent( "^7Same as: /" .. table.concat( command.strings, ", /" ) )
+					end
+					return false, true, false, nil
+				end
+			end
+		end
+
+		CoD.PCUtility.ShowGameEvent( "^1No command is called /" .. asked .. "." )
+		return false, true, false, nil
+	end
+
+	CoD.PCUtility.ShowGameEvent( "^2Chat commands:" )
+
+	for _, command in ipairs( CoD.ChatClientUtility.ChatCommands ) do
+		if not command.hidden then
+			ShowCommandHelp( command )
+		end
+	end
+
+	return false, true, false, nil
+end
+
+table.insert(CoD.ChatClientUtility.ChatCommands,
+{
+	strings = {
+		  "help",
+		  "commands",
+		  "cmds",
+		  "h"
+	},
+	usage = "/help [command]",
+	help = "this list, or one command",
+	fct = TryHelp
+})

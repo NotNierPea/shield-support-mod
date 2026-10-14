@@ -67,6 +67,9 @@ WZChanges()
 
 MPChanges()
 {
+    // the skill of the bots, from the bot settings of the menu
+    level BotSkillInit();
+
     // lua option...
     if (getdvarint(#"shield_botsrandom", 1))
     {
@@ -128,7 +131,8 @@ detour bot<scripts\mp_common\bots\mp_bot.gsc>::init()
 
     ShieldLog("^2Bot Init -> Called");
 
-    level thread [[ @bot<scripts\mp_common\bots\mp_bot.gsc>::init_strategic_command ]]();
+    // the plan of the bots, for every variant of an objective mode
+    level thread BotObjectiveCommander();
     botsoak = getdvarint(#"sv_botsoak", 0);
 
     if (!isdedicated()) 
@@ -165,7 +169,10 @@ detour util<scripts\core_common\util_shared.gsc>::function_8570168d()
     }
     */
 
-    switch (getdvarint(#"bot_difficulty", 1)) 
+    // by the skill of the menu when one is picked there
+    difficulty = BotSkillGameDifficulty();
+
+    switch (difficulty)
     {
         case 0:
             level.var_df0a0911 = "bot_tacstate_mp_easy";
@@ -182,8 +189,6 @@ detour util<scripts\core_common\util_shared.gsc>::function_8570168d()
             break;
     }
 
-    difficulty = getdvarint(#"bot_difficulty", 1);
-
     if (difficulty == 0) {
         level.var_6679b27c = 202500;
     } else if (difficulty == 1) {
@@ -193,6 +198,10 @@ detour util<scripts\core_common\util_shared.gsc>::function_8570168d()
     } else if (difficulty == 3) {
         level.var_6679b27c = 1000000;
     }
+
+    // ruthless: a dog tag is picked up from further away
+    if (getDvarInt(#"shield_bot_skill", 0) >= 5)
+        level.var_6679b27c = 2250000;
 
     // return false anyways
     return false;

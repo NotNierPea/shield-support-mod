@@ -167,59 +167,174 @@ CoD.DirectorQuitButtonContainer.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_a
 				return false
 			end
 		end, false )
-		f1_arg0:addElement( ServerBrowserButton )
+		--f1_arg0:addElement( ServerBrowserButton )
 		f1_arg0.ServerBrowserButton = ServerBrowserButton
 
-		ServerBrowserButton.id = "ServerBrowserButton"
+		--ServerBrowserButton.id = "ServerBrowserButton"
 
-		local ReconnectedButton = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 0.5, 0.5, -725 + 250, -513 + 250, 0, 0, 265 + 460, 510 + 460 - 53.5 )
-		
-		ReconnectedButton.MiddleText:setTTF( "notosans_bold" )
-		ReconnectedButton.MiddleText:setText("Reconnect")
-
-		ReconnectedButton.MiddleTextFocus:setText("Reconnect")
-		ReconnectedButton.MiddleTextFocus:setTTF( "notosans_bold" )
-
-		ReconnectedButton:mergeStateConditions( {
-			{
-				stateName = "Locked",
-				condition = function ( menu, element, event )
-					return AlwaysFalse()
-				end
-			}
-		} )
-
-		ReconnectedButton:linkToElementModel( f1_arg0, nil, false, function ( model )
-			ReconnectedButton:setModel( model, f1_arg0 )
-		end )
-		f1_arg0:addElement( ReconnectedButton )
-		f1_arg0.ReconnectedButton = ReconnectedButton
-
-		f1_arg0:AddButtonCallbackFunction( ReconnectedButton, f1_arg1, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-			PlaySoundAlias( "uin_paint_image_flip_toggle" )
-			CoD.EnhPrintInfo("ReconnectedButton")
-			
-			Engine[@"exec"](Engine[@"getprimarycontroller"](), "recoverDW")
-
-		end, function ( element, menu, controller )
-			if IsGamepad( controller ) then
-				CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
-				return true
-			elseif IsMouseOrKeyboard( controller ) then
-				CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-				return false
-			else
-				return false
-			end
-		end, false )
-		
-		ReconnectedButton.id = "ReconnectedButton"
+		CoD.ShieldAddReconnectCard( f1_arg0, f1_arg1 )
 
 		-- refresh in main init
 		CoD.RefreshShieldShit()
 	end
 
 	return self
+end
+
+---------------------------
+
+--[[
+	The reconnect card of the connection screen: over the CONNECTING status of the game (bottom left, from 160,
+	see connectionlabel.lua) and in its column, so what is going on and what to do about it read as one. Drawn as
+	the lobby browser draws (CoD.Shield.BrowserUI), with its own few parts: this is the first menu of the game,
+	before LobbyBrowser.lua may be loaded. The button stays a child of the menu under its id, or the menu can't
+	find it for the focus.
+]]
+local CARD_LEFT = 240
+local CARD_RIGHT = 680
+local CARD_TOP = 724
+local CARD_BOTTOM = 916
+local CARD_PADDING = 24
+
+local ReadyColor = { r = 0.45, g = 0.9, b = 0.45 }
+local BusyColor = { r = 1, g = 0.78, b = 0.25 }
+
+-- how long the card says it is reconnecting before it can be pressed again
+local RECONNECT_BUSY_MS = 6000
+
+local function CardBox( left, right, top, bottom, r, g, b, alpha )
+	local box = LUI.UIImage.new( 0, 0, left, right, 0, 0, top, bottom )
+	box:setRGB( r, g, b )
+	box:setAlpha( alpha )
+	return box
+end
+
+local function CardText( left, right, top, size, font )
+	local text = LUI.UIText.new( 0, 0, left, right, 0, 0, top, top + size )
+	text:setTTF( font )
+	text:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
+	text:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
+	return text
+end
+
+CoD.ShieldAddReconnectCard = function ( menu, controller )
+	local Card = LUI.UIElement.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	menu:addElement( Card )
+	menu.ReconnectCard = Card
+
+	Card:addElement( CardBox( CARD_LEFT, CARD_RIGHT, CARD_TOP, CARD_BOTTOM, 0, 0, 0, 0.9 ) )
+
+	local Accent = CardBox( CARD_LEFT, CARD_RIGHT, CARD_TOP, CARD_TOP + 4, ReadyColor.r, ReadyColor.g, ReadyColor.b, 1 )
+	Card:addElement( Accent )
+
+	local Frame = LUI.UIImage.new( 0, 0, CARD_LEFT - 1, CARD_RIGHT + 1, 0, 0, CARD_TOP - 1, CARD_BOTTOM + 1 )
+	Frame:setAlpha( 0.2 )
+	Frame:setImage( RegisterImage( @"uie_ui_menu_store_common_frame" ) )
+	Frame:setMaterial( LUI.UIImage.GetCachedMaterial( @"uie_nineslice_add" ) )
+	Frame:setShaderVector( 0, 0, 0, 0, 0 )
+	Frame:setupNineSliceShader( 12, 12 )
+	Card:addElement( Frame )
+
+	-- the light of the card: it breathes while it waits, and turns amber while it reconnects
+	local Dot = CardBox( CARD_LEFT + CARD_PADDING, CARD_LEFT + CARD_PADDING + 10, CARD_TOP + 25, CARD_TOP + 35, ReadyColor.r, ReadyColor.g, ReadyColor.b, 1 )
+	Card:addElement( Dot )
+
+	local Caption = CardText( CARD_LEFT + CARD_PADDING + 20, CARD_RIGHT - CARD_PADDING, CARD_TOP + 22, 15, "ttmussels_regular" )
+	Caption:setRGB( 0.55, 0.55, 0.55 )
+	Caption:setLetterSpacing( 2 )
+	Caption:setText( "ONLINE SERVICES" )
+	Card:addElement( Caption )
+
+	local Title = CardText( CARD_LEFT + CARD_PADDING, CARD_RIGHT - CARD_PADDING, CARD_TOP + 46, 30, "notosans_bold" )
+	Title:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+	Title:setText( "STUCK CONNECTING?" )
+	Card:addElement( Title )
+
+	local Desc = CardText( CARD_LEFT + CARD_PADDING, CARD_RIGHT - CARD_PADDING, CARD_TOP + 84, 18, "notosans_regular" )
+	Desc:setRGB( 0.62, 0.62, 0.62 )
+	Desc:setText( "Signs in to the online services again." )
+	Card:addElement( Desc )
+
+	Card:addElement( CardBox( CARD_LEFT + CARD_PADDING, CARD_RIGHT - CARD_PADDING, CARD_TOP + 118, CARD_TOP + 119, 1, 1, 1, 0.1 ) )
+
+	local busy = false
+	local bright = true
+
+	local function SetColor( color )
+		Accent:setRGB( color.r, color.g, color.b )
+		Dot:setRGB( color.r, color.g, color.b )
+	end
+
+	-- once a second the light breathes
+	Card:addElement( LUI.UITimer.newElementTimer( 1000, false, function ()
+		bright = not bright
+		Dot:beginAnimation( busy and 250 or 900 )
+		Dot:setAlpha( bright and 1 or 0.2 )
+	end ) )
+
+	local ReconnectedButton = CoD.DirectorSelectButtonMiniInternal.new( menu, controller, 0, 0, CARD_LEFT + CARD_PADDING, CARD_RIGHT - CARD_PADDING, 0, 0, CARD_TOP + 130, CARD_TOP + 176 )
+
+	ReconnectedButton.MiddleText:setTTF( "notosans_bold" )
+	ReconnectedButton.MiddleText:setText( "RECONNECT" )
+	ReconnectedButton.MiddleTextFocus:setTTF( "notosans_bold" )
+	ReconnectedButton.MiddleTextFocus:setText( "RECONNECT" )
+
+	local function SetBusy( value )
+		busy = value
+		local label = busy and "RECONNECTING" or "RECONNECT"
+
+		SetColor( busy and BusyColor or ReadyColor )
+		Title:setText( busy and "RECONNECTING" or "STUCK CONNECTING?" )
+		Desc:setAlpha( busy and 0 or 1 )
+		ReconnectedButton.MiddleText:setText( label )
+		ReconnectedButton.MiddleTextFocus:setText( label )
+	end
+
+	ReconnectedButton:mergeStateConditions( {
+		{
+			stateName = "Locked",
+			condition = function ( menu, element, event )
+				return AlwaysFalse()
+			end
+		}
+	} )
+
+	ReconnectedButton:linkToElementModel( menu, nil, false, function ( model )
+		ReconnectedButton:setModel( model, controller )
+	end )
+	menu:addElement( ReconnectedButton )
+	menu.ReconnectedButton = ReconnectedButton
+
+	menu:AddButtonCallbackFunction( ReconnectedButton, controller, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
+		-- one sign in at a time
+		if busy then
+			return true
+		end
+
+		PlaySoundAlias( "uin_paint_image_flip_toggle" )
+		CoD.EnhPrintInfo( "ReconnectedButton" )
+
+		SetBusy( true )
+		Engine[@"exec"]( Engine[@"getprimarycontroller"](), "recoverDW" )
+
+		Card:addElement( LUI.UITimer.newElementTimer( RECONNECT_BUSY_MS, true, function ()
+			SetBusy( false )
+		end ) )
+
+		return true
+	end, function ( element, menu, controller )
+		if IsGamepad( controller ) then
+			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
+			return true
+		elseif IsMouseOrKeyboard( controller ) then
+			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
+			return false
+		else
+			return false
+		end
+	end, false )
+
+	ReconnectedButton.id = "ReconnectedButton"
 end
 
 CoD.DirectorQuitButtonContainer.__resetProperties = function ( f4_arg0 )

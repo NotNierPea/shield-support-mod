@@ -105,7 +105,8 @@ local function LoadTeamChangeMenu()
 		self.buttonList = buttonList
 
 		local RespawnNote = LUI.UIText.new(0.20, 0.20, -100, 500, 0.80, 0.80, 0, 50)
-		RespawnNote:setText("Note: You will need to wait at least 10 seconds before Respawning!")
+		-- see TeamSwitch.gsc: the specialist is kept unless the new team has it already
+		RespawnNote:setText("You respawn on the new team right away, with your specialist and class.")
 		RespawnNote:setTTF("notosans_bold")
 		RespawnNote:setBackingType(2)
 		RespawnNote:setBackingColor(0.04, 0.81, 1)

@@ -32,31 +32,42 @@ CoD.Shield.ShowServerToast = function(event_name, event_table)
 	CoD.OverlayUtility.ShowToast( "Invite", "Server", message, "ui_icon_startmenu_option_network" )
 end
 
+-- how often the client answered a question for the lobbies, with a list or with the word that there is none
+local LobbyAnswers = 0
+
 CoD.Shield.OnServerLobbyListReceived = function(event_name, event_table)
 	CoD.EnhPrintInfo("got servers from C++ side")
 
+	LobbyAnswers = LobbyAnswers + 1
+
+	-- the master server gave no answer: that is said in the place of the rows, and nothing is waited for any more
+	local Failed = type(event_table) == "table" and event_table.failed == 1
+	local Root = Engine[@"getglobalmodel"]()
+
+	Engine[@"createmodel"]( Root, "ShieldLobbyBrowser.failed" ):set( Failed and 1 or 0 )
+
+	if Failed then
+		Engine[@"createmodel"]( Root, "ShieldLobbyBrowser.count" ):set( 0 )
+	end
+
 	if CoD.Menu.ServerLobbyBrowser ~= nil then
 		CoD.Menu.ServerLobbyBrowser:addElement( LUI.UITimer.newElementTimer( 5, true, function ()
-			CoD.Menu.ServerLobbyBrowser:setDataSource( "ShieldDWGameServersEmpty" )
-			CoD.Menu.ServerLobbyBrowser:updateDataSource()
-			CoD.Menu.ServerLobbyBrowser:setDataSource( "ShieldDWGameServers" )
-			CoD.Menu.ServerLobbyBrowser:updateDataSource()
+			CoD.Shield.RefillLobbyRows( CoD.Menu.ServerLobbyBrowser )
 			end)
 		)
 	end
 end
 
-local function OnServerSettingChanged ( f137_arg0, f137_arg1, f137_arg2, f137_arg3, f137_arg4 )
-	local dvar_name = f137_arg3
-	local dvar_val = Engine[@"getdvarint"]( dvar_name )
-	local current_val = f137_arg1.value
-	CoD.OptionsUtility.UpdateInfoModels( f137_arg1 )
-
-	if current_val == dvar_val then
-		return 
-	else
-		Engine[@"setdvar"]( dvar_name, current_val )
-	end
+-- The rows again, by what the client, the filter and the search say now. A list keeps the row it was scrolled to
+-- when its rows change: with fewer rows than that, only the last ones would show. Emptied, it is put back to its
+-- top before the new rows come.
+CoD.Shield.RefillLobbyRows = function ( list )
+	list:setDataSource( "ShieldDWGameServersEmpty" )
+	list:updateDataSource()
+	list:clearLayout()
+	list:clearSavedActiveIndex()
+	list:setDataSource( "ShieldDWGameServers" )
+	list:updateDataSource()
 end
 
 ---------------------------
@@ -88,16 +99,28 @@ local function LobbyModeOf( mode, map )
 	return "mp"
 end
 
--- the colour of a mode: the bar at the start of a row, and its tag
+-- the colour of a mode: the bar and the tag of a row, the line and the tag of the card
 local LobbyModeColors = {
 	mp = { r = 0.35, g = 0.75, b = 1 },
 	zm = { r = 1, g = 0.38, b = 0.28 },
 	wz = { r = 0.45, g = 0.9, b = 0.45 }
 }
 
+-- a mode in full, where a lobby tells no gametype
+local LobbyModeNames = {
+	mp = "MULTIPLAYER",
+	zm = "ZOMBIES",
+	wz = "BLACKOUT"
+}
+
 -- how many lobbies the list shows: -1 while the first answer is waited for
 local function LobbyCountModel()
 	return Engine[@"createmodel"]( Engine[@"getglobalmodel"](), "ShieldLobbyBrowser.count" )
+end
+
+-- 1 when the master server gave no answer to the last question, see CoD.Shield.OnServerLobbyListReceived
+local function LobbyFailedModel()
+	return Engine[@"createmodel"]( Engine[@"getglobalmodel"](), "ShieldLobbyBrowser.failed" )
 end
 
 -- the maps of blackout have no name in the table of maps
@@ -172,7 +195,8 @@ end
 -- A picture in a box that cuts what is over (setUseStencil): the pictures of the game are not all of one shape,
 -- so it is made as large as the box needs in its own shape, centred, and never squeezed into the box.
 local function SetPreviewImage( image, name, width, height )
-	image:setImage( RegisterImage( name ) )
+	-- a picture some tables of the game give registered already, as userdata, draws nothing when it is registered again
+	image:setImage( type( name ) == "userdata" and name or RegisterImage( name ) )
 
 	local imageWidth, imageHeight = image:getImageDimensions()
 
@@ -196,6 +220,78 @@ local function ShortenText( text, max )
 		return string.sub( text, 1, max - 2 ) .. ".."
 	end
 	return text
+end
+
+-- a text of one line, by its left and right end, its top and its size
+local function NewText( left, right, top, size, font, alignment )
+	local text = LUI.UIText.new( 0, 0, left, right, 0, 0, top, top + size )
+	text:setTTF( font )
+	text:setAlignment( alignment or Enum[@"luialignment"][@"lui_alignment_left"] )
+	text:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
+	return text
+end
+
+-- the small grey words over a value
+local function NewCaption( left, right, top, words, alignment )
+	local text = NewText( left, right, top, 15, "ttmussels_regular", alignment )
+	text:setRGB( 0.55, 0.55, 0.55 )
+	text:setLetterSpacing( 2 )
+	text:setText( words )
+	return text
+end
+
+-- a box of one colour
+local function NewBox( left, right, top, bottom, r, g, b, alpha )
+	local box = LUI.UIImage.new( 0, 0, left, right, 0, 0, top, bottom )
+	box:setRGB( r, g, b )
+	box:setAlpha( alpha )
+	return box
+end
+
+-- Black over the lower end of a picture, fading out upwards, for what is written on it. Thin layers that all reach
+-- down to the end, each a little stronger than the one over it: nothing shows between them at any size of the screen.
+-- They go into the box that cuts the picture, after it, so they are drawn with it and over it.
+local function AddBottomFade( clip, height, fade )
+	local layers = math.floor( fade / 6 )
+
+	for layer = 1, layers, 1 do
+		local shade = LUI.UIImage.new( 0, 1, 0, 0, 0, 0, height - fade + ( layer - 1 ) * 6, height )
+		shade:setRGB( 0, 0, 0 )
+		shade:setAlpha( 0.01 + 0.09 * layer / layers )
+		clip:addElement( shade )
+	end
+end
+
+-- how full a lobby is: green, yellow when it fills, red when there is hardly a place left
+local function FillColor( ratio )
+	if ratio >= 0.9 then
+		return 1, 0.4, 0.3
+	elseif ratio >= 0.5 then
+		return 1, 0.8, 0.25
+	end
+	return 0.45, 0.9, 0.45
+end
+
+-- the bar under the players of a lobby, nothing of it when the host tells no limit
+local function SetFillBar( fill, left, width, players, max )
+	if players == nil or max == nil or max <= 0 then
+		fill:setAlpha( 0 )
+		return
+	end
+
+	local ratio = math.min( math.max( players / max, 0 ), 1 )
+
+	fill:setRGB( FillColor( ratio ) )
+	fill:setAlpha( 1 )
+	fill:setLeftRight( 0, 0, left, left + math.max( width * ratio, 2 ) )
+end
+
+-- "3 / 12", or the players alone
+local function PlayersLabel( players, max )
+	if max ~= nil and max > 0 then
+		return players .. " / " .. max
+	end
+	return tostring( players or 0 )
 end
 
 -- empty to fix weird bug
@@ -234,10 +330,10 @@ DataSources.ShieldDWGameServers = DataSourceHelpers.ListSetup( "ShieldDWGameServ
 			local TryGetMap = ServerRowValue( ServerRoot, times_servers, "mapName" ) or "UNK_MAP0"
 			local TryGetGameType = ServerRowValue( ServerRoot, times_servers, "gameType" ) or ""
 			local TryHostName = ServerRowValue( ServerRoot, times_servers, "gamertag" ) or ""
-			local TryClientCount = ServerRowValue( ServerRoot, times_servers, "clientCount" ) or 0
+			local TryClientCount = tonumber( ServerRowValue( ServerRoot, times_servers, "clientCount" ) ) or 0
 			local TryLobbyID = ServerRowValue( ServerRoot, times_servers, "xuid" )
 			-- these three come with the newer clients
-			local TryMaxClients = ServerRowValue( ServerRoot, times_servers, "maxClients" ) or 0
+			local TryMaxClients = tonumber( ServerRowValue( ServerRoot, times_servers, "maxClients" ) ) or 0
 			local TryMode = ServerRowValue( ServerRoot, times_servers, "mode" )
 			local TryMods = ServerRowValue( ServerRoot, times_servers, "mods" )
 
@@ -252,22 +348,16 @@ DataSources.ShieldDWGameServers = DataSourceHelpers.ListSetup( "ShieldDWGameServ
 				HostMods = TryMods
 			end
 
-			if TryMaxClients > 0 then
-				TryClientCount = TryClientCount .. "/" .. TryMaxClients
-			end
-
 			local Lobby = DescribeLobby( TryMode, TryGetMap, TryGetGameType )
-			local Shown = true
+			local Shown = Filter == 0 or ModeNumbers[Lobby.mode] == Filter
 
-			if Search ~= "" then
+			if Shown and Search ~= "" then
 				-- the map, the gametype or the host, as they are named or as they are shown
 				Shown = string.find( ToUpper( TryGetMap ), Search, 1, true ) ~= nil or
 					string.find( ToUpper( Lobby.mapName ), Search, 1, true ) ~= nil or
 					string.find( ToUpper( TryGetGameType ), Search, 1, true ) ~= nil or
 					string.find( ToUpper( Lobby.gametypeName ), Search, 1, true ) ~= nil or
 					string.find( ToUpper( HostName ), Search, 1, true ) ~= nil
-			elseif Filter ~= 0 and ModeNumbers[Lobby.mode] ~= Filter then
-				Shown = false
 			end
 
 			if Shown then
@@ -276,7 +366,9 @@ DataSources.ShieldDWGameServers = DataSourceHelpers.ListSetup( "ShieldDWGameServ
 						ServerName = Lobby.title,
 						HostedBy = HostName,
 						Mods = HostMods,
-						ClientCount = TryClientCount,
+						ClientCount = PlayersLabel( TryClientCount, TryMaxClients ),
+						Players = TryClientCount,
+						MaxPlayers = TryMaxClients,
 						ConnectionIP = Engine[@"uint64tostring"](TryLobbyID),
 						MapStatus = TryGetMap,
 						GameTypeStatus = TryGetGameType,
@@ -290,46 +382,15 @@ DataSources.ShieldDWGameServers = DataSourceHelpers.ListSetup( "ShieldDWGameServ
 		end
 	end
 
+	-- the lobbies with the most players first
+	table.sort( InfoServers, function ( a, b )
+		return a.models.Players > b.models.Players
+	end )
+
 	CountModel:set( #InfoServers )
 
 	return InfoServers
 end, true )
-
--- Server Settings
-DataSources.ShieldServerSettings = DataSourceHelpers.ListSetup( "ShieldServerSettings", function ( f138_arg0 )
-	local Settings = {}
-
-	table.insert( Settings, CoD.OptionsUtility.CreateDvarSettings( f138_arg0, @"shield/server_filter", @"menu/enabled", "shield_filter_server", "shield_filter_server", {
-		{
-			option = Engine[@"hash_4F9F1239CFD921FE"]( @"hash_146513144F1265BA" ),
-			value = 0,
-			default = true
-		},
-		{
-			option = Engine[@"hash_4F9F1239CFD921FE"]( @"hash_555D96CC762EABDD" ),
-			value = 1
-		},
-		{
-			option = Engine[@"hash_4F9F1239CFD921FE"]( @"hash_5B06081B8B4567F2" ),
-			value = 2
-		},
-		{
-			option = Engine[@"hash_4F9F1239CFD921FE"]( @"hash_7A2DD20750465431" ),
-			value = 3
-		}
-	}, nil, OnServerSettingChanged ) )
-
-	return Settings
-
-end, nil, nil, function ( f139_arg0, f139_arg1, f139_arg2 )
-	local f139_local0 = Engine[@"createmodel"]( Engine[@"getglobalmodel"](), "GametypeSettings.Update" )
-	if f139_arg1.updateSubscription then
-		f139_arg1:removeSubscription( f139_arg1.updateSubscription )
-	end
-	f139_arg1.updateSubscription = f139_arg1:subscribeToModel( f139_local0, function ()
-		f139_arg1:updateDataSource()
-	end, false )
-end )
 
 ---------------------------
 
@@ -338,7 +399,7 @@ CoD.ShieldLobbyServerBrowserOverlay = InheritFrom( CoD.Menu )
 LUI.createMenu.ShieldLobbyServerBrowserOverlay = function ( f1_arg0, f1_arg1 )
 	local self = CoD.Menu.NewForUIEditor( "ShieldLobbyServerBrowserOverlay", f1_arg0 )
 	local f1_local1 = self
-	
+
 	self:setClass( CoD.ShieldLobbyServerBrowserOverlay )
 	self.soundSet = "default"
 	self:setOwner( f1_arg0 )
@@ -346,17 +407,17 @@ LUI.createMenu.ShieldLobbyServerBrowserOverlay = function ( f1_arg0, f1_arg1 )
 	self:setTopBottom( 0, 1, 0, 0 )
 	self:playSound( "menu_open", f1_arg0 )
 	self.anyChildUsesUpdateState = true
-	
+
 	local Background = CoD.StartMenuOptionsBackground.new( f1_local1, f1_arg0, 0, 1, 0, 0, 0, 1, 0, 0 )
 	self:addElement( Background )
 	self.Background = Background
-	
+
 	local FooterContainerFrontendRight = nil
-	
+
 	FooterContainerFrontendRight = CoD.FooterContainer_Frontend_Right.new( f1_local1, f1_arg0, 0.5, 0.5, -960, 960, 1, 1, -48, 0 )
 	self:addElement( FooterContainerFrontendRight )
 	self.FooterContainerFrontendRight = FooterContainerFrontendRight
-	
+
 	local SafeAreaContainerLobbyServerBrwoserOverlay = CoD.Shield_SafeAreaContainer_LobbyServerBrwoserOverlay.new( f1_local1, f1_arg0, 0, 0, 0, 1920, 0, 0, 0, 1080 )
 	SafeAreaContainerLobbyServerBrwoserOverlay:registerEventHandler( "menu_loaded", function ( element, event )
 		local f3_local0 = nil
@@ -375,7 +436,7 @@ LUI.createMenu.ShieldLobbyServerBrowserOverlay = function ( f1_arg0, f1_arg1 )
 	end )
 	self:addElement( SafeAreaContainerLobbyServerBrwoserOverlay )
 	self.SafeAreaContainerLobbyServerBrwoserOverlay = SafeAreaContainerLobbyServerBrwoserOverlay
-	
+
 	f1_local1:AddButtonCallbackFunction( self, f1_arg0, Enum[@"hash_3DD78803F918E9D"][@"hash_1805EFA15E9E7E5A"], nil, function ( element, menu, controller, model )
 		GoBack( self, controller )
 		return true
@@ -397,11 +458,11 @@ LUI.createMenu.ShieldLobbyServerBrowserOverlay = function ( f1_arg0, f1_arg1 )
 	} )
 
 	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
-	
+
 	if PostLoadFunc then
 		PostLoadFunc( self, f1_arg0 )
 	end
-	
+
 	local f1_local19 = self
 
 	CoD.EnhPrintInfo("Called", "Shield's Lobby Server Browser")
@@ -414,15 +475,78 @@ end
 CoD.ShieldLobbyServerBrowserOverlay.__onClose = function ( f8_arg0 )
 	f8_arg0.Background:close()
 	f8_arg0.FooterContainerFrontendRight:close()
-	--f8_arg0.FooterContainerFrontendRight2:close()
 	f8_arg0.SafeAreaContainerLobbyServerBrwoserOverlay:close()
-	--f8_arg0.ShieldServerListButtonList:close()
 end
 
--- Shield's In-game DW Server Lists
+---------------------------
+
+--[[
+	The body of the browser, 1744 by 800.
+	Left, 1060 wide: the title with the filter of modes, the names of the columns, and ten rows.
+	Right, from 1084, 660 wide: the card of the lobby in focus, under it the search and the refresh, and under those the way to a lobby of one's own.
+]]
+local CARD_LEFT = 1084
+local CARD_RIGHT = 1744
+local CARD_IMAGE_HEIGHT = 430
+local CARD_BOTTOM = 680
+local CARD_TEXT_LEFT = CARD_LEFT + 24
+local CARD_TEXT_RIGHT = CARD_RIGHT - 24
+local CARD_PLAYERS_LEFT = CARD_LEFT + 416
+local LIST_TOP = 86
+
+-- the modes of the filter, as shield_filter_server counts them
+local FilterChips = {
+	-- all 200 wide: the glow of the button in focus is made for that, on a narrower one it spills far over
+	{ label = "ALL", value = 0, left = 236, right = 436, color = { r = 1, g = 1, b = 1 } },
+	{ label = "MP", value = 1, left = 444, right = 644, color = LobbyModeColors.mp },
+	{ label = "ZM", value = 2, left = 652, right = 852, color = LobbyModeColors.zm },
+	{ label = "BLACKOUT", value = 3, left = 860, right = 1060, color = LobbyModeColors.wz }
+}
+
+-- a button of the game with its own words, never locked
+local function NewBrowserButton( self, menu, controller, label, left, right, top, bottom )
+	local button = CoD.DirectorSelectButtonMiniInternal.new( menu, controller, 0, 0, left, right, 0, 0, top, bottom )
+
+	button.MiddleText:setText( label )
+	button.MiddleTextFocus:setText( label )
+
+	button:mergeStateConditions( {
+		{
+			stateName = "Locked",
+			condition = function ( menu, element, event )
+				return AlwaysFalse()
+			end
+		}
+	} )
+
+	button:linkToElementModel( self, nil, false, function ( model )
+		button:setModel( model, controller )
+	end )
+
+	return button
+end
+
+-- what a button of the browser does when it is clicked
+local function OnBrowserButton( menu, controller, button, action )
+	menu:AddButtonCallbackFunction( button, controller, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
+		action()
+		return true
+	end, function ( element, menu, controller )
+		if IsGamepad( controller ) then
+			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/select", nil, "ui_confirm" )
+			return true
+		elseif IsMouseOrKeyboard( controller ) then
+			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
+			return false
+		else
+			return false
+		end
+	end, false )
+end
+
 CoD.ShieldDWGameServerRowList = InheritFrom( LUI.UIElement )
-CoD.ShieldDWGameServerRowList.__defaultWidth = 1600
-CoD.ShieldDWGameServerRowList.__defaultHeight = 620
+CoD.ShieldDWGameServerRowList.__defaultWidth = 1744
+CoD.ShieldDWGameServerRowList.__defaultHeight = 800
 CoD.ShieldDWGameServerRowList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
 	local self = LUI.UIElement.new( f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
 	self:setClass( CoD.ShieldDWGameServerRowList )
@@ -430,16 +554,25 @@ CoD.ShieldDWGameServerRowList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg
 	self.soundSet = "default"
 	self.onlyChildrenFocusable = true
 	self.anyChildUsesUpdateState = true
-	
+
+	-- everything of the body that is only closed with it
+	self.Parts = {}
+
+	local function Add( element )
+		self:addElement( element )
+		table.insert( self.Parts, element )
+		return element
+	end
+
 	local Servers = LUI.UIList.new( f1_arg0, f1_arg1, 7, 0, nil, false, false, false, false )
-	Servers:setLeftRight( 0, 0, 0, 1070 )
-	Servers:setTopBottom( 0, 0, 0, 609 )
+	Servers:setLeftRight( 0, 0, 0, 1060 )
+	Servers:setTopBottom( 0, 0, LIST_TOP, LIST_TOP + 654 )
 
 	-- fix weird bug
 	Servers:setDataSource( "ShieldDWGameServersEmpty" )
 
 	Servers:setWidgetType( CoD.ShieldGameServerRow )
-	Servers:setVerticalCount( 11 )
+	Servers:setVerticalCount( 10 )
 	Servers:setSpacing( 6 )
 
 	Servers:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
@@ -451,48 +584,234 @@ CoD.ShieldDWGameServerRowList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg
 
 	CoD.Menu.ServerLobbyBrowser = Servers
 
-	CoD.ShowServerToast("Refreshing lobbies...")
-	Engine[@"exec"](Engine[@"getprimarycontroller"](), "getservers")
+	-- Asks the client for the lobbies. It answers with the list, or says that the master server gave none.
+	-- An older client says nothing then: no word from it after a while is taken for no answer of the server.
+	local function AskForLobbies()
+		local answers = LobbyAnswers
 
-	local ShieldFilterGamemode = LUI.UIList.new( f1_arg0, f1_arg1, 3, 3, nil, false, false, false, false )
+		CoD.ShowServerToast("Refreshing lobbies...")
+		Engine[@"exec"](Engine[@"getprimarycontroller"](), "getservers")
 
-	if Engine[@"getdvarint"]("shield_ui_color") == 0 then
-		ShieldFilterGamemode:setRGB(0, 1, 1)
-	elseif Engine[@"getdvarint"]("shield_ui_color") == 1 then
-		ShieldFilterGamemode:setRGB(1, 0, 0)
-	elseif Engine[@"getdvarint"]("shield_ui_color") == 2 then
-		ShieldFilterGamemode:setRGB(0, 1, 0)
+		self:addElement( LUI.UITimer.newElementTimer( 6000, true, function ()
+			if LobbyAnswers == answers then
+				LobbyFailedModel():set( 1 )
+
+				-- rows of an answer of before stay: only the wait for a first one ends
+				local count = LobbyCountModel():get()
+				if count == nil or count < 0 then
+					LobbyCountModel():set( 0 )
+				end
+			end
+		end ) )
 	end
 
-	ShieldFilterGamemode:setLeftRight( 0, 0, 1080, 1580 )
-	ShieldFilterGamemode:setTopBottom( 0, 0, 440, 500 )
-	ShieldFilterGamemode:setVerticalCount(1)
-	ShieldFilterGamemode:setHorizontalCount(1)
-	ShieldFilterGamemode:setSpacing(0)
-	ShieldFilterGamemode:setWidgetType( CoD.CustomGames_SettingSliderNoCustom )
-	ShieldFilterGamemode:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	ShieldFilterGamemode:setDataSource( "ShieldServerSettings" )
-	self:addElement( ShieldFilterGamemode )
-	self.ShieldFilterGamemode = ShieldFilterGamemode
+	LobbyFailedModel():set( 0 )
+	AskForLobbies()
 
-	ShieldFilterGamemode.id = "ShieldFilterGamemode"
+	-- the rows again, by what the filter and the search are now
+	local function ReloadRows()
+		CoD.Shield.RefillLobbyRows( Servers )
+	end
 
-	ShieldFilterGamemode:registerEventHandler( "grid_item_changed", function ( element, event )
-		local f19_local0 = nil
-		Servers:setDataSource( "ShieldDWGameServersEmpty" )
-		Servers:updateDataSource()
-		Servers:setDataSource( "ShieldDWGameServers" )
-		Servers:updateDataSource()
-		return f19_local0
-	end )
+	---------------------------
+	-- over the rows: the title, how many lobbies, and the filter of modes
 
-	-- Search
-	local SearchServer = CoD.Shield_NameEditBox.new( f1_arg0, f1_arg1, 0, 0, 1080, 1430, 0, 0, 376, 426 )
+	local Title = Add( NewText( 0, 228, -4, 32, "notosans_bold" ) )
+	Title:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+	Title:setText( "LOBBIES" )
+
+	-- the count under the title: the filter takes the room beside it
+	local CountText = Add( NewText( 2, 228, 30, 14, "ttmussels_regular" ) )
+	CountText:setRGB( 0.55, 0.55, 0.55 )
+	CountText:setLetterSpacing( 2 )
+
+	local CountModel = LobbyCountModel()
+	CountModel:set( -1 )
+
+	local FailedModel = LobbyFailedModel()
+
+	local function ShowCount()
+		local count = CountModel:get()
+		if FailedModel:get() == 1 then
+			CountText:setText( "NO ANSWER" )
+		elseif count == nil or count < 0 then
+			CountText:setText( "SEARCHING" )
+		elseif count == 0 then
+			CountText:setText( "NONE OPEN" )
+		else
+			CountText:setText( count .. " OPEN" )
+		end
+	end
+
+	CountText:subscribeToModel( CountModel, ShowCount )
+	CountText:subscribeToModel( FailedModel, ShowCount )
+
+	self.FilterChips = {}
+
+	local function MarkFilterChips( filter )
+		for _, chip in ipairs( self.FilterChips ) do
+			if chip.FilterValue == filter then
+				chip.ActiveMark:setAlpha( 1 )
+			else
+				chip.ActiveMark:setAlpha( 0 )
+			end
+		end
+	end
+
+	for _, info in ipairs( FilterChips ) do
+		local Chip = NewBrowserButton( self, f1_arg0, f1_arg1, info.label, info.left, info.right, 0, 44 )
+		Chip.FilterValue = info.value
+
+		-- the line under the mode the list is on
+		local ActiveMark = LUI.UIImage.new( 0, 1, 0, 0, 1, 1, -3, 0 )
+		ActiveMark:setRGB( info.color.r, info.color.g, info.color.b )
+		ActiveMark:setAlpha( 0 )
+		Chip:addElement( ActiveMark )
+		Chip.ActiveMark = ActiveMark
+
+		self:addElement( Chip )
+		-- the menu finds what can take the focus as parent[id]: the id has to be the name it is kept under
+		Chip.id = "FilterChip" .. info.value
+		self[Chip.id] = Chip
+		table.insert( self.FilterChips, Chip )
+
+		OnBrowserButton( f1_arg0, f1_arg1, Chip, function ()
+			PlaySoundAlias( "uin_paint_image_flip_toggle" )
+			Engine[@"setdvar"]( "shield_filter_server", info.value )
+			MarkFilterChips( info.value )
+			ReloadRows()
+		end )
+	end
+
+	MarkFilterChips( Engine[@"getdvarint"]( @"shield_filter_server" ) )
+
+	-- the names of the columns, where the rows have them
+	Add( NewCaption( 127, 560, 56, "LOBBY" ) )
+	Add( NewCaption( 590, 880, 56, "HOST" ) )
+	Add( NewCaption( 900, 1040, 56, "PLAYERS", Enum[@"luialignment"][@"lui_alignment_right"] ) )
+	Add( NewBox( 0, 1060, 78, 79, 1, 1, 1, 0.12 ) )
+
+	---------------------------
+	-- the card of the lobby in focus: its picture, 660 by 430, which cuts what of the picture is over
+
+	local MapClip = LUI.UIElement.new( 0, 0, CARD_LEFT, CARD_RIGHT, 0, 0, 0, CARD_IMAGE_HEIGHT )
+	MapClip:setUseStencil( true )
+	Add( MapClip )
+
+	local MapImage = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	MapImage:setImage( RegisterImage( @"uie_ui_menu_emblem_grid" ) )
+	MapImage:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_1A02C44161370F6D" ) )
+	MapImage:setShaderVector( 0, 0, 0, 0, 0 )
+	MapImage:setShaderVector( 1, 1, 1, 0, 0 )
+	MapImage:setShaderVector( 2, 0, 0, 0, 0 )
+	MapClip:addElement( MapImage )
+	self.MapImage = MapImage
+
+	-- the picture goes dark to its lower end, where the name of the map is written on it
+	AddBottomFade( MapClip, CARD_IMAGE_HEIGHT, 200 )
+
+	-- the line over the card, in the colour of the mode
+	local CardAccent = Add( NewBox( CARD_LEFT, CARD_RIGHT, 0, 4, 1, 1, 1, 0.25 ) )
+
+	local CardPill = Add( NewBox( CARD_TEXT_LEFT, CARD_TEXT_LEFT + 52, 318, 344, 1, 1, 1, 0 ) )
+
+	local CardPillText = Add( NewText( CARD_TEXT_LEFT, CARD_TEXT_LEFT + 52, 322, 18, "notosans_bold", Enum[@"luialignment"][@"lui_alignment_center"] ) )
+	CardPillText:setRGB( 0.04, 0.04, 0.04 )
+
+	local CardGametype = Add( NewText( CARD_TEXT_LEFT + 64, CARD_TEXT_RIGHT, 320, 22, "ttmussels_regular" ) )
+	CardGametype:setRGB( 0.86, 0.86, 0.86 )
+	CardGametype:setLetterSpacing( 2 )
+
+	local CardTitle = Add( NewText( CARD_TEXT_LEFT, CARD_TEXT_RIGHT, 354, 48, "notosans_bold" ) )
+	CardTitle:setRGB( 1, 1, 1 )
+	CardTitle:setText( "Select a lobby" )
+
+	-- under the picture: who hosts it, how many play, and the mods it runs
+	Add( NewBox( CARD_LEFT, CARD_RIGHT, CARD_IMAGE_HEIGHT, CARD_BOTTOM, 0, 0, 0, 0.5 ) )
+
+	Add( NewCaption( CARD_TEXT_LEFT, CARD_PLAYERS_LEFT - 20, 450, "HOSTED BY" ) )
+
+	local CardHost = Add( NewText( CARD_TEXT_LEFT, CARD_PLAYERS_LEFT - 20, 472, 30, "notosans_bold" ) )
+	CardHost:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+	CardHost:setText( "-" )
+
+	Add( NewCaption( CARD_PLAYERS_LEFT, CARD_TEXT_RIGHT, 450, "PLAYERS" ) )
+
+	local CardPlayers = Add( NewText( CARD_PLAYERS_LEFT, CARD_TEXT_RIGHT, 471, 32, "0arame_mono_stencil" ) )
+	CardPlayers:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+	CardPlayers:setText( "-" )
+
+	Add( NewBox( CARD_PLAYERS_LEFT, CARD_TEXT_RIGHT, 516, 522, 1, 1, 1, 0.12 ) )
+	local CardFill = Add( NewBox( CARD_PLAYERS_LEFT, CARD_PLAYERS_LEFT + 2, 516, 522, 1, 1, 1, 0 ) )
+
+	Add( NewBox( CARD_TEXT_LEFT, CARD_TEXT_RIGHT, 546, 547, 1, 1, 1, 0.1 ) )
+
+	Add( NewCaption( CARD_TEXT_LEFT, CARD_TEXT_RIGHT, 564, "MODS" ) )
+
+	local CardMods = Add( NewText( CARD_TEXT_LEFT, CARD_TEXT_RIGHT, 586, 22, "ttmussels_regular" ) )
+	CardMods:setRGB( 0.55, 0.55, 0.55 )
+	CardMods:setText( "-" )
+
+	Add( NewCaption( CARD_TEXT_LEFT, CARD_TEXT_RIGHT, 646, "CLICK A LOBBY TO JOIN IT", Enum[@"luialignment"][@"lui_alignment_right"] ) )
+
+	-- the thin frame of the game around the card
+	local CardFrame = LUI.UIImage.new( 0, 0, CARD_LEFT - 1, CARD_RIGHT + 1, 0, 0, -1, CARD_BOTTOM + 1 )
+	CardFrame:setAlpha( 0.12 )
+	CardFrame:setImage( RegisterImage( @"uie_ui_menu_store_common_frame" ) )
+	CardFrame:setMaterial( LUI.UIImage.GetCachedMaterial( @"uie_nineslice_add" ) )
+	CardFrame:setShaderVector( 0, 0, 0, 0, 0 )
+	CardFrame:setupNineSliceShader( 12, 12 )
+	Add( CardFrame )
+
+	-- the card tells of that row
+	local function ShowLobby( row )
+		local mode = row.LobbyMode or "mp"
+		local color = LobbyModeColors[mode] or LobbyModeColors.mp
+
+		-- arena, hopefully, for a lobby with no picture
+		SetPreviewImage( MapImage, row.CurrentMapImage or @"uie_ui_menu_survey_arena", CARD_RIGHT - CARD_LEFT, CARD_IMAGE_HEIGHT )
+
+		-- the new picture comes up out of the dark
+		MapImage:completeAnimation()
+		MapImage:setAlpha( 0.35 )
+		MapImage:beginAnimation( 180 )
+		MapImage:setAlpha( 1 )
+
+		CardAccent:setRGB( color.r, color.g, color.b )
+		CardAccent:setAlpha( 1 )
+		CardPill:setRGB( color.r, color.g, color.b )
+		CardPill:setAlpha( 1 )
+		CardPillText:setText( ToUpper( mode ) )
+
+		if row.CurrentGameTypeTranslated ~= nil and row.CurrentGameTypeTranslated ~= "" then
+			CardGametype:setText( ToUpper( row.CurrentGameTypeTranslated ) )
+		else
+			CardGametype:setText( LobbyModeNames[mode] or "" )
+		end
+
+		CardTitle:setText( row.CurrentMapTranslated or "Lobby" )
+		CardHost:setText( row.HostedUser or "-" )
+		CardPlayers:setText( PlayersLabel( row.Players, row.MaxPlayers ) )
+		SetFillBar( CardFill, CARD_PLAYERS_LEFT, CARD_TEXT_RIGHT - CARD_PLAYERS_LEFT, row.Players, row.MaxPlayers )
+
+		if row.HostMods ~= nil and row.HostMods ~= "" then
+			CardMods:setRGB( 1, 0.85, 0.2 )
+			CardMods:setText( row.HostMods )
+		else
+			CardMods:setRGB( 0.55, 0.55, 0.55 )
+			CardMods:setText( "None" )
+		end
+	end
+
+	---------------------------
+	-- under the card: the search and the refresh
+
+	local SearchServer = CoD.Shield_NameEditBox.new( f1_arg0, f1_arg1, 0, 0, CARD_LEFT, CARD_LEFT + 400, 0, 0, 692, 740 )
 	SearchServer:linkToElementModel( self, nil, false, function ( model )
 		SearchServer:setModel( model, f1_arg1 )
 	end )
-	SearchServer.TextBox:setLeftRight(0, 0, 20 + 85, 330)
-	SearchServer.RankHighlight:setText("^2Search: ")
+	SearchServer.TextBox:setLeftRight( 0, 0, 100, 385 )
+	SearchServer.RankHighlight:setText( "Search:" )
 	self:addElement( SearchServer )
 	self.SearchServer = SearchServer
 
@@ -524,125 +843,40 @@ CoD.ShieldDWGameServerRowList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg
 			Engine[@"setdvar"]( "shield_search_server", "" )
 		end
 
-		Servers:setDataSource( "ShieldDWGameServersEmpty" )
-		Servers:updateDataSource()
-		Servers:setDataSource( "ShieldDWGameServers" )
-		Servers:updateDataSource()
+		ReloadRows()
 	end )
 
 	SearchServer.id = "SearchServer"
 
-	local Mainframe = CoD.StartMenuOptionsMainFrame.new( f1_arg0, f1_arg1, 0, 0, 0 + 1080 - 3, 515 + 1230 + 3, 0, 0, 0 - 50 - 3, 358 + 3 )
-	Mainframe:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	Mainframe:setAlpha( 0.05 )
-	self:addElement( Mainframe )
-	self.Mainframe = Mainframe
+	local RefreshServersButton = NewBrowserButton( self, f1_arg0, f1_arg1, "REFRESH", CARD_LEFT + 412, CARD_RIGHT, 692, 740 )
+	self:addElement( RefreshServersButton )
+	self.RefreshServersButton = RefreshServersButton
+	RefreshServersButton.id = "RefreshServersButton"
 
-	-- the box of the picture, 665 by 330: it cuts what of the picture is over
-	local MapClip = LUI.UIElement.new( 0, 0, 0 + 1080, 515 + 1230, 0, 0, 0 - 50, 280 )
-	MapClip:setUseStencil( true )
-	self:addElement( MapClip )
-	self.MapClip = MapClip
+	OnBrowserButton( f1_arg0, f1_arg1, RefreshServersButton, function ()
+		PlaySoundAlias( "uin_paint_image_flip_toggle" )
+		CoD.EnhPrintInfo("RefreshServersButton")
 
-	local MapImage = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
-	MapImage:setImage( RegisterImage( @"uie_ui_menu_emblem_grid" ) )
-	MapImage:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_1A02C44161370F6D" ) )
-	MapImage:setShaderVector( 0, 0, 0, 0, 0 )
-	MapImage:setShaderVector( 1, 1, 1, 0, 0 )
-	MapImage:setShaderVector( 2, 0, 0, 0, 0 )
-	MapClip:addElement( MapImage )
-	self.MapImage = MapImage
+		AskForLobbies()
+	end )
 
-	local MapBackImage = LUI.UIImage.new( 0, 0, 0 + 1080, 515 + 1230, 0, 0, 216, 280 )
-	MapBackImage:setRGB( 0, 0, 0 )
-	MapBackImage:setAlpha( 0.6 )
-	self:addElement( MapBackImage )
-	self.MapBackImage = MapBackImage
+	-- under them: a lobby of one's own, see HostLobby.lua
+	local HostLobbyButton = NewBrowserButton( self, f1_arg0, f1_arg1, "HOST LOBBY", CARD_LEFT, CARD_RIGHT, 752, 800 )
+	self:addElement( HostLobbyButton )
+	self.HostLobbyButton = HostLobbyButton
+	HostLobbyButton.id = "HostLobbyButton"
 
-	local ServerTextStuff = LUI.UIText.new( 0, 0, 1095, 1730, 0, 0, 233, 263 )
-	ServerTextStuff:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	ServerTextStuff:setTTF("notosans_bold")
-	ServerTextStuff:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	ServerTextStuff:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( ServerTextStuff )
-	self.ServerTextStuff = ServerTextStuff
+	OnBrowserButton( f1_arg0, f1_arg1, HostLobbyButton, function ()
+		PlaySoundAlias( "uin_paint_image_flip_toggle" )
+		OpenOverlay( f1_arg0, "ShieldHostLobbyOverlay", f1_arg1 )
+	end )
 
-	-- the footer of the card
-	local InfoBack = LUI.UIImage.new( 0, 0, 0 + 1080, 515 + 1230, 0, 0, 280, 358 )
-	InfoBack:setRGB( 0, 0, 0 )
-	InfoBack:setAlpha( 0.45 )
-	self:addElement( InfoBack )
-	self.InfoBack = InfoBack
-
-	-- in it: who hosts the lobby in focus, how many play, and the mods it runs
-	local PlayersText = LUI.UIText.new( 0, 0, 1500, 1730, 0, 0, 290, 314 )
-	PlayersText:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	PlayersText:setTTF( "ttmussels_regular" )
-	PlayersText:setAlignment( Enum[@"luialignment"][@"lui_alignment_right"] )
-	PlayersText:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( PlayersText )
-	self.PlayersText = PlayersText
-
-	local HostText = LUI.UIText.new( 0, 0, 1095, 1500, 0, 0, 290, 314 )
-	HostText:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	HostText:setTTF( "notosans_bold" )
-	HostText:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	HostText:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( HostText )
-	self.HostText = HostText
-
-	local ModsText = LUI.UIText.new( 0, 0, 1095, 1740, 0, 0, 324, 344 )
-	ModsText:setRGB( 1, 0.85, 0.2 )
-	ModsText:setTTF( "ttmussels_regular" )
-	ModsText:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	ModsText:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( ModsText )
-	self.ModsText = ModsText
-
-	--[[
-	local f1_local2 = Servers
-	local LANServerBrowserDetails = Servers.subscribeToModel
-	local f1_local4 = Engine[@"getmodelforcontroller"]( f1_arg1 )
-	LANServerBrowserDetails( f1_local2, f1_local4.LastInput, function ( f3_arg0, f3_arg1 )
-		CoD.Menu.UpdateButtonShownState( f3_arg1, f1_arg0, f1_arg1, Enum[@"luibutton"][@"lui_key_xba_pscross"] )
-	end, false )
-	]]
+	---------------------------
+	-- the rows
 
 	Servers:registerEventHandler( "list_item_gain_focus", function ( element, event )
-		-- ????
-		local f4_local0 = nil
-		--LobbyLANServerPlayerListRefresh( self, element, f1_arg1 )
-		--CoD.EnhPrintInfo(element.CurrentMapImage)
-
-
-		if element.CurrentMapImage ~= nil then
-			SetPreviewImage( MapImage, element.CurrentMapImage, 665, 330 )
-		else
-			-- arena, hopefully
-			SetPreviewImage( MapImage, @"uie_ui_menu_survey_arena", 665, 330 )
-		end
-
-		if element.CurrentGameTypeTranslated ~= "" then
-			ServerTextStuff:setText(element.CurrentMapTranslated .. " - " .. element.CurrentGameTypeTranslated)
-		else
-			ServerTextStuff:setText(element.CurrentMapTranslated)
-		end
-
-		HostText:setText("Hosted by: " .. (element.HostedUser or ""))
-
-		if element.CurrentClientCount ~= nil then
-			PlayersText:setText(element.CurrentClientCount .. " players")
-		else
-			PlayersText:setText("")
-		end
-
-		if element.HostMods ~= nil and element.HostMods ~= "" then
-			ModsText:setText("Mods: " .. element.HostMods)
-		else
-			ModsText:setText("")
-		end
-
-		return f4_local0
+		ShowLobby( element )
+		return nil
 	end )
 
 	Servers:registerEventHandler( "gain_focus", function ( element, event )
@@ -658,26 +892,12 @@ CoD.ShieldDWGameServerRowList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg
 
 	-- element is the current datasource being clicked..
 	f1_arg0:AddButtonCallbackFunction( Servers, f1_arg1, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		if IsGamepad( controller ) then
+		if IsGamepad( controller ) or IsMouseOrKeyboard( controller ) then
 			PlaySoundAlias("uin_toggle_generic")
 			CoD.EnhPrintInfo("Server Game Connect", element.CurrentLobbyID)
 			CoD.ShowServerToast("Joining to Lobby " .. element.CurrentLobbyID .. "...")
 			Engine[@"exec"](Engine[@"getprimarycontroller"](), "joinserver " .. element.CurrentLobbyID)
-
-			--JoinSystemLinkServer( self, element, controller )
-			--GoBack( self, controller )
 			return true
-		elseif IsMouseOrKeyboard( controller ) then
-			PlaySoundAlias("uin_toggle_generic")
-			CoD.EnhPrintInfo("Server Game Connect",  element.CurrentLobbyID)
-			CoD.ShowServerToast("Joining to Lobby " .. element.CurrentLobbyID .. "...")
-			Engine[@"exec"](Engine[@"getprimarycontroller"](), "joinserver " .. element.CurrentLobbyID)
-
-			--JoinSystemLinkServer( self, element, controller )
-			--GoBack( self, controller )
-			return true
-		else
-			
 		end
 	end, function ( element, menu, controller )
 		if IsGamepad( controller ) then
@@ -695,290 +915,289 @@ CoD.ShieldDWGameServerRowList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg
 	self.Servers = Servers
 
 	-- in the place of the rows while there is none
-	local EmptyText = LUI.UIText.new( 0, 0, 0, 1070, 0, 0, 250, 276 )
-	EmptyText:setRGB( 0.59, 0.59, 0.59 )
-	EmptyText:setTTF( "ttmussels_regular" )
-	EmptyText:setAlignment( Enum[@"luialignment"][@"lui_alignment_center"] )
-	EmptyText:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( EmptyText )
-	self.EmptyText = EmptyText
+	local EmptyTitle = Add( NewText( 0, 1060, LIST_TOP + 250, 30, "notosans_bold", Enum[@"luialignment"][@"lui_alignment_center"] ) )
+	EmptyTitle:setRGB( 0.75, 0.75, 0.75 )
 
-	local CountModel = LobbyCountModel()
-	CountModel:set( -1 )
-	EmptyText:subscribeToModel( CountModel, function ( model )
-		local count = model:get()
-		if count == nil or count < 0 then
-			EmptyText:setText( "Looking for lobbies..." )
+	local EmptyText = Add( NewText( 0, 1060, LIST_TOP + 292, 20, "ttmussels_regular", Enum[@"luialignment"][@"lui_alignment_center"] ) )
+	EmptyText:setRGB( 0.5, 0.5, 0.5 )
+
+	local function ShowEmpty()
+		local count = CountModel:get()
+		if FailedModel:get() == 1 and ( count == nil or count <= 0 ) then
+			EmptyTitle:setText( "The master server does not answer" )
+			EmptyText:setText( "No lobbies can be listed until it does. Refresh in a moment." )
+			EmptyTitle:setAlpha( 1 )
+			EmptyText:setAlpha( 1 )
+		elseif count == nil or count < 0 then
+			EmptyTitle:setText( "Looking for lobbies..." )
+			EmptyText:setText( "" )
+			EmptyTitle:setAlpha( 1 )
 			EmptyText:setAlpha( 1 )
 		elseif count == 0 then
-			EmptyText:setText( "No lobbies found. Host one, or refresh in a moment." )
+			EmptyTitle:setText( "No lobbies found" )
+			EmptyText:setText( "Host a public match, change the filter, or refresh in a moment." )
+			EmptyTitle:setAlpha( 1 )
 			EmptyText:setAlpha( 1 )
 		else
+			EmptyTitle:setAlpha( 0 )
 			EmptyText:setAlpha( 0 )
 		end
-	end )
+	end
 
-	
-	--[[
-	LANServerBrowserDetails = CoD.LANServerBrowserDetails.new( f1_arg0, f1_arg1, 0, 0, 1085, 1600, 0, 0, 0, 610 )
-	self:addElement( LANServerBrowserDetails )
-	self.LANServerBrowserDetails = LANServerBrowserDetails
-	
-	LANServerBrowserDetails:linkToElementModel( Servers, nil, false, function ( model )
-		LANServerBrowserDetails:setModel( model, f1_arg1 )
-	end )
-	]]
-	
+	EmptyText:subscribeToModel( CountModel, ShowEmpty )
+	EmptyText:subscribeToModel( FailedModel, ShowEmpty )
+
 	Servers.id = "Servers"
-	--LANServerBrowserDetails.id = "LANServerBrowserDetails"
 	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
-	
+
 	if PostLoadFunc then
 		PostLoadFunc( self, f1_arg1, f1_arg0 )
 	end
-	
+
 	return self
 end
 
 CoD.ShieldDWGameServerRowList.__onClose = function ( f9_arg0 )
-	--f9_arg0.LANServerBrowserDetails:close()
-	f9_arg0.Mainframe:close()
-	f9_arg0.SearchServer:close()
-	f9_arg0.ShieldFilterGamemode:close()
-	f9_arg0.ServerTextStuff:close()
-	f9_arg0.HostText:close()
-	f9_arg0.ModsText:close()
-	f9_arg0.PlayersText:close()
-	f9_arg0.InfoBack:close()
-	f9_arg0.EmptyText:close()
+	for _, element in ipairs( f9_arg0.Parts ) do
+		element:close()
+	end
+	for _, chip in ipairs( f9_arg0.FilterChips ) do
+		chip:close()
+	end
 	f9_arg0.MapImage:close()
-	f9_arg0.MapClip:close()
-	f9_arg0.MapBackImage:close()
+	f9_arg0.SearchServer:close()
+	f9_arg0.RefreshServersButton:close()
+	f9_arg0.HostLobbyButton:close()
 	f9_arg0.Servers:close()
 end
 
--- Server Widget Style
+---------------------------
+
+--[[
+	A row, 1060 by 60: the picture of the map, the map over its mode and gametype,
+	the host over the mods, and the players over a bar of how full the lobby is.
+]]
+local ROW_HEIGHT = 60
+local ROW_THUMB_WIDTH = 107
+local ROW_TEXT_LEFT = 127
+local ROW_BAR_LEFT = 920
+local ROW_BAR_WIDTH = 120
+
+-- what of a row changes with the focus: nothing here has a colour of its own, a row keeps that of its mode
+local RowFocusParts = {
+	{ "BlackBar", function ( element, focus ) element:setAlpha( focus and 0.1 or 0.05 ) end },
+	{ "Tint", function ( element, focus ) element:setAlpha( focus and 0.16 or 0 ) end },
+	{ "FocusFrame", function ( element, focus ) element:setAlpha( focus and 1 or 0 ) end },
+	{ "ThumbDim", function ( element, focus ) element:setAlpha( focus and 0 or 0.35 ) end },
+	{ "Accent", function ( element, focus ) element:setLeftRight( 0, 0, 0, focus and 7 or 4 ) end }
+}
+
+-- a clip of a row that ends in the focus or out of it, at once or over some time coming from the other
+local function RowClip( parts, focus, duration )
+	return function ( self, event )
+		self:__resetProperties()
+		self:setupElementClipCounter( #parts )
+
+		for _, part in ipairs( parts ) do
+			local element = self[part[1]]
+
+			element:completeAnimation()
+
+			if duration then
+				part[2]( element, not focus )
+				element:beginAnimation( duration )
+				part[2]( element, focus )
+				element:registerEventHandler( "interrupted_keyframe", self.clipInterrupted )
+				element:registerEventHandler( "transition_complete_keyframe", self.clipFinished )
+			else
+				part[2]( element, focus )
+				self.clipFinished( element )
+			end
+		end
+	end
+end
+
 CoD.ShieldGameServerRow = InheritFrom( LUI.UIElement )
-CoD.ShieldGameServerRow.__defaultWidth = 1070
-CoD.ShieldGameServerRow.__defaultHeight = 44
+CoD.ShieldGameServerRow.__defaultWidth = 1060
+CoD.ShieldGameServerRow.__defaultHeight = ROW_HEIGHT
 CoD.ShieldGameServerRow.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
 	local self = LUI.UIElement.new( f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
 	self:setClass( CoD.ShieldGameServerRow )
 	self.id = "ShieldGameServerRow"
 	self.soundSet = "default"
 	f1_arg0:addElementToPendingUpdateStateList( self )
-	
-	local BlackBar = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 1, 1 )
-	BlackBar:setRGB( 0.78, 0.78, 0.78 )
+
+	self.Parts = {}
+
+	local function Add( element )
+		self:addElement( element )
+		table.insert( self.Parts, element )
+		return element
+	end
+
+	local BlackBar = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	BlackBar:setRGB( 1, 1, 1 )
 	BlackBar:setAlpha( 0.05 )
-	self:addElement( BlackBar )
+	Add( BlackBar )
 	self.BlackBar = BlackBar
 
+	-- the colour of the mode over the row in focus
+	local Tint = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	Tint:setAlpha( 0 )
+	Add( Tint )
+	self.Tint = Tint
+
+	-- the picture of the map, cut to its box
+	local ThumbClip = LUI.UIElement.new( 0, 0, 0, ROW_THUMB_WIDTH, 0, 0, 0, ROW_HEIGHT )
+	ThumbClip:setUseStencil( true )
+	Add( ThumbClip )
+
+	local Thumb = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	Thumb:setAlpha( 0 )
+	ThumbClip:addElement( Thumb )
+	self.Thumb = Thumb
+
+	-- it is a little dark until the row is in focus. Of the row, not of the box of the picture:
+	-- a part that a clip changes tells its parent when it is done, and only the row counts those
+	local ThumbDim = Add( NewBox( 0, ROW_THUMB_WIDTH, 0, ROW_HEIGHT, 0, 0, 0, 0.35 ) )
+	self.ThumbDim = ThumbDim
+
 	-- the bar at the start of the row
-	local Accent = LUI.UIImage.new( 0, 0, 0, 4, 0, 1, 1, 1 )
-	Accent:setRGB( LobbyModeColors.mp.r, LobbyModeColors.mp.g, LobbyModeColors.mp.b )
-	self:addElement( Accent )
+	local Accent = LUI.UIImage.new( 0, 0, 0, 4, 0, 1, 0, 0 )
+	Add( Accent )
 	self.Accent = Accent
 
-	-- MP, ZM or WZ
-	local ModeTag = LUI.UIText.new( 0, 0, 16, 56, 0, 0, 13, 31 )
-	ModeTag:setRGB( LobbyModeColors.mp.r, LobbyModeColors.mp.g, LobbyModeColors.mp.b )
-	ModeTag:setTTF( "notosans_bold" )
-	ModeTag:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	ModeTag:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-	self:addElement( ModeTag )
-	self.ModeTag = ModeTag
-	
-	local HostedBy = LUI.UIText.new( 0, 0, 540, 1060, 0, 0, 10, 34 )
-	HostedBy:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	HostedBy:setTTF( "ttmussels_regular" )
-	HostedBy:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_558C8A85F2048829"] )
-	HostedBy:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-	self:addElement( HostedBy )
-	self.HostedBy = HostedBy
-
-	-- the mods of the host, smaller, from the right end of the row
-	local HostMods = LUI.UIText.new( 0, 0, 640, 1055, 0, 0, 13, 31 )
-	HostMods:setRGB( 1, 0.85, 0.2 )
-	HostMods:setTTF( "ttmussels_regular" )
-	HostMods:setAlignment( Enum[@"luialignment"][@"lui_alignment_right"] )
-	HostMods:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-	self:addElement( HostMods )
-	self.HostModsText = HostMods
-	
-	local ServerIP = LUI.UIText.new( 0, 0, 480, 824, 0, 0, 10, 34 )
-	ServerIP:setRGB( 0.94, 0.94, 0.94 )
-	ServerIP:setTTF( "ttmussels_regular" )
-	ServerIP:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_558C8A85F2048829"] )
-	ServerIP:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-	self:addElement( ServerIP )
-	self.ServerIP = ServerIP
-	
-	local ClientCount = LUI.UIText.new( 0, 0, 420, 520, 0, 0, 10, 34 )
-	ClientCount:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	ClientCount:setTTF( "0arame_mono_stencil" )
-	ClientCount:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_558C8A85F2048829"] )
-	ClientCount:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-	self:addElement( ClientCount )
-	self.ClientCount = ClientCount
-	
-	local ServerName = LUI.UIText.new( 0, 0, 62, 405, 0, 0, 10, 34 )
+	local ServerName = Add( NewText( ROW_TEXT_LEFT, 570, 7, 24, "notosans_bold" ) )
 	ServerName:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	ServerName:setTTF( "ttmussels_regular" )
-	ServerName:setLetterSpacing( 1 )
-	ServerName:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_558C8A85F2048829"] )
-	ServerName:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-	self:addElement( ServerName )
 	self.ServerName = ServerName
-	
-	-- Link them to Get from DataSource!
-	self.HostedBy:linkToElementModel( self, "HostedBy", true, function ( model )
-		local f2_local0 = model:get()
-		if f2_local0 ~= nil then
-			local name = f2_local0
-			local mods = CoD.ModelUtility.GetSelfModelPathValue( self, "Mods" ) or ""
 
-			HostedBy:setText( name )
-			self.HostedUser = name
-			self.HostMods = mods
+	-- MP, ZM or WZ, dark on the colour of the mode
+	local Pill = Add( NewBox( ROW_TEXT_LEFT, ROW_TEXT_LEFT + 36, 36, 54, 1, 1, 1, 1 ) )
 
-			if mods ~= "" then
-				HostMods:setText( "Mods: " .. ShortenText( mods, 40 ) )
-			else
-				HostMods:setText( "" )
-			end
+	local PillText = Add( NewText( ROW_TEXT_LEFT, ROW_TEXT_LEFT + 36, 38, 14, "notosans_bold", Enum[@"luialignment"][@"lui_alignment_center"] ) )
+	PillText:setRGB( 0.04, 0.04, 0.04 )
+
+	local Gametype = Add( NewText( ROW_TEXT_LEFT + 46, 570, 36, 18, "ttmussels_regular" ) )
+	Gametype:setRGB( 0.68, 0.68, 0.68 )
+	Gametype:setLetterSpacing( 1 )
+
+	local HostedBy = Add( NewText( 590, 890, 8, 22, "ttmussels_regular" ) )
+	HostedBy:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+
+	local HostMods = Add( NewText( 590, 890, 37, 16, "ttmussels_regular" ) )
+
+	local ClientCount = Add( NewText( 900, 1040, 9, 24, "0arame_mono_stencil", Enum[@"luialignment"][@"lui_alignment_right"] ) )
+	ClientCount:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+
+	Add( NewBox( ROW_BAR_LEFT, ROW_BAR_LEFT + ROW_BAR_WIDTH, 43, 47, 1, 1, 1, 0.12 ) )
+	local Fill = Add( NewBox( ROW_BAR_LEFT, ROW_BAR_LEFT + 2, 43, 47, 1, 1, 1, 0 ) )
+
+	-- the frame of the game around the row in focus, in the colour of the mode
+	local FocusFrame = LUI.UIImage.new( 0, 1, -4, 4, 0, 1, -4, 4 )
+	FocusFrame:setAlpha( 0 )
+	FocusFrame:setImage( RegisterImage( @"uie_ui_menu_store_focus_frame" ) )
+	FocusFrame:setMaterial( LUI.UIImage.GetCachedMaterial( @"uie_nineslice_add" ) )
+	FocusFrame:setShaderVector( 0, 0, 0, 0, 0 )
+	FocusFrame:setupNineSliceShader( 10, 10 )
+	Add( FocusFrame )
+	self.FocusFrame = FocusFrame
+
+	-- everything of the row is read when its lobby is set: the list makes the lobby whole before it gives it
+	ServerName:linkToElementModel( self, "ServerName", true, function ( model )
+		if model:get() == nil then
+			return
 		end
+
+		local Lobby = DescribeLobby( CoD.ModelUtility.GetSelfModelPathValue( self, "Mode" ), CoD.ModelUtility.GetSelfModelPathValue( self, "MapStatus" ),
+			CoD.ModelUtility.GetSelfModelPathValue( self, "GameTypeStatus" ) )
+		local color = LobbyModeColors[Lobby.mode] or LobbyModeColors.mp
+
+		-- what the card and the join read of the row in focus
+		self.CurrentMapTranslated = Lobby.mapName
+		self.CurrentGameTypeTranslated = Lobby.gametypeName
+		self.CurrentMapImage = Lobby.image
+		self.CurrentSessionMode = ToUpper( Lobby.mode )
+		self.LobbyMode = Lobby.mode
+		self.CurrentLobbyID = CoD.ModelUtility.GetSelfModelPathValue( self, "ConnectionIP" )
+		self.HostedUser = CoD.ModelUtility.GetSelfModelPathValue( self, "HostedBy" ) or ""
+		self.HostMods = CoD.ModelUtility.GetSelfModelPathValue( self, "Mods" ) or ""
+		self.Players = CoD.ModelUtility.GetSelfModelPathValue( self, "Players" ) or 0
+		self.MaxPlayers = CoD.ModelUtility.GetSelfModelPathValue( self, "MaxPlayers" ) or 0
+		self.CurrentClientCount = CoD.ModelUtility.GetSelfModelPathValue( self, "ClientCount" )
+
+		Accent:setRGB( color.r, color.g, color.b )
+		Tint:setRGB( color.r, color.g, color.b )
+		FocusFrame:setRGB( color.r, color.g, color.b )
+		Pill:setRGB( color.r, color.g, color.b )
+		PillText:setText( Lobby.tag )
+
+		SetPreviewImage( Thumb, Lobby.image, ROW_THUMB_WIDTH, ROW_HEIGHT )
+		Thumb:setAlpha( 1 )
+
+		ServerName:setText( Lobby.mapName )
+
+		if Lobby.gametypeName ~= "" then
+			Gametype:setText( ToUpper( Lobby.gametypeName ) )
+		else
+			Gametype:setText( LobbyModeNames[Lobby.mode] or "" )
+		end
+
+		HostedBy:setText( self.HostedUser )
+
+		if self.HostMods ~= "" then
+			HostMods:setRGB( 1, 0.85, 0.2 )
+			HostMods:setText( "Mods: " .. ShortenText( self.HostMods, 36 ) )
+		else
+			HostMods:setRGB( 0.42, 0.42, 0.42 )
+			HostMods:setText( "No mods" )
+		end
+
+		ClientCount:setText( self.CurrentClientCount or "" )
+
+		-- red when nobody else gets in
+		if self.MaxPlayers > 0 and self.Players >= self.MaxPlayers then
+			ClientCount:setRGB( 1, 0.4, 0.3 )
+		else
+			ClientCount:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+		end
+
+		SetFillBar( Fill, ROW_BAR_LEFT, ROW_BAR_WIDTH, self.Players, self.MaxPlayers )
 	end )
 
-	self.ServerIP:linkToElementModel( self, "ConnectionIP", true, function ( model )
-		local f3_local0 = model:get()
-		if f3_local0 ~= nil then
-			--ServerIP:setText(f3_local0)
-			self.CurrentLobbyID = f3_local0
-		end
-	end )
-
-	self.ClientCount:linkToElementModel( self, "ClientCount", true, function ( model )
-		local f4_local0 = model:get()
-		if f4_local0 ~= nil then
-			ClientCount:setText( f4_local0 )
-			self.CurrentClientCount = f4_local0
-		end
-	end )
-
-	-- the title and the picture: from the map and the gametype of the lobby
-	self.ServerName:linkToElementModel( self, "ServerName", true, function ( model )
-		local f5_local0 = model:get()
-		if f5_local0 ~= nil then
-			local Lobby = DescribeLobby( CoD.ModelUtility.GetSelfModelPathValue(self, "Mode"), CoD.ModelUtility.GetSelfModelPathValue(self, "MapStatus"),
-				CoD.ModelUtility.GetSelfModelPathValue(self, "GameTypeStatus") )
-
-			self.CurrentMapTranslated = Lobby.mapName
-			self.CurrentGameTypeTranslated = Lobby.gametypeName
-			self.CurrentMapImage = Lobby.image
-			self.CurrentSessionMode = ToUpper( Lobby.mode )
-
-			local color = LobbyModeColors[Lobby.mode] or LobbyModeColors.mp
-
-			Accent:setRGB( color.r, color.g, color.b )
-			ModeTag:setRGB( color.r, color.g, color.b )
-			ModeTag:setText( Lobby.tag )
-			ServerName:setText( Lobby.name )
-		end
-	end )
-
-	--[[
-	HostName.__String_Reference = function ( f5_arg0 )
-		local f5_local0 = f5_arg0:get()
-		if f5_local0 ~= nil then
-			HostName:setText( PrependClanTagToHostname( self:getModel(), f5_local0 ) )
-		end
-	end
-	
-	self.HostName:linkToElementModel( self, "gamertag", true, HostName.__String_Reference )
-	HostName.__String_Reference_FullPath = function ()
-		local f6_local0 = self.HostName:getModel()
-		if f6_local0 then
-			f6_local0 = self.HostName:getModel()
-			f6_local0 = f6_local0.gamertag
-		end
-		if f6_local0 then
-			HostName.__String_Reference( f6_local0 )
-		end
-	end
-	]]
-	
-	--HostName:linkToElementModel( self, "clantag", true, HostName.__String_Reference_FullPath )
 	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
-	
+
 	if PostLoadFunc then
 		PostLoadFunc( self, f1_arg1, f1_arg0 )
 	end
-	
+
 	return self
 end
 
 CoD.ShieldGameServerRow.__resetProperties = function ( f7_arg0 )
-	f7_arg0.BlackBar:completeAnimation()
-	f7_arg0.ServerName:completeAnimation()
-	f7_arg0.ClientCount:completeAnimation()
-	f7_arg0.ServerIP:completeAnimation()
-	f7_arg0.HostedBy:completeAnimation()
-	f7_arg0.BlackBar:setRGB( 0.78, 0.78, 0.78 )
-	f7_arg0.BlackBar:setAlpha( 0.05 )
-	f7_arg0.ServerName:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	f7_arg0.ServerName:setAlpha( 1 )
-	f7_arg0.ClientCount:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	f7_arg0.ServerIP:setRGB( 0.94, 0.94, 0.94 )
-	f7_arg0.HostedBy:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+	for _, part in ipairs( RowFocusParts ) do
+		local element = f7_arg0[part[1]]
+		element:completeAnimation()
+		part[2]( element, false )
+	end
 end
 
 CoD.ShieldGameServerRow.__clipsPerState = {
 	DefaultState = {
-		DefaultClip = function ( f8_arg0, f8_arg1 )
-			f8_arg0:__resetProperties()
-			f8_arg0:setupElementClipCounter( 2 )
-			f8_arg0.BlackBar:completeAnimation()
-			f8_arg0.BlackBar:setRGB( 0.71, 0.71, 0.71 )
-			f8_arg0.BlackBar:setAlpha( 0.05 )
-			f8_arg0.clipFinished( f8_arg0.BlackBar )
-			f8_arg0.ServerName:completeAnimation()
-			f8_arg0.ServerName:setAlpha( 1 )
-			f8_arg0.clipFinished( f8_arg0.ServerName )
-		end,
-		Focus = function ( f9_arg0, f9_arg1 )
-			f9_arg0:__resetProperties()
-			f9_arg0:setupElementClipCounter( 5 )
-			f9_arg0.BlackBar:completeAnimation()
-			f9_arg0.BlackBar:setRGB( 0.82, 0.82, 0.82 )
-			f9_arg0.BlackBar:setAlpha( 0.16 )
-			f9_arg0.clipFinished( f9_arg0.BlackBar )
-			f9_arg0.HostedBy:completeAnimation()
-			f9_arg0.HostedBy:setRGB( 0.86, 0.86, 0.86 )
-			f9_arg0.clipFinished( f9_arg0.HostedBy )
-			--f9_arg0.ServerIP:completeAnimation()
-			--f9_arg0.ServerIP:setRGB( 0.94, 0.94, 0.94 )
-			--f9_arg0.clipFinished( f9_arg0.ServerIP )
-			f9_arg0.ClientCount:completeAnimation()
-			f9_arg0.ClientCount:setRGB( 0.94, 0.94, 0.94 )
-			f9_arg0.clipFinished( f9_arg0.ClientCount )
-			f9_arg0.ServerName:completeAnimation()
-			f9_arg0.ServerName:setRGB( 0.93, 0.93, 0 )
-			f9_arg0.clipFinished( f9_arg0.ServerName )
-		end
+		DefaultClip = RowClip( RowFocusParts, false ),
+		Focus = RowClip( RowFocusParts, true ),
+		GainFocus = RowClip( RowFocusParts, true, 120 ),
+		LoseFocus = RowClip( RowFocusParts, false, 120 )
 	}
 }
 
 CoD.ShieldGameServerRow.__onClose = function ( f10_arg0 )
-	f10_arg0.HostedBy:close()
-	f10_arg0.HostModsText:close()
-	f10_arg0.Accent:close()
-	f10_arg0.ModeTag:close()
-	f10_arg0.ServerIP:close()
-	f10_arg0.ClientCount:close()
-	f10_arg0.ServerName:close()
-	f10_arg0.BlackBar:close()
+	f10_arg0.Thumb:close()
+	for _, element in ipairs( f10_arg0.Parts ) do
+		element:close()
+	end
 end
+
+---------------------------
 
 -- Safe for Server
 CoD.Shield_SafeAreaContainer_LobbyServerBrwoserOverlay = InheritFrom( LUI.UIElement )
@@ -991,18 +1210,18 @@ CoD.Shield_SafeAreaContainer_LobbyServerBrwoserOverlay.new = function ( f1_arg0,
 	self.soundSet = "none"
 	self.onlyChildrenFocusable = true
 	self.anyChildUsesUpdateState = true
-	
+
 	local TabBacking = CoD.CommonTabBarBacking.new( f1_arg0, f1_arg1, -0.1, 1.1, 0, 0, 0, 0, 52, 89 )
 	TabBacking.TabBackingBlur:setAlpha( 0 )
 	self:addElement( TabBacking )
 	self.TabBacking = TabBacking
-	
+
 	local CommonHeader = CoD.CommonHeader.new( f1_arg0, f1_arg1, 0, 1, 0, 0, 0, 0, 0, 67 )
 	CommonHeader.subtitle.StageTitle:setText("^2Lobby Browser")
 	CommonHeader.subtitle.subtitle:setText("^3Open Lobbies")
 	self:addElement( CommonHeader )
 	self.CommonHeader = CommonHeader
-	
+
 	local FETabBar = CoD.DirectorSelect_Tabbar_Center.new( f1_arg0, f1_arg1, 0.5, 0.5, -100.5, 100.5, 0, 0, 52.5, 113.5 )
 	FETabBar:mergeStateConditions( {
 		{
@@ -1029,157 +1248,29 @@ CoD.Shield_SafeAreaContainer_LobbyServerBrwoserOverlay.new = function ( f1_arg0,
 	FETabBar:registerEventHandler( "list_active_changed", function ( element, event )
 		local f4_local0 = nil
 		CoD.LobbyUtility.LobbyLANServerBrowserSetMainModeFilter( self, element, f1_arg1 )
-		--RefreshServerList( self, f1_arg1 )
 		return f4_local0
 	end )
 	self:addElement( FETabBar )
 	self.FETabBar = FETabBar
-	
+
 	HeaderStripe = CoD.header_container_frontend.new( f1_arg0, f1_arg1, 0, 1, 0, 0, 0, 0, 0, 42 )
 	self:addElement( HeaderStripe )
 	self.HeaderStripe = HeaderStripe
 
-	local ShieldDWGameServerDetails = CoD.ShieldDWGameServerRowList.new( f1_arg0, f1_arg1, 0.5, 0.5, -800, 800, 0.20, 0.20, -310 + 325, 300 + 325 )
+	-- the body: from 88 to 1832 of the 1920 across, from 140 to 940 down
+	local ShieldDWGameServerDetails = CoD.ShieldDWGameServerRowList.new( f1_arg0, f1_arg1, 0.5, 0.5, -872, 872, 0, 0, 140, 940 )
 	self:addElement( ShieldDWGameServerDetails )
 	self.ShieldDWGameServerDetails = ShieldDWGameServerDetails
-
-	local RefreshServersButton = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 0.5, 0.5, 1445 - 800, 1745 - 800, 0.20, 0.20, 376 + 15, 426 + 15 )
-	
-	RefreshServersButton.MiddleText:setTTF( "notosans_bold" )
-	RefreshServersButton.MiddleText:setText("Refresh Lobbies")
-
-	RefreshServersButton.MiddleTextFocus:setText("Refresh Lobbies")
-	RefreshServersButton.MiddleTextFocus:setTTF( "notosans_bold" )
-
-	RefreshServersButton:mergeStateConditions( {
-		{
-			stateName = "Locked",
-			condition = function ( menu, element, event )
-				return AlwaysFalse()
-			end
-		}
-	} )
-
-	RefreshServersButton:linkToElementModel( self, nil, false, function ( model )
-		RefreshServersButton:setModel( model, f1_arg1 )
-	end )
-	self:addElement( RefreshServersButton )
-	self.RefreshServersButton = RefreshServersButton
-
-	f1_arg0:AddButtonCallbackFunction( RefreshServersButton, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		PlaySoundAlias( "uin_paint_image_flip_toggle" )
-		CoD.EnhPrintInfo("RefreshServersButton")
-		
-		CoD.ShowServerToast("Refreshing lobbies...")
-		Engine[@"exec"](Engine[@"getprimarycontroller"](), "getservers")
-
-	end, function ( element, menu, controller )
-		if IsGamepad( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
-			return true
-		elseif IsMouseOrKeyboard( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-			return false
-		else
-			return false
-		end
-	end, false )
-	
-	RefreshServersButton.id = "RefreshServersButton"
-
-	local LobbyHeaderBackingL = LUI.UIImage.new( 0.5, 0.5, 160 - 975, 1229 - 975, 0.20, 0.20, 176 - 215, 216 - 215 )
-	LobbyHeaderBackingL:setRGB( 0, 0, 0 )
-	LobbyHeaderBackingL:setAlpha( 0.5 )
-	self:addElement( LobbyHeaderBackingL )
-	self.LobbyHeaderBackingL = LobbyHeaderBackingL
-
-	-- desc for in-game servers
-	local GameServersHint = LUI.UIText.new( 0.5, 0.5, -20 - 770, 850 - 770, 0.20, 0.20, 100 - 200, 140 - 200 )
-	GameServersHint:setText("Lobbies")
-	GameServersHint:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	GameServersHint:setTTF("notosans_bold")
-	GameServersHint:setRGB(1, 1, 0)
-	GameServersHint:setBackingType( 2 )
-	GameServersHint:setBackingColor( 0.04, 0.81, 1 )
-	GameServersHint:setBackingAlpha( 0.01 )
-	GameServersHint:setBackingXPadding( 12 )
-	GameServersHint:setBackingYPadding( 6 )
-	GameServersHint:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	GameServersHint:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( GameServersHint )
-	self.GameServersHint = GameServersHint
-
-	GameServersHint:subscribeToModel( LobbyCountModel(), function ( model )
-		local count = model:get()
-		if count ~= nil and count > 0 then
-			GameServersHint:setText( "Lobbies (" .. count .. ")" )
-		else
-			GameServersHint:setText( "Lobbies" )
-		end
-	end )
-
-	-- descs for dw game servers
-	local LobbyNameText = LUI.UIText.new( 0.5, 0.5, -783, -583, 0.20, 0.20, -353.5 + 325, -334.5 + 325 )
-	LobbyNameText:setRGB( 0.59, 0.59, 0.59 )
-	LobbyNameText:setScale( LanguageOverrideNumber( "japanese", 0.75, 1, 1 ) )
-	LobbyNameText:setText("Lobby Name")
-	LobbyNameText:setTTF( "ttmussels_regular" )
-	LobbyNameText:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_558C8A85F2048829"] )
-	LobbyNameText:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-	self:addElement( LobbyNameText )
-	self.LobbyNameText = LobbyNameText
-	
-	local LobbyPlayerCountText = LUI.UIText.new( 0.5, 0.5, -380, -260, 0.20, 0.20, -353.5 + 325, -334.5 + 325 )
-	LobbyPlayerCountText:setRGB( 0.59, 0.59, 0.59 )
-	LobbyPlayerCountText:setScale( LanguageOverrideNumber( "japanese", 0.75, 1, 1 ) )
-	LobbyPlayerCountText:setText("Players")
-	LobbyPlayerCountText:setTTF( "ttmussels_regular" )
-	LobbyPlayerCountText:setLetterSpacing( 1 )
-	LobbyPlayerCountText:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_558C8A85F2048829"] )
-	LobbyPlayerCountText:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-	self:addElement( LobbyPlayerCountText )
-	self.LobbyPlayerCountText = LobbyPlayerCountText
-	
-	local LobbyIPText = LUI.UIText.new( 0.5, 0.5, -300, -31, 0.20, 0.20, -353.5 + 325, -334.5 + 325 )
-	LobbyIPText:setRGB( 0.59, 0.59, 0.59 )
-	LobbyIPText:setScale( LanguageOverrideNumber( "japanese", 0.75, 1, 1 ) )
-	--LobbyIPText:setText("Lobby ID")
-	LobbyIPText:setTTF( "ttmussels_regular" )
-	LobbyIPText:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_558C8A85F2048829"] )
-	LobbyIPText:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-	self:addElement( LobbyIPText )
-	self.LobbyIPText = LobbyIPText
-	
-	local LobbyHostedByText = LUI.UIText.new( 0.5, 0.5, -260, 0, 0.20, 0.20, -353.5 + 325, -334.5 + 325 )
-	LobbyHostedByText:setRGB( 0.59, 0.59, 0.59 )
-	LobbyHostedByText:setScale( LanguageOverrideNumber( "japanese", 0.75, 1, 1 ) )
-	LobbyHostedByText:setTTF( "ttmussels_regular" )
-	LobbyHostedByText:setText("Hosted By")
-	LobbyHostedByText:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_558C8A85F2048829"] )
-	LobbyHostedByText:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-	self:addElement( LobbyHostedByText )
-	self.LobbyHostedByText = LobbyHostedByText
-	
-	local LobbyDetailsTextBox = LUI.UIText.new( 0.5, 0.5, 294, 514, 0.20, 0.20, -353.5 + 325, -334.5 + 325 )
-	LobbyDetailsTextBox:setRGB( 0.59, 0.59, 0.59 )
-	LobbyDetailsTextBox:setScale( LanguageOverrideNumber( "japanese", 0.75, 1, 1 ) )
-	LobbyDetailsTextBox:setText("") -- not needed really..
-	LobbyDetailsTextBox:setTTF( "ttmussels_regular" )
-	LobbyDetailsTextBox:setAlpha(0)
-	LobbyDetailsTextBox:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_558C8A85F2048829"] )
-	LobbyDetailsTextBox:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-	self:addElement( LobbyDetailsTextBox )
-	self.LobbyDetailsTextBox = LobbyDetailsTextBox
 
 	ShieldDWGameServerDetails.id = "ShieldDWGameServerDetails"
 	FETabBar.id = "FETabBar"
 
 	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
-	
+
 	if PostLoadFunc then
 		PostLoadFunc( self, f1_arg1, f1_arg0 )
 	end
-	
+
 	return self
 end
 
@@ -1188,16 +1279,22 @@ CoD.Shield_SafeAreaContainer_LobbyServerBrwoserOverlay.__onClose = function ( f5
 	f5_arg0.CommonHeader:close()
 	f5_arg0.FETabBar:close()
 	f5_arg0.HeaderStripe:close()
-
 	f5_arg0.ShieldDWGameServerDetails:close()
-
-	--f5_arg0.HeaderPixelGridTiledBackingL:close()
-	f5_arg0.GameServersHint:close()
-	f5_arg0.LobbyNameText:close()
-	f5_arg0.LobbyPlayerCountText:close()
-	f5_arg0.LobbyIPText:close()
-	f5_arg0.LobbyHostedByText:close()
-	f5_arg0.LobbyDetailsTextBox:close()
-	--f5_arg0.LobbyHeaderPixelGridTiledBackingL:close()
-	f5_arg0.LobbyHeaderBackingL:close()
 end
+
+---------------------------
+
+-- what the browser is drawn with, for the menu that hosts a lobby: HostLobby.lua
+CoD.Shield.BrowserUI = {
+	NewText = NewText,
+	NewCaption = NewCaption,
+	NewBox = NewBox,
+	NewBrowserButton = NewBrowserButton,
+	OnBrowserButton = OnBrowserButton,
+	SetPreviewImage = SetPreviewImage,
+	AddBottomFade = AddBottomFade,
+	ShortenText = ShortenText,
+	IsBlankText = IsBlankText,
+	FocusClip = RowClip,
+	ModeColors = LobbyModeColors
+}

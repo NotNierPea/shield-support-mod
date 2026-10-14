@@ -383,6 +383,21 @@ CoD.ReloadOverrides = function()
 	CoD.DirectorSelectOverride()
 	CoD.ChatOverride()
 	CoD.ReactivesReload()
+
+	-- the button of the laboratory, see Cookbook.lua: that file can be loaded after this one
+	if CoD.CookbookReload then
+		CoD.CookbookReload()
+	end
+
+	-- the offers of the laboratory the servers handed out, see LabOffers.lua
+	if CoD.LabOffersReload then
+		CoD.LabOffersReload()
+	end
+
+	-- the popup that says how COD Points are earned, in the place of the store, see EarnCodPoints.lua
+	if CoD.EarnCodPointsReload then
+		CoD.EarnCodPointsReload()
+	end
 end
 
 CoD.RefreshShieldShit = function()

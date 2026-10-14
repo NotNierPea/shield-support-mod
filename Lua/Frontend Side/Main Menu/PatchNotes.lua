@@ -116,6 +116,172 @@ CoD.CreditsGuy.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_
 	return self
 end
 
+---------------------------
+
+-- What the menu says: change it here, the cards lay themselves out. A line may have colours in it (^3).
+local PatchNotes = {
+	"Added support for custom camos",
+	"Improved viewmodel fov, no needing to move the gun around anymore, with aspect ratio support (/viewmodel (fov) in chat, /ratio (amount) in chat, moving the gun xyz around still exists)",
+	"Added an option to make fov not affect ADS (kinda works)",
+	"Added an option to mute the chat in online (/mute or /unmute in chat)",
+	"Added a timescale command",
+	"Some other stuff added/fixed"
+}
+
+local InfoNotes = {
+	"You can find Mods in the Discord Server, or from Featured Mods in Main Menu",
+	"Voice Chat is not supported yet",
+	"Having NAT Type: Open, will fix some errors when joining lobbies",
+	"To open Console, Press '~'",
+	"To Unlock All, Press Shield Options on the far left",
+	"To View Client's Logs, you can find it in BO4's Files called 'project-bo4.log'"
+}
+
+local Credits = {
+	{ name = "peawhatever", role = "Lua and GSC of the support mod, some C++, and hosting the online server", image = @"peawhatever_cred" },
+	{ name = "Wanted", role = "Hooks and patches in C++", image = @"wanted_cred" },
+	{ name = "ATE47", role = "GSC, CSC and Lua modding, and some custom assets", image = @"ate47_cred" },
+	{ name = "Project-Bo4", role = "By Eagle: the base client in the public GitHub version, and some help", image = @"eagle_cred" }
+}
+
+-- the links: what the button says, the command of the client that opens it, and the address shown under it
+local Links = {
+	{ id = "OpenDocsButton", label = "SHIELD DOCS", command = "docs", address = "shield-client.gitbook.io" },
+	{ id = "OpenDiscordButton", label = "DISCORD SERVER", command = "discord", address = "discord.gg/AXECAzJJGU" }
+}
+
+---------------------------
+
+--[[
+	The body, 1744 by 850, in the middle of the screen from 140 down.
+	Left, 860 wide: the patch notes over the info. Right, from 884: the credits over the links.
+	Everything is placed by its place in the body.
+]]
+local BODY_LEFT = -872
+local BODY_TOP = 140
+local BODY_BOTTOM = 850
+local COLUMN_WIDTH = 860
+local RIGHT_COLUMN = 884
+local CARD_PADDING = 28
+
+local NOTES_BOTTOM = 430
+local CREDITS_BOTTOM = 660
+local CARD_GAP = 24
+
+-- a line of the notes: its letters, and the room between two notes. NOTE_LINE and NOTE_CHARS are only
+-- for a game that does not tell how high a note is: then it is guessed from how many letters it has
+local NOTE_SIZE = 20
+local NOTE_GAP = 14
+local NOTE_LINE = 25
+local NOTE_CHARS = 90
+
+local CardColors = {
+	notes = { r = 0.45, g = 0.9, b = 0.45 },
+	info = { r = 0.35, g = 0.75, b = 1 },
+	credits = { r = 1, g = 0.8, b = 0.25 },
+	links = { r = 1, g = 0.38, b = 0.28 }
+}
+
+local function NewText( left, right, top, size, font, alignment )
+	local text = LUI.UIText.new( 0.5, 0.5, BODY_LEFT + left, BODY_LEFT + right, 0, 0, BODY_TOP + top, BODY_TOP + top + size )
+	text:setTTF( font )
+	text:setAlignment( alignment or Enum[@"luialignment"][@"lui_alignment_left"] )
+	text:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
+	return text
+end
+
+-- the small grey words over a title
+local function NewCaption( left, right, top, words, alignment )
+	local text = NewText( left, right, top, 15, "ttmussels_regular", alignment )
+	text:setRGB( 0.55, 0.55, 0.55 )
+	text:setLetterSpacing( 2 )
+	text:setText( words )
+	return text
+end
+
+-- a box of one colour
+local function NewBox( left, right, top, bottom, r, g, b, alpha )
+	local box = LUI.UIImage.new( 0.5, 0.5, BODY_LEFT + left, BODY_LEFT + right, 0, 0, BODY_TOP + top, BODY_TOP + bottom )
+	box:setRGB( r, g, b )
+	box:setAlpha( alpha )
+	return box
+end
+
+-- A card: dark, with a line of its colour over it, the thin frame of the game around it, and its name.
+-- Gives where its own things start.
+local function AddCard( add, left, right, top, bottom, color, caption, title )
+	add( NewBox( left, right, top, bottom, 0, 0, 0, 0.5 ) )
+	add( NewBox( left, right, top, top + 4, color.r, color.g, color.b, 1 ) )
+
+	local Frame = LUI.UIImage.new( 0.5, 0.5, BODY_LEFT + left - 1, BODY_LEFT + right + 1, 0, 0, BODY_TOP + top - 1, BODY_TOP + bottom + 1 )
+	Frame:setAlpha( 0.12 )
+	Frame:setImage( RegisterImage( @"uie_ui_menu_store_common_frame" ) )
+	Frame:setMaterial( LUI.UIImage.GetCachedMaterial( @"uie_nineslice_add" ) )
+	Frame:setShaderVector( 0, 0, 0, 0, 0 )
+	Frame:setupNineSliceShader( 12, 12 )
+	add( Frame )
+
+	add( NewCaption( left + CARD_PADDING, right - CARD_PADDING, top + 24, caption ) )
+
+	-- a card with no title is a low one: its things come right under the small words
+	if title == nil then
+		return top + 52
+	end
+
+	local Title = add( NewText( left + CARD_PADDING, right - CARD_PADDING, top + 44, 34, "notosans_bold" ) )
+	Title:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+	Title:setText( title )
+
+	add( NewBox( left + CARD_PADDING, right - CARD_PADDING, top + 94, top + 95, 1, 1, 1, 0.1 ) )
+
+	return top + 112
+end
+
+-- the notes of a card, one under the other, each after a small square of the colour of the card
+local function AddNotes( add, left, right, top, color, notes )
+	local y = top
+
+	for _, note in ipairs( notes ) do
+		add( NewBox( left, left + 6, y + 9, y + 15, color.r, color.g, color.b, 1 ) )
+
+		local Note = add( NewText( left + 20, right, y, NOTE_SIZE, "notosans_regular" ) )
+		Note:setRGB( 0.86, 0.86, 0.86 )
+		Note:setText( note )
+
+		-- the game breaks a long note in lines by itself: it is asked how high that makes it
+		local height = Note:getTextHeightForWidth( right - left - 20 )
+
+		if height == nil or height <= 0 then
+			height = math.ceil( string.len( note ) / NOTE_CHARS ) * NOTE_LINE
+		end
+
+		y = y + math.max( height, NOTE_SIZE ) + NOTE_GAP
+	end
+end
+
+-- a button of the game with its own words, never locked
+local function NewLinkButton( self, menu, controller, label, left, right, top, bottom )
+	local button = CoD.DirectorSelectButtonMiniInternal.new( menu, controller, 0.5, 0.5, BODY_LEFT + left, BODY_LEFT + right, 0, 0, BODY_TOP + top, BODY_TOP + bottom )
+
+	button.MiddleText:setText( label )
+	button.MiddleTextFocus:setText( label )
+
+	button:mergeStateConditions( {
+		{
+			stateName = "Locked",
+			condition = function ( menu, element, event )
+				return AlwaysFalse()
+			end
+		}
+	} )
+
+	button:linkToElementModel( self, nil, false, function ( model )
+		button:setModel( model, controller )
+	end )
+
+	return button
+end
+
 CoD.ShieldPatchNotes_SafeAreaFront = InheritFrom( LUI.UIElement )
 CoD.ShieldPatchNotes_SafeAreaFront.__defaultWidth = 1920
 CoD.ShieldPatchNotes_SafeAreaFront.__defaultHeight = 1080
@@ -126,341 +292,141 @@ CoD.ShieldPatchNotes_SafeAreaFront.new = function ( f1_arg0, f1_arg1, f1_arg2, f
 	self.soundSet = "none"
 	self.onlyChildrenFocusable = true
 	self.anyChildUsesUpdateState = true
-	
+
+	-- everything of the menu that is only closed with it
+	self.Parts = {}
+
+	local function Add( element )
+		self:addElement( element )
+		table.insert( self.Parts, element )
+		return element
+	end
+
 	local TabBacking = CoD.CommonTabBarBacking.new( f1_arg0, f1_arg1, -0.1, 1.1, 0, 0, 0, 0, 52, 89 )
 	TabBacking.TabBackingBlur:setAlpha( 0 )
 	self:addElement( TabBacking )
 	self.TabBacking = TabBacking
-	
+
 	local CommonHeader = CoD.CommonHeader.new( f1_arg0, f1_arg1, 0, 1, 0, 0, 0, 0, 0, 67 )
-	CommonHeader.subtitle.StageTitle:setText("^2Shield Patch Notes")
-	CommonHeader.subtitle.subtitle:setText("^1Shield's Last Patch Notes")
+	CommonHeader.subtitle.StageTitle:setText("^2Shield Info")
+	CommonHeader.subtitle.subtitle:setText("^3Patch Notes, Info & Credits")
 	self:addElement( CommonHeader )
 	self.CommonHeader = CommonHeader
-	
+
 	local HeaderStripe = CoD.header_container_frontend.new( f1_arg0, f1_arg1, 0, 1, 0, 0, 0, 0, 0, 42 )
 	self:addElement( HeaderStripe )
 	self.HeaderStripe = HeaderStripe
 
-	local BG = LUI.UIImage.new( 0.50, 0.50, -896.74, 0.26, 0.50, 0.50, -445.50, 464.50 )
-	BG:setRGB( 0, 0, 0 )
-    BG:setAlpha( 0.50 )
-	BG:setZRot( 180 )
-	self:addElement( BG )
-	self.BG = BG
+	---------------------------
+	-- left: the patch notes over the info
 
-	--LUI_DebugElement(f1_arg0, f1_arg1, self, BG, "BG", 10)
+	local NotesTop = AddCard( Add, 0, COLUMN_WIDTH, 0, NOTES_BOTTOM, CardColors.notes, "WHAT IS NEW", "Patch Notes" )
+	AddNotes( Add, CARD_PADDING, COLUMN_WIDTH - CARD_PADDING, NotesTop, CardColors.notes, PatchNotes )
 
-    local Outline = LUI.UIImage.new( 0.50, 0.50, -896.74, 0.26, 0.50, 0.50, -445.50, 464.50 )
-    Outline:setRGB( 1, 1, 1 )
-	Outline:setAlpha( 0.05 )
-	Outline:setImage( RegisterImage( @"uie_highlight_border_line" ) )
-	Outline:setMaterial( LUI.UIImage.GetCachedMaterial( @"uie_nineslice_normal" ) )
-	Outline:setShaderVector( 0, 0, 0, 0, 0 )
-	Outline:setupNineSliceShader( 6, 6 )
-	self:addElement( Outline )
-	self.Outline = Outline
+	local InfoTop = AddCard( Add, 0, COLUMN_WIDTH, NOTES_BOTTOM + CARD_GAP, BODY_BOTTOM, CardColors.info, "GOOD TO KNOW", "Shield Info" )
+	AddNotes( Add, CARD_PADDING, COLUMN_WIDTH - CARD_PADDING, InfoTop, CardColors.info, InfoNotes )
 
-	--LUI_DebugElement(f1_arg0, f1_arg1, self, Outline, "Outline", 10)
+	---------------------------
+	-- right: the credits, two in a row
 
-	local BG2 = LUI.UIImage.new( 0.50, 0.50, 49.50, 947.50, 0.50, 0.50, -445.50, 464.50 )
-	BG2:setRGB( 0, 0, 0 )
-    BG2:setAlpha( 0.50 )
-	BG2:setZRot( 180 )
-	self:addElement( BG2 )
-	self.BG2 = BG2
+	local CreditsTop = AddCard( Add, RIGHT_COLUMN, RIGHT_COLUMN + COLUMN_WIDTH, 0, CREDITS_BOTTOM, CardColors.credits, "THE PEOPLE BEHIND SHIELD", "Credits" )
 
-	--LUI_DebugElement(f1_arg0, f1_arg1, self, BG2, "BG2", 10)
+	local CELL_WIDTH = 400
+	local CELL_HEIGHT = 222
+	local CELL_GAP = 12
+	-- the picture is 160 high, in the middle of its tile, and the words beside it start a little under its top
+	local PORTRAIT_TOP = ( CELL_HEIGHT - 160 ) / 2
+	local WORDS_TOP = PORTRAIT_TOP + 28
 
-    local Outline2 = LUI.UIImage.new( 0.50, 0.50, 49.50, 947.50, 0.50, 0.50, -445.50, 464.50 )
-    Outline2:setRGB( 1, 1, 1 )
-	Outline2:setAlpha( 0.05 )
-	Outline2:setImage( RegisterImage( @"uie_highlight_border_line" ) )
-	Outline2:setMaterial( LUI.UIImage.GetCachedMaterial( @"uie_nineslice_normal" ) )
-	Outline2:setShaderVector( 0, 0, 0, 0, 0 )
-	Outline2:setupNineSliceShader( 6, 6 )
-	self:addElement( Outline2 )
-	self.Outline2 = Outline2
+	self.Portraits = {}
 
-	--LUI_DebugElement(f1_arg0, f1_arg1, self, Outline2, "Outline2", 10)
+	local function CellPlace( index )
+		local column = ( index - 1 ) % 2
+		local row = math.floor( ( index - 1 ) / 2 )
+		return RIGHT_COLUMN + 24 + column * ( CELL_WIDTH + CELL_GAP ), CreditsTop - 4 + row * ( CELL_HEIGHT + 4 )
+	end
 
-	local PatchNotesText = LUI.UIText.new( 0.50, 0.50, -851.27, -251.27, 0.50, 0.50, -404.75, -362.75 )
-	PatchNotesText:setText("Last Patch Notes:")
-	PatchNotesText:setTTF("notosans_bold")
-	PatchNotesText:setLetterSpacing(0.5)
-	self:addElement(PatchNotesText)
-	self.PatchNotesText = PatchNotesText
+	for index, credit in ipairs( Credits ) do
+		local left, top = CellPlace( index )
 
-	local PatchNotesAll = LUI.UIText.new(0.50, 0.50, -850.99, -52.99, 0.50, 0.50, -351.25, -326.25)
-	PatchNotesAll:setText("- Added support for custom camos\n- improved viewmodel fov, no needing to move the gun around anymore, with aspect ratio support (/viewmodel (fov) in chat, /ratio (amount) in chat, moving the gun xyz around still exists)\n- Added an option to make fov not affect ADS (kinda works)\n- Added an option to mute the chat in online (/mute or /unmute in chat)\n- Added a timescale command\n- Some other stuff added/fixed")
-	PatchNotesAll:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	PatchNotesAll:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	PatchNotesAll:setTTF("notosans_bold")
-	PatchNotesAll:setLetterSpacing(0.5)
-	self:addElement(PatchNotesAll)
-	self.PatchNotesAll = PatchNotesAll
+		Add( NewBox( left, left + CELL_WIDTH, top, top + CELL_HEIGHT, 1, 1, 1, 0.04 ) )
 
-	--LUI_DebugElement(f1_arg0, f1_arg1, self, PatchNotesText, "PatchNotesText", 10)
+		-- the round picture, as large as it was made for
+		local Portrait = CoD.CreditsGuy.new( f1_arg0, f1_arg1, 0.5, 0.5, BODY_LEFT + left + 6, BODY_LEFT + left + 166, 0, 0, BODY_TOP + top + PORTRAIT_TOP, BODY_TOP + top + PORTRAIT_TOP + 159 )
+		Portrait:setRFTMaterial( LUI.UIImage.GetCachedMaterial( @"hash_2D79DB5C45AD6024" ) )
+		Portrait:setShaderVector( 0, 34, 6, 0, 0 )
+		Portrait:setShaderVector( 1, 80, 80, 0, 0 )
+		Portrait:setShaderVector( 2, 0, 0.45, 0, 0 )
+		Portrait.Portrait:setShaderVector( 0, 0.1, 0, 0, 0 )
+		Portrait.Portrait:setImage( RegisterImage( credit.image ) )
+		self:addElement( Portrait )
+		table.insert( self.Portraits, Portrait )
 
-	local InfoNotesText = LUI.UIText.new( 0.50, 0.50, -851.27, -251.27, 0.50, 0.50, 3.50, 47.50 )
-	InfoNotesText:setText("Shield Info:")
-	InfoNotesText:setTTF("notosans_bold")
-	InfoNotesText:setLetterSpacing(0.5)
-	self:addElement(InfoNotesText)
-	self.InfoNotesText = InfoNotesText
+		local Name = Add( NewText( left + 182, left + CELL_WIDTH - 10, top + WORDS_TOP, 24, "notosans_bold" ) )
+		Name:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+		Name:setText( credit.name )
 
-	local InfoNotesAll = LUI.UIText.new(0.50, 0.50, -851.52, -53.52, 0.50, 0.50, 56.75, 80.00)
-	InfoNotesAll:setText("- Shield Documentation: shield-bo4.gitbook.io\n- Shield Discord Server: discord.gg/AXECAzJJGU\n- You can find Mods in the Discord Server, or from Featured Mods in Main Menu\n- Voice Chat is not supported yet\n- Having NAT Type: Open, will fix some errors when joining lobbies\n- To open Console, Press '~'\n- To Unlock All, Press Shield Options on the far left\n- To View Client's Logs, you can find it in BO4's Files called 'project-bo4.log'")
-	InfoNotesAll:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	InfoNotesAll:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	InfoNotesAll:setTTF("notosans_bold")
-	InfoNotesAll:setLetterSpacing(0.5)
-	self:addElement(InfoNotesAll)
-	self.InfoNotesAll = InfoNotesAll
+		Add( NewBox( left + 182, left + 222, top + WORDS_TOP + 32, top + WORDS_TOP + 34, CardColors.credits.r, CardColors.credits.g, CardColors.credits.b, 1 ) )
 
-	--LUI_DebugElement(f1_arg0, f1_arg1, self, InfoNotesText, "InfoNotesText", 10)
+		local Role = Add( NewText( left + 182, left + CELL_WIDTH - 10, top + WORDS_TOP + 44, 16, "notosans_regular" ) )
+		Role:setRGB( 0.62, 0.62, 0.62 )
+		Role:setText( credit.role )
+	end
 
-	-- open commands and buttons
-	local OpenDocsButton = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 0.5, 0.5, 70 - 840 - 85 + 70, 370 - 840 - 85 + 90, 0.5, 0.5, 227.5 + 100, 277.5 + 100 )
-	
-	OpenDocsButton.MiddleText:setTTF( "notosans_bold" )
-	OpenDocsButton.MiddleText:setText("Open Shield Docs Link")
+	-- under the last row of them, over both columns
+	local OthersLeft, OthersTop = CellPlace( math.ceil( #Credits / 2 ) * 2 + 1 )
+	local OthersRight = OthersLeft + CELL_WIDTH * 2 + CELL_GAP
 
-	OpenDocsButton.MiddleTextFocus:setText("Open Shield Docs Link")
-	OpenDocsButton.MiddleTextFocus:setTTF( "notosans_bold" )
+	Add( NewBox( OthersLeft, OthersRight, OthersTop, OthersTop + 80, 1, 1, 1, 0.04 ) )
 
-	OpenDocsButton:mergeStateConditions( {
-		{
-			stateName = "Locked",
-			condition = function ( menu, element, event )
-				return AlwaysFalse()
-			end
-		}
-	} )
+	local Others = Add( NewText( OthersLeft, OthersRight, OthersTop + 29, 22, "notosans_bold", Enum[@"luialignment"][@"lui_alignment_center"] ) )
+	Others:setRGB( 0.62, 0.62, 0.62 )
+	Others:setText( "...and many others" )
 
-	OpenDocsButton:linkToElementModel( self, nil, false, function ( model )
-		OpenDocsButton:setModel( model, f1_arg1 )
-	end )
-	self:addElement( OpenDocsButton )
-	self.OpenDocsButton = OpenDocsButton
+	---------------------------
+	-- under them: the links, each a button with its address under it
 
-	f1_arg0:AddButtonCallbackFunction( OpenDocsButton, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		PlaySoundAlias( "uin_paint_image_flip_toggle" )
-		CoD.EnhPrintInfo("OpenDocsButton")
-		
-		Engine[@"exec"](Engine[@"getprimarycontroller"](), "docs")
+	local LinksTop = AddCard( Add, RIGHT_COLUMN, RIGHT_COLUMN + COLUMN_WIDTH, CREDITS_BOTTOM + CARD_GAP, BODY_BOTTOM, CardColors.links, "LINKS" )
 
-	end, function ( element, menu, controller )
-		if IsGamepad( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
+	self.LinkButtons = {}
+
+	for index, link in ipairs( Links ) do
+		local left = RIGHT_COLUMN + 24 + ( index - 1 ) * ( CELL_WIDTH + CELL_GAP )
+
+		local Button = NewLinkButton( self, f1_arg0, f1_arg1, link.label, left, left + CELL_WIDTH, LinksTop, LinksTop + 50 )
+		self:addElement( Button )
+		-- the menu finds what can take the focus as parent[id]: the id has to be the name it is kept under
+		Button.id = link.id
+		self[link.id] = Button
+		table.insert( self.LinkButtons, Button )
+
+		f1_arg0:AddButtonCallbackFunction( Button, f1_arg1, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
+			PlaySoundAlias( "uin_paint_image_flip_toggle" )
+			CoD.EnhPrintInfo( link.id )
+
+			Engine[@"exec"]( Engine[@"getprimarycontroller"](), link.command )
 			return true
-		elseif IsMouseOrKeyboard( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-			return false
-		else
-			return false
-		end
-	end, false )
-	
-	OpenDocsButton.id = "OpenDocsButton"
-
-	------------------------------------------
-
-	local OpenDiscordButton = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 0.5, 0.5, 70 - 840 + 190 + 130, 370 - 840 + 210 + 130, 0.5, 0.5, 227.5 + 100, 277.5 + 100 )
-	
-	OpenDiscordButton.MiddleText:setTTF( "notosans_bold" )
-	OpenDiscordButton.MiddleText:setText("Open Discord Invite Link")
-
-	OpenDiscordButton.MiddleTextFocus:setText("Open Discord Invite Link")
-	OpenDiscordButton.MiddleTextFocus:setTTF( "notosans_bold" )
-
-	OpenDiscordButton:mergeStateConditions( {
-		{
-			stateName = "Locked",
-			condition = function ( menu, element, event )
-				return AlwaysFalse()
+		end, function ( element, menu, controller )
+			if IsGamepad( controller ) then
+				CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/select", nil, "ui_confirm" )
+				return true
+			elseif IsMouseOrKeyboard( controller ) then
+				CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
+				return false
+			else
+				return false
 			end
-		}
-	} )
+		end, false )
 
-	OpenDiscordButton:linkToElementModel( self, nil, false, function ( model )
-		OpenDiscordButton:setModel( model, f1_arg1 )
-	end )
-	self:addElement( OpenDiscordButton )
-	self.OpenDiscordButton = OpenDiscordButton
-
-	f1_arg0:AddButtonCallbackFunction( OpenDiscordButton, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		PlaySoundAlias( "uin_paint_image_flip_toggle" )
-		CoD.EnhPrintInfo("OpenDiscordButton")
-		
-		Engine[@"exec"](Engine[@"getprimarycontroller"](), "discord")
-
-	end, function ( element, menu, controller )
-		if IsGamepad( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
-			return true
-		elseif IsMouseOrKeyboard( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-			return false
-		else
-			return false
-		end
-	end, false )
-	
-	OpenDiscordButton.id = "OpenDiscordButton"
-
-	----------------------------------------------
-
-	-- CREDITS
-	local CreditsText = LUI.UIText.new( 0.50, 0.50, 393.02, 998.02, 0.40, 0.40, -319.26, -269.26 )
-	CreditsText:setText("^5C R E D I T S")
-	CreditsText:setTTF("notosans_bold")
-	CreditsText:setLetterSpacing(0.5)
-	self:addElement(CreditsText)
-	self.CreditsText = CreditsText
-
-	-- Peawhatever
-	local Duck = CoD.CreditsGuy.new( f1_arg0, f1_arg1, 0.50, 0.50, 270.00, 430.00, 0.50, 0.50, -381.01, -222.01 )
-	Duck:setRFTMaterial( LUI.UIImage.GetCachedMaterial( @"hash_2D79DB5C45AD6024" ) )
-	Duck:setShaderVector( 0, 34, 6, 0, 0 )
-	Duck:setShaderVector( 1, 80, 80, 0, 0 )
-	Duck:setShaderVector( 2, 0, 0.45, 0, 0 )
-	Duck.Portrait:setShaderVector( 0, 0.1, 0, 0, 0 )
-	Duck.Portrait:setImage( RegisterImage( @"peawhatever_cred" ) )
-	self:addElement( Duck )
-	self.Duck = Duck
-
-	local PeawhateverText = LUI.UIText.new( 0.50, 0.50, 276.02, 476.02, 0.50, 0.50, -224, -190 )
-	PeawhateverText:setText("peawhatever")
-	PeawhateverText:setTTF("notosans_bold")
-	PeawhateverText:setLetterSpacing(0.5)
-	self:addElement(PeawhateverText)
-	self.PeawhateverText = PeawhateverText
-
-	local PeawhateverText_Desc = LUI.UIText.new( 0.50, 0.50, 241.49, 284.49, 0.50, 0.50, -186.24, -174.24 )
-	PeawhateverText_Desc:setText("(for lua/gsc support mod, and some c++)")
-	PeawhateverText_Desc:setTTF( "default" )
-	PeawhateverText_Desc:setLetterSpacing(0.5)
-	self:addElement(PeawhateverText_Desc)
-	self.PeawhateverText_Desc = PeawhateverText_Desc
-
-	-- Wanted
-	local Wanted = CoD.CreditsGuy.new( f1_arg0, f1_arg1, 0.50, 0.50, 560.00, 720.00, 0.50, 0.50, -381.01, -222.01 )
-	Wanted:setRFTMaterial( LUI.UIImage.GetCachedMaterial( @"hash_2D79DB5C45AD6024" ) )
-	Wanted:setShaderVector( 0, 34, 6, 0, 0 )
-	Wanted:setShaderVector( 1, 80, 80, 0, 0 )
-	Wanted:setShaderVector( 2, 0, 0.45, 0, 0 )
-	Wanted.Portrait:setShaderVector( 0, 0.1, 0, 0, 0 )
-	Wanted.Portrait:setImage( RegisterImage( @"wanted_cred" ) )
-	self:addElement( Wanted )
-	self.Wanted = Wanted
-
-	local WantedText = LUI.UIText.new( 0.50, 0.50, 595.02, 795.02, 0.50, 0.50, -224, -190 )
-	WantedText:setText("Wanted")
-	WantedText:setTTF("notosans_bold")
-	WantedText:setLetterSpacing(0.5)
-	self:addElement(WantedText)
-	self.WantedText = WantedText
-
-	local WantedText_Desc = LUI.UIText.new( 0.50, 0.50, 561.27, 591.27, 0.50, 0.50, -186.51, -174.51 )
-	WantedText_Desc:setText("(for hooks and patches in c++)")
-	WantedText_Desc:setTTF( "default" )
-	WantedText_Desc:setLetterSpacing(0.5)
-	self:addElement(WantedText_Desc)
-	self.WantedText_Desc = WantedText_Desc
-
-	-- second
-	-- BodNJenie
-	local BodNJenie = CoD.CreditsGuy.new( f1_arg0, f1_arg1, 0.50, 0.50, 270.00, 430.00, 0.50, 0.50, -381.01 + 300, -222.01 + 300 )
-	BodNJenie:setRFTMaterial( LUI.UIImage.GetCachedMaterial( @"hash_2D79DB5C45AD6024" ) )
-	BodNJenie:setShaderVector( 0, 34, 6, 0, 0 )
-	BodNJenie:setShaderVector( 1, 80, 80, 0, 0 )
-	BodNJenie:setShaderVector( 2, 0, 0.45, 0, 0 )
-	BodNJenie.Portrait:setShaderVector( 0, 0.1, 0, 0, 0 )
-	BodNJenie.Portrait:setImage( RegisterImage( @"bodnjenie_cred" ) )
-	self:addElement( BodNJenie )
-	self.BodNJenie = BodNJenie
-
-	local BodNJenieText = LUI.UIText.new( 0.50, 0.50, 290.02, 476.02, 0.50, 0.50, -224 + 300, -190 + 300 )
-	BodNJenieText:setText("BodNJenie")
-	BodNJenieText:setTTF("notosans_bold")
-	BodNJenieText:setLetterSpacing(0.5)
-	self:addElement(BodNJenieText)
-	self.BodNJenieText = BodNJenieText
-
-	local BodNJenieText_Desc = LUI.UIText.new( 0.50, 0.50, 20.75, 700.75, 0.50, 0.50, 114.75, 126.75 )
-	BodNJenieText_Desc:setTTF( "default" )
-	BodNJenieText_Desc:setAlignment( Enum[@"luialignment"][@"lui_alignment_center"] )
-	BodNJenieText_Desc:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	BodNJenieText_Desc:setText("(for hosting public server, making it \npossible to play online with friends)")
-	BodNJenieText_Desc:setLetterSpacing(0.5)
-	self:addElement(BodNJenieText_Desc)
-	self.BodNJenieText_Desc = BodNJenieText_Desc
-
-	-- ATE47
-	local ATE47 = CoD.CreditsGuy.new( f1_arg0, f1_arg1, 0.50, 0.50, 560.00, 720.00, 0.50, 0.50, -381.01 + 300, -222.01 + 300 )
-	ATE47:setRFTMaterial( LUI.UIImage.GetCachedMaterial( @"hash_2D79DB5C45AD6024" ) )
-	ATE47:setShaderVector( 0, 34, 6, 0, 0 )
-	ATE47:setShaderVector( 1, 80, 80, 0, 0 )
-	ATE47:setShaderVector( 2, 0, 0.45, 0, 0 )
-	ATE47.Portrait:setShaderVector( 0, 0.1, 0, 0, 0 )
-	ATE47.Portrait:setImage( RegisterImage( @"ate47_cred" ) )
-	self:addElement( ATE47 )
-	self.ATE47 = ATE47
-
-	local ATE47Text = LUI.UIText.new( 0.50, 0.50, 605.02, 795.02, 0.50, 0.50, -224 + 300, -190 + 300 )
-	ATE47Text:setText("ATE47")
-	ATE47Text:setTTF("notosans_bold")
-	ATE47Text:setLetterSpacing(0.5)
-	self:addElement(ATE47Text)
-	self.ATE47Text = ATE47Text
-
-	local ATE47Text_Desc = LUI.UIText.new( 0.50, 0.50, 504.30, 534.30, 0.50, 0.50, 114.75, 126.75 )
-	ATE47Text_Desc:setText("(for gsc/csc/lua modding and some custom assets)")
-	ATE47Text_Desc:setTTF( "default" )
-	ATE47Text_Desc:setLetterSpacing(0.5)
-	self:addElement(ATE47Text_Desc)
-	self.ATE47Text_Desc = ATE47Text_Desc
-
-	-- Eagle (Porject-Bo4)
-	local Eagle = CoD.CreditsGuy.new( f1_arg0, f1_arg1, 0.50, 0.50, 403.27, 563.27, 0.50, 0.50, 179.99 - 10.0, 336.99 - 10.0 )
-	Eagle:setRFTMaterial( LUI.UIImage.GetCachedMaterial( @"hash_2D79DB5C45AD6024" ) )
-	Eagle:setShaderVector( 0, 34, 6, 0, 0 )
-	Eagle:setShaderVector( 1, 80, 80, 0, 0 )
-	Eagle:setShaderVector( 2, 0, 0.45, 0, 0 )
-	Eagle.Portrait:setShaderVector( 0, 0.1, 0, 0, 0 )
-	Eagle.Portrait:setImage( RegisterImage( @"eagle_cred" ) )
-	self:addElement( Eagle )
-	self.Eagle = Eagle
-
-	local EagleText = LUI.UIText.new( 0.50, 0.50, 374.02, 564.02, 0.50, 0.50, 321.25 - 5.0, 355.25 - 5.0 )
-	EagleText:setText("Project-Bo4 (Eagle)")
-	EagleText:setTTF("notosans_bold")
-	EagleText:setLetterSpacing(0.5)
-	self:addElement(EagleText)
-	self.EagleText = EagleText
-
-	local EagleText_Desc = LUI.UIText.new( 0.50, 0.50, 310.50, 340.50, 0.50, 0.50, 356.50, 368.50 )
-	EagleText_Desc:setText("(for the base client in the public github version, and some help)")
-	EagleText_Desc:setTTF( "default" )
-	EagleText_Desc:setLetterSpacing(0.5)
-	self:addElement(EagleText_Desc)
-	self.EagleText_Desc = EagleText_Desc
-
-	-- others
-	local others_many = LUI.UIText.new( 0.50, 0.50, 376.23, 406.23, 0.50, 0.50, 414.98, 444.98 )
-	others_many:setText("and many others...")
-	others_many:setTTF( "default" )
-	others_many:setLetterSpacing(0.5)
-	self:addElement(others_many)
-	self.others_many = others_many
+		Add( NewCaption( left, left + CELL_WIDTH, LinksTop + 62, link.address, Enum[@"luialignment"][@"lui_alignment_center"] ) )
+	end
 
 	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
-	
+
 	if PostLoadFunc then
 		PostLoadFunc( self, f1_arg1, f1_arg0 )
 	end
-	
+
 	return self
 end
 
@@ -469,11 +435,13 @@ CoD.ShieldPatchNotes_SafeAreaFront.__onClose = function ( f8_arg0 )
 	f8_arg0.CommonHeader:close()
 	f8_arg0.TabBacking:close()
 
-	f8_arg0.PatchNotesText:close()
-	f8_arg0.InfoNotesText:close()
-
-	f8_arg0.PatchNotesAll:close()
-	f8_arg0.InfoNotesAll:close()
-
-	f8_arg0.Duck:close()
+	for _, element in ipairs( f8_arg0.Parts ) do
+		element:close()
+	end
+	for _, portrait in ipairs( f8_arg0.Portraits ) do
+		portrait:close()
+	end
+	for _, button in ipairs( f8_arg0.LinkButtons ) do
+		button:close()
+	end
 end

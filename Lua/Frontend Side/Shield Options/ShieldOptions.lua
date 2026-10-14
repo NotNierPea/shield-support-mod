@@ -176,24 +176,6 @@ LUI.createMenu.ShieldOptionsMenu = function ( f1_arg0, f1_arg1 )
 	local FooterContainerFrontendRight2 = CoD.Fo..., -48, 0 )
 	]]
 
-	local HeaderPixelGridTiledBackingL = LUI.UIImage.new( 0, 0, 0, 4000, 0.61, 0.61, -160.5, -120.5 )
-	HeaderPixelGridTiledBackingL:setAlpha( 0.25 )
-	HeaderPixelGridTiledBackingL:setImage( RegisterImage( @"hash_1311E811A3183347" ) )
-	HeaderPixelGridTiledBackingL:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_16CBE95C250C6D15" ) )
-	HeaderPixelGridTiledBackingL:setShaderVector( 0, 0, 0, 0, 0 )
-	HeaderPixelGridTiledBackingL:setupNineSliceShader( 128, 128 )
-	self:addElement( HeaderPixelGridTiledBackingL )
-	self.HeaderPixelGridTiledBackingL = HeaderPixelGridTiledBackingL
-	
-	local HeaderPixelGridTiledBackingR = LUI.UIImage.new( 0, 0, 0, 4000, 0.27, 0.27, -160.5, -120.5 )
-	HeaderPixelGridTiledBackingR:setAlpha( 0.15 )
-	HeaderPixelGridTiledBackingR:setImage( RegisterImage( @"hash_1311E811A3183347" ) )
-	HeaderPixelGridTiledBackingR:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_16CBE95C250C6D15" ) )
-	HeaderPixelGridTiledBackingR:setShaderVector( 0, 0, 0, 0, 0 )
-	HeaderPixelGridTiledBackingR:setupNineSliceShader( 128, 128 )
-	self:addElement( HeaderPixelGridTiledBackingR )
-	self.HeaderPixelGridTiledBackingR = HeaderPixelGridTiledBackingR
-	
 	--[[
 	local CornerPipR = LUI.UIImage.new( 0, 0, 1749.5, 1765.5, 0, 0, 930, 946 )
 	CornerPipR:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
@@ -272,8 +254,181 @@ CoD.ShieldOptionsMenu.__onClose = function ( f8_arg0 )
 	f8_arg0.FooterContainerFrontendRight:close()
 	f8_arg0.ShieldOptionsMenu_SafeAreaFront:close()
 
-	f8_arg0.HeaderPixelGridTiledBackingL:close()
-	f8_arg0.HeaderPixelGridTiledBackingR:close()
+end
+
+---------------------------
+
+--[[
+	The body, 1744 by 770, in the middle of the screen from 140 down.
+	Left, 860 wide: the profile, the rank and prestige, the size of the lobby.
+	Right, from 884: the settings, each a button that opens its own menu, and the mods.
+	Everything is placed by its place in the body.
+]]
+local BODY_LEFT = -872
+local BODY_TOP = 140
+local COLUMN_WIDTH = 860
+local RIGHT_COLUMN = 884
+local CARD_PADDING = 28
+local BUTTON_WIDTH = 400
+local BUTTON_HEIGHT = 50
+
+-- the cards, by their top and bottom. The two of each column end and start on the same lines, 24 apart.
+local PROFILE_CARD = { 0, 210 }
+local RANK_CARD = { 234, 536 }
+local LOBBY_CARD = { 560, 770 }
+local SETTINGS_CARD = { 0, 536 }
+local MODS_CARD = { 560, 770 }
+
+-- the settings: what the button says, the menu it opens, and what is in there
+local SettingsMenus = {
+	{ id = "UnlockSettings", label = "UNLOCK ALL", menu = "Shield_Unlocks_SettingsPopup", about = "Everything, or only attachments, camos and cards, items, loot or class slots." },
+	{ id = "BotSettings", label = "BOTS", menu = "Shield_Bot_SettingsPopup", about = "How good the bots of multiplayer are: aim, reaction, awareness, headshots, objectives." },
+	{ id = "AimAssistSettings", label = "FOV & AIM ASSIST", menu = "Shield_AimAssist_SettingsPopup", about = "FOV scaling, and the lock-on and slowdown of aim assist." },
+	{ id = "MiscModsButton", label = "MISC SETTINGS", menu = "Shield_Misc_SettingsPopup", about = "Menu colours, Discord presence, bots, round counter, movement and more." },
+	{ id = "WaterMarkSettings", label = "WATERMARK", menu = "Shield_WaterMark_SettingsPopup", about = "What the watermark shows: the Shield text, the mods, the checksum." },
+	{ id = "BlackMarketSettings", label = "BLACK MARKET", menu = "Shield_BlackMarket_SettingsPopup", about = "How cases and tiers are earned, the active season, what purchases cost." }
+}
+
+local CardColors = {
+	profile = { r = 0.35, g = 0.75, b = 1 },
+	rank = { r = 1, g = 0.8, b = 0.25 },
+	lobby = { r = 0.45, g = 0.9, b = 0.45 },
+	settings = { r = 0.35, g = 0.75, b = 1 },
+	mods = { r = 1, g = 0.38, b = 0.28 }
+}
+
+local function NewText( left, right, top, size, font, alignment )
+	local text = LUI.UIText.new( 0.5, 0.5, BODY_LEFT + left, BODY_LEFT + right, 0, 0, BODY_TOP + top, BODY_TOP + top + size )
+	text:setTTF( font )
+	text:setAlignment( alignment or Enum[@"luialignment"][@"lui_alignment_left"] )
+	text:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
+	return text
+end
+
+-- the small grey words over a title
+local function NewCaption( left, right, top, words )
+	local text = NewText( left, right, top, 15, "ttmussels_regular" )
+	text:setRGB( 0.55, 0.55, 0.55 )
+	text:setLetterSpacing( 2 )
+	text:setText( words )
+	return text
+end
+
+-- what a thing beside it does, in grey: the game breaks it in lines
+local function NewHint( left, right, top, words )
+	local text = NewText( left, right, top, 18, "notosans_regular" )
+	text:setRGB( 0.62, 0.62, 0.62 )
+	text:setText( words )
+	return text
+end
+
+-- a box of one colour
+local function NewBox( left, right, top, bottom, r, g, b, alpha )
+	local box = LUI.UIImage.new( 0.5, 0.5, BODY_LEFT + left, BODY_LEFT + right, 0, 0, BODY_TOP + top, BODY_TOP + bottom )
+	box:setRGB( r, g, b )
+	box:setAlpha( alpha )
+	return box
+end
+
+-- A card: dark, with a line of its colour over it, the thin frame of the game around it, and its name.
+-- Gives where its own things start.
+local function AddCard( add, left, card, color, caption, title )
+	local right = left + COLUMN_WIDTH
+	local top = card[1]
+	local bottom = card[2]
+
+	add( NewBox( left, right, top, bottom, 0, 0, 0, 0.5 ) )
+	add( NewBox( left, right, top, top + 4, color.r, color.g, color.b, 1 ) )
+
+	local Frame = LUI.UIImage.new( 0.5, 0.5, BODY_LEFT + left - 1, BODY_LEFT + right + 1, 0, 0, BODY_TOP + top - 1, BODY_TOP + bottom + 1 )
+	Frame:setAlpha( 0.12 )
+	Frame:setImage( RegisterImage( @"uie_ui_menu_store_common_frame" ) )
+	Frame:setMaterial( LUI.UIImage.GetCachedMaterial( @"uie_nineslice_add" ) )
+	Frame:setShaderVector( 0, 0, 0, 0, 0 )
+	Frame:setupNineSliceShader( 12, 12 )
+	add( Frame )
+
+	add( NewCaption( left + CARD_PADDING, right - CARD_PADDING, top + 24, caption ) )
+
+	local Title = add( NewText( left + CARD_PADDING, right - CARD_PADDING, top + 44, 34, "notosans_bold" ) )
+	Title:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+	Title:setText( title )
+
+	add( NewBox( left + CARD_PADDING, right - CARD_PADDING, top + 94, top + 95, 1, 1, 1, 0.1 ) )
+
+	return top + 112
+end
+
+-- A button of the game with its own words, never locked, that does that when it is clicked. The menu finds
+-- what can take the focus as parent[id]: it is kept under its id.
+local function AddButton( self, menu, controller, id, label, left, top, action )
+	local button = CoD.DirectorSelectButtonMiniInternal.new( menu, controller, 0.5, 0.5, BODY_LEFT + left, BODY_LEFT + left + BUTTON_WIDTH, 0, 0, BODY_TOP + top, BODY_TOP + top + BUTTON_HEIGHT )
+
+	button.MiddleText:setText( label )
+	button.MiddleTextFocus:setText( label )
+
+	button:mergeStateConditions( {
+		{
+			stateName = "Locked",
+			condition = function ( menu, element, event )
+				return AlwaysFalse()
+			end
+		}
+	} )
+
+	button:linkToElementModel( self, nil, false, function ( model )
+		button:setModel( model, controller )
+	end )
+
+	self:addElement( button )
+	button.id = id
+	self[id] = button
+	table.insert( self.Buttons, button )
+
+	menu:AddButtonCallbackFunction( button, controller, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
+		PlaySoundAlias( "uin_paint_image_flip_toggle" )
+		CoD.EnhPrintInfo( id )
+		action( menu, controller )
+		return true
+	end, function ( element, menu, controller )
+		if IsGamepad( controller ) then
+			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/select", nil, "ui_confirm" )
+			return true
+		elseif IsMouseOrKeyboard( controller ) then
+			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
+			return false
+		else
+			return false
+		end
+	end, false )
+
+	return button
+end
+
+-- the rank a player has now: its paragon rank once it is a prestige master
+local function CurrentRank()
+	local prestige = Engine[@"getstatbyname"]( Engine[@"getprimarycontroller"](), "plevel" )
+
+	if prestige ~= nil and tonumber( prestige ) == 11 then
+		return Engine[@"getstatbyname"]( Engine[@"getprimarycontroller"](), "paragon_rank" ), true
+	end
+
+	return Engine[@"getstatbyname"]( Engine[@"getprimarycontroller"](), "RANK" ), false
+end
+
+-- a model of the player for a box to write in
+local function EditModel( controller, name )
+	local model = Engine[@"getmodel"]( Engine[@"getmodelforcontroller"]( controller ), name )
+
+	if model == nil then
+		model = Engine[@"createmodel"]( Engine[@"getmodelforcontroller"]( controller ), name )
+	end
+
+	if model:get() == nil then
+		model:set( "" )
+	end
+
+	return model
 end
 
 CoD.ShieldOptionsMenu_SafeAreaFront = InheritFrom( LUI.UIElement )
@@ -286,48 +441,27 @@ CoD.ShieldOptionsMenu_SafeAreaFront.new = function ( f1_arg0, f1_arg1, f1_arg2, 
 	self.soundSet = "none"
 	self.onlyChildrenFocusable = true
 	self.anyChildUsesUpdateState = true
-	
+
+	-- everything of the menu that is only closed with it
+	self.Parts = {}
+	self.Buttons = {}
+
+	local function Add( element )
+		self:addElement( element )
+		table.insert( self.Parts, element )
+		return element
+	end
+
 	local TabBacking = CoD.CommonTabBarBacking.new( f1_arg0, f1_arg1, -0.1, 1.1, 0, 0, 0, 0, 52, 89 )
 	TabBacking.TabBackingBlur:setAlpha( 0 )
 	self:addElement( TabBacking )
 	self.TabBacking = TabBacking
-	
+
 	local CommonHeader = CoD.CommonHeader.new( f1_arg0, f1_arg1, 0, 1, 0, 0, 0, 0, 0, 67 )
 	CommonHeader.subtitle.StageTitle:setText("^2Shield Options")
-	CommonHeader.subtitle.subtitle:setText("^3Modify Username, Unlock Options and Rank")
+	CommonHeader.subtitle.subtitle:setText("^3Profile, Rank, Lobby and Settings")
 	self:addElement( CommonHeader )
 	self.CommonHeader = CommonHeader
-
-	local actionsListPCEnh = LUI.UIList.new( f1_arg0, f1_arg1, 0, 0, nil, false, false, false, false )
-	actionsListPCEnh:setLeftRight( 0.50, 0.50, -695.77 + 10, -530.77 + 10 )
-	actionsListPCEnh:setTopBottom( 0.50, 0.50, 295.26 - 80, 391.26 - 80 )
-	actionsListPCEnh:setAlpha( 1 )
-	actionsListPCEnh:setWidgetType( CoD.CraftActionHeaderEnhShield )
-	actionsListPCEnh:setVerticalCount( 15 )
-	actionsListPCEnh:setSpacing( 0 )
-	actionsListPCEnh:setDataSource( "EnhActionsShieldPC" )
-	self:addElement( actionsListPCEnh )
-	self.actionsListPCEnh = actionsListPCEnh
-
-	actionsListPCEnh.id = "actionsListPCEnh"
-
-	--LUI_DebugElement(f1_arg0, f1_arg1, self, actionsListPCEnh, "actionsListPCEnh", 10)
-
-	local actionsListPCEnhHint = LUI.UIText.new( 0.50, 0.50, -789.26 + 10, -143.26 + 10, 0.50, 0.50, 386.76 - 80, 406.76 - 80 )
-	actionsListPCEnhHint:setText("Sets your party/engine player limit, for zombies 4+ players, you need to use the Enhancement Mod for fixes/improvments and better gameplay.")
-	actionsListPCEnhHint:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	actionsListPCEnhHint:setTTF("notosans_bold")
-	actionsListPCEnhHint:setBackingType( 2 )
-	actionsListPCEnhHint:setBackingColor( 0.04, 0.81, 1 )
-	actionsListPCEnhHint:setBackingAlpha( 0.01 )
-	actionsListPCEnhHint:setBackingXPadding( 12 )
-	actionsListPCEnhHint:setBackingYPadding( 6 )
-	actionsListPCEnhHint:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	actionsListPCEnhHint:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( actionsListPCEnhHint )
-	self.actionsListPCEnhHint = actionsListPCEnhHint
-
-	--LUI_DebugElement(f1_arg0, f1_arg1, self, actionsListPCEnhHint, "actionsListPCEnhHint", 10)
 
 	local ShieldSettingsTabs = CoD.Common_Tabbar_Center.new( f1_arg0, f1_arg1, 0.5, 0.5, -100.5, 100.5, 0, 0, 52.5 - 15, 113.5 - 15 )
 
@@ -353,27 +487,26 @@ CoD.ShieldOptionsMenu_SafeAreaFront.new = function ( f1_arg0, f1_arg1, f1_arg2, 
 	end )
 	self:addElement( ShieldSettingsTabs )
 	self.ShieldSettingsTabs = ShieldSettingsTabs
-	
+
 	HeaderStripe = CoD.header_container_frontend.new( f1_arg0, f1_arg1, 0, 1, 0, 0, 0, 0, 0, 42 )
 	self:addElement( HeaderStripe )
 	self.HeaderStripe = HeaderStripe
-	
-	-- Name Edit
-	local NameEditBox = CoD.Shield_NameEditBox.new( f1_arg0, f1_arg1, 0.5, 0.5, -20 - 750, 350 - 750, 0.5, 0.5, 100 - 400, 150 - 400 )
+
+	---------------------------
+	-- left: the profile
+
+	local ProfileTop = AddCard( Add, 0, PROFILE_CARD, CardColors.profile, "WHO YOU ARE", "Profile" )
+
+	local NameEditBox = CoD.Shield_NameEditBox.new( f1_arg0, f1_arg1, 0.5, 0.5, BODY_LEFT + CARD_PADDING, BODY_LEFT + CARD_PADDING + BUTTON_WIDTH, 0, 0, BODY_TOP + ProfileTop, BODY_TOP + ProfileTop + BUTTON_HEIGHT )
 	NameEditBox:linkToElementModel( self, nil, false, function ( model )
 		NameEditBox:setModel( model, f1_arg1 )
 	end )
-	NameEditBox.TextBox:setLeftRight(0, 0, 20 + 110, 320 + 110)
-	NameEditBox.RankHighlight:setText("^2Set Username: ")
+	NameEditBox.TextBox:setLeftRight( 0, 0, 125, 390 )
+	NameEditBox.RankHighlight:setText( "Username:" )
 	self:addElement( NameEditBox )
 	self.NameEditBox = NameEditBox
 
-	-- prevent element pool being fucked
-	local NameEditBoxModel = Engine[@"getmodel"]( Engine[@"getmodelforcontroller"]( f1_arg1 ), "Shield_Name" )
-
-	if NameEditBoxModel == nil then
-		NameEditBoxModel = Engine[@"createmodel"]( Engine[@"getmodelforcontroller"]( f1_arg1 ), "Shield_Name" )
-	end
+	local NameEditBoxModel = EditModel( f1_arg1, "Shield_Name" )
 
 	Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_username identity name string")
 
@@ -385,18 +518,18 @@ CoD.ShieldOptionsMenu_SafeAreaFront.new = function ( f1_arg0, f1_arg1, f1_arg2, 
 
 			CoD.EnhPrintInfo("Username", NameData)
 			PlaySoundAlias( "uin_paint_image_flip_toggle" )
-			
+
 			if not CoD.IsValidName(NameData) then
 				f331_arg0:set("^1Invalid Username!")
 				NameEditBox:addElement( LUI.UITimer.newElementTimer( 300, true, function ()
 					-- reset old name
-				f331_arg0:set(Engine[@"getdvarstring"]("shield_username"))
+					f331_arg0:set(Engine[@"getdvarstring"]("shield_username"))
 				end ) )
 			else
 				f331_arg0:set("^3Username Set!")
 				NameEditBox:addElement( LUI.UITimer.newElementTimer( 300, true, function ()
 					-- reset new name
-				f331_arg0:set(NameData)
+					f331_arg0:set(NameData)
 				end ) )
 
 				-- shield api here later..
@@ -410,265 +543,24 @@ CoD.ShieldOptionsMenu_SafeAreaFront.new = function ( f1_arg0, f1_arg1, f1_arg2, 
 
 	self.NameEditBoxModel = NameEditBoxModel
 
-	local ReloadModsButton = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 0.5, 0.5, -740, 310 - 740, 0.5, 0.5, -165, 50 - 165 )
-	
-	ReloadModsButton.MiddleText:setTTF( "notosans_bold" )
-	ReloadModsButton.MiddleText:setText("Reload Shield Mods")
+	Add( NewHint( CARD_PADDING + BUTTON_WIDTH + 24, COLUMN_WIDTH - CARD_PADDING, ProfileTop + 4, "A new username applies after you restart the game." ) )
 
-	ReloadModsButton.MiddleTextFocus:setText("Reload Shield Mods")
-	ReloadModsButton.MiddleTextFocus:setTTF( "notosans_bold" )
+	---------------------------
+	-- the rank and the prestige
 
-	ReloadModsButton:mergeStateConditions( {
-		{
-			stateName = "Locked",
-			condition = function ( menu, element, event )
-				return false
-			end
-		}
-	} )
+	local RankTop = AddCard( Add, 0, RANK_CARD, CardColors.rank, "FOR THE MODE YOU ARE IN", "Rank & Prestige" )
 
-	ReloadModsButton:linkToElementModel( self, nil, false, function ( model )
-		ReloadModsButton:setModel( model, f1_arg1 )
-	end )
-	self:addElement( ReloadModsButton )
-	self.ReloadModsButton = ReloadModsButton
-
-	f1_arg0:AddButtonCallbackFunction( ReloadModsButton, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		PlaySoundAlias( "uin_paint_image_flip_toggle" )
-		CoD.EnhPrintInfo("ReloadModsButton")
-		
-		-- reload with killserver
-		CoD.VM_ReloadMods()
-
-	end, function ( element, menu, controller )
-		if IsGamepad( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
-			return true
-		elseif IsMouseOrKeyboard( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-			return false
-		else
-			return false
-		end
-	end, false )
-	
-	local sizeReloadModsButton = CoD.DirectorSelectButtonImageInternal.new( f1_arg0, f1_arg1, 0.5, 0.5, -740, 310 - 740, 0.5, 0.5, -165, 50 - 165 )
-	sizeReloadModsButton:mergeStateConditions( {
-		{
-			stateName = "Disabled",
-			condition = function ( menu, element, event )
-				return AlwaysFalse()
-			end
-		}
-	} )
-
-	sizeReloadModsButton:setAlpha( 0 )
-	sizeReloadModsButton.Tint:setRGB( 0.05, 0.08, 0.11 )
-	sizeReloadModsButton.Tint:setAlpha( 0.25 )
-	sizeReloadModsButton:linkToElementModel( self, nil, false, function ( model )
-		sizeReloadModsButton:setModel( model, f1_arg1 )
-	end )
-	sizeReloadModsButton.ButtonName.GameModeText:setText("^3Reload Mods")
-	self:addElement( sizeReloadModsButton )
-	self.sizeReloadModsButton = sizeReloadModsButton
-
-	ReloadModsButton.id = "ReloadModsButton"
-	sizeReloadModsButton.id = "sizeReloadModsButton"
-
-	local MiscModsButton = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 0.5, 0.5, -740 + 500, 310 - 740 + 500, 0.5, 0.5, -165, 50 - 165 )
-	
-	MiscModsButton.MiddleText:setTTF( "notosans_bold" )
-	MiscModsButton.MiddleText:setText("Misc Settings")
-
-	MiscModsButton.MiddleTextFocus:setText("Misc Settings")
-	MiscModsButton.MiddleTextFocus:setTTF( "notosans_bold" )
-
-	MiscModsButton:mergeStateConditions( {
-		{
-			stateName = "Locked",
-			condition = function ( menu, element, event )
-				return false
-			end
-		}
-	} )
-
-	MiscModsButton:linkToElementModel( self, nil, false, function ( model )
-		MiscModsButton:setModel( model, f1_arg1 )
-	end )
-	self:addElement( MiscModsButton )
-	self.MiscModsButton = MiscModsButton
-
-	f1_arg0:AddButtonCallbackFunction( MiscModsButton, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		PlaySoundAlias( "uin_paint_image_flip_toggle" )
-		CoD.EnhPrintInfo("MiscModsButton")
-		
-		-- open misc settings..
-		OpenOverlay( self, "Shield_Misc_SettingsPopup", controller )
-
-	end, function ( element, menu, controller )
-		if IsGamepad( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
-			return true
-		elseif IsMouseOrKeyboard( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-			return false
-		else
-			return false
-		end
-	end, false )
-
-	MiscModsButton.id = "MiscModsButton"
-
-	-- watermark
-	local WaterMarkSettings = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 0.5, 0.5, -740 + 1000, 310 - 740 + 1000, 0.5, 0.5, -165, 50 - 165 )
-	
-	WaterMarkSettings.MiddleText:setTTF( "notosans_bold" )
-	WaterMarkSettings.MiddleText:setText("Watermark Settings")
-
-	WaterMarkSettings.MiddleTextFocus:setText("Watermark Settings")
-	WaterMarkSettings.MiddleTextFocus:setTTF( "notosans_bold" )
-	
-	WaterMarkSettings:linkToElementModel( self, nil, false, function ( model )
-		WaterMarkSettings:setModel( model, f1_arg1 )
-	end )
-	self:addElement( WaterMarkSettings )
-	self.WaterMarkSettings = WaterMarkSettings
-
-	f1_arg0:AddButtonCallbackFunction( WaterMarkSettings, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		PlaySoundAlias( "uin_paint_image_flip_toggle" )
-		CoD.EnhPrintInfo("WaterMarkSettings")
-		
-		OpenOverlay( self, "Shield_WaterMark_SettingsPopup", controller )
-
-	end, function ( element, menu, controller )
-		if IsGamepad( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
-			return true
-		elseif IsMouseOrKeyboard( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-			return false
-		else
-			return false
-		end
-	end, false )
-
-	WaterMarkSettings.id = "WaterMarkSettings"
-
-	-- desc for name
-	local NameHint = LUI.UIText.new( 0.5, 0.5, 0 - 755, 550 - 755, 0.5, 0.5, 100 - 315, 120 - 315 )
-	NameHint:setText("To Apply Username Change, Restart the Game!")
-	NameHint:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	NameHint:setTTF("notosans_bold")
-	NameHint:setBackingType( 2 )
-	NameHint:setBackingColor( 0.04, 0.81, 1 )
-	NameHint:setBackingAlpha( 0.01 )
-	NameHint:setBackingXPadding( 12 )
-	NameHint:setBackingYPadding( 6 )
-	NameHint:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	NameHint:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( NameHint )
-	self.NameHint = NameHint
-
-	local AimAssistSettings = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 0.5, 0.5, -740 + 1000, 310 - 740 + 1000, 0.5, 0.5, -165 - 125, 50 - 165 - 125 )
-	
-	AimAssistSettings.MiddleText:setTTF( "notosans_bold" )
-	AimAssistSettings.MiddleText:setText("FOV & Aim Assist Settings")
-
-	AimAssistSettings.MiddleTextFocus:setText("FOV & Aim Assist Settings")
-	AimAssistSettings.MiddleTextFocus:setTTF( "notosans_bold" )
-	
-	AimAssistSettings:linkToElementModel( self, nil, false, function ( model )
-		AimAssistSettings:setModel( model, f1_arg1 )
-	end )
-	self:addElement( AimAssistSettings )
-	self.AimAssistSettings = AimAssistSettings
-
-	f1_arg0:AddButtonCallbackFunction( AimAssistSettings, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		PlaySoundAlias( "uin_paint_image_flip_toggle" )
-		CoD.EnhPrintInfo("AimAssistSettings")
-		
-		OpenOverlay( self, "Shield_AimAssist_SettingsPopup", controller )
-
-	end, function ( element, menu, controller )
-		if IsGamepad( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
-			return true
-		elseif IsMouseOrKeyboard( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-			return false
-		else
-			return false
-		end
-	end, false )
-
-	AimAssistSettings.id = "AimAssistSettings"
-
-	-- unlock button
-	local UnlockSettings = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 0.5, 0.5, -740 + 500, 310 - 740 + 500, 0.5, 0.5, -165 - 125, 50 - 165 - 125 )
-	
-	UnlockSettings.MiddleText:setTTF( "notosans_bold" )
-	UnlockSettings.MiddleText:setText("Unlock All Settings")
-
-	UnlockSettings.MiddleTextFocus:setText("Unlock All Settings")
-	UnlockSettings.MiddleTextFocus:setTTF( "notosans_bold" )
-	
-	UnlockSettings:linkToElementModel( self, nil, false, function ( model )
-		UnlockSettings:setModel( model, f1_arg1 )
-	end )
-	self:addElement( UnlockSettings )
-	self.UnlockSettings = UnlockSettings
-
-	f1_arg0:AddButtonCallbackFunction( UnlockSettings, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		PlaySoundAlias( "uin_paint_image_flip_toggle" )
-		CoD.EnhPrintInfo("UnlockSettings")
-		
-		OpenOverlay( self, "Shield_Unlocks_SettingsPopup", controller )
-
-	end, function ( element, menu, controller )
-		if IsGamepad( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
-			return true
-		elseif IsMouseOrKeyboard( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-			return false
-		else
-			return false
-		end
-	end, false )
-
-	UnlockSettings.id = "UnlockSettings"
-
-	-- neat trick here lol
-	-- LUI.UIText.new(0.5, 0.5, Engine[@"getdvarint"]("x1"), Engine[@"getdvarint"]("x2"), 0.5, 0.5, Engine[@"getdvarint"]("y1"), Engine[@"getdvarint"]("y2"))
-
-	-- Rank Edit
-	local RankEditBox = CoD.Shield_RankEditBox.new( f1_arg0, f1_arg1, 0.5, 0.5, -20 - 770, 350 - 770, 0.5, 0.5, 230 - 100, 280 - 100 )
+	local RankEditBox = CoD.Shield_RankEditBox.new( f1_arg0, f1_arg1, 0.5, 0.5, BODY_LEFT + CARD_PADDING, BODY_LEFT + CARD_PADDING + 390, 0, 0, BODY_TOP + RankTop, BODY_TOP + RankTop + BUTTON_HEIGHT )
 	RankEditBox:linkToElementModel( self, nil, false, function ( model )
 		RankEditBox:setModel( model, f1_arg1 )
 	end )
-	RankEditBox.TextBox:setLeftRight(0, 0, 20 + 80, 320 + 80)
-	RankEditBox.RankHighlight:setText("^2Set Rank: ")
+	RankEditBox.TextBox:setLeftRight( 0, 0, 85, 380 )
+	RankEditBox.RankHighlight:setText( "Rank:" )
 	self:addElement( RankEditBox )
 	self.RankEditBox = RankEditBox
 
-	local RankEditBoxModel = Engine[@"getmodel"]( Engine[@"getmodelforcontroller"]( f1_arg1 ), "Shield_Rank" )
-
-	if RankEditBoxModel == nil then
-		RankEditBoxModel = Engine[@"createmodel"]( Engine[@"getmodelforcontroller"]( f1_arg1 ), "Shield_Rank" )
-	end
-
-	if RankEditBoxModel:get() == nil then
-		RankEditBoxModel:set( "" )
-	end
-
-	local PrestigeNon = Engine[@"getstatbyname"](Engine[@"getprimarycontroller"](), "plevel")
-	local isPrestigeMasterNon = PrestigeNon ~= nil and tonumber(PrestigeNon) == 11
-
-	if isPrestigeMasterNon == true then
-		RankEditBoxModel:set(Engine[@"getstatbyname"](Engine[@"getprimarycontroller"](), "paragon_rank"))
-	else
-		RankEditBoxModel:set(Engine[@"getstatbyname"](Engine[@"getprimarycontroller"](), "RANK"))
-	end
+	local RankEditBoxModel = EditModel( f1_arg1, "Shield_Rank" )
+	RankEditBoxModel:set( ( CurrentRank() ) )
 
 	CoD.PCUtility.SetupEditControlWithModel( RankEditBox, f1_arg1, f1_arg0, RankEditBoxModel, function ( f331_arg0, f331_arg1, f331_arg2 )
 		if not f331_arg2.canceled and f331_arg2.name == "textbox_editdone" then
@@ -676,18 +568,11 @@ CoD.ShieldOptionsMenu_SafeAreaFront.new = function ( f1_arg0, f1_arg1, f1_arg2, 
 			local RankLimit = 54
 			local sessionmode = Engine[@"CurrentSessionMode"]()
 
-			if sessionmode == Enum[@"emodes"][@"mode_multiplayer"] then -- mp
-				RankLimit = 54
-			end
-			if sessionmode == Enum[@"emodes"][@"mode_zombies"] then -- zm
-				RankLimit = 54
-			end
 			if sessionmode == Enum[@"emodes"][@"mode_warzone"] then -- wz
 				RankLimit = 79
 			end
 
-			local Prestige = Engine[@"getstatbyname"](Engine[@"getprimarycontroller"](), "plevel")
-			local isPrestigeMaster = Prestige ~= nil and tonumber(Prestige) == 11
+			local _, isPrestigeMaster = CurrentRank()
 
 			if isPrestigeMaster == true then
 				RankLimit = 999
@@ -701,55 +586,36 @@ CoD.ShieldOptionsMenu_SafeAreaFront.new = function ( f1_arg0, f1_arg1, f1_arg2, 
 			if RankData ~= nil and RankData ~= "" then
 				CoD.EnhPrintInfo("Gamemode RankData", RankData)
 				PlaySoundAlias( "uin_paint_image_flip_toggle" )
-				
+
 				if not CoD.isInteger(RankData) or tonumber(RankData) > RankLimit or tonumber(RankData) < 1 then
 					f331_arg0:set("^1Invalid Rank!")
-					RankEditBox:addElement( LUI.UITimer.newElementTimer( 300, true, function ()
-						if isPrestigeMaster == true then
-							f331_arg0:set(Engine[@"getstatbyname"](Engine[@"getprimarycontroller"](), "paragon_rank"))
-						else
-							f331_arg0:set(Engine[@"getstatbyname"](Engine[@"getprimarycontroller"](), "RANK"))
-						end
-					end ) )
 				else
 					f331_arg0:set("^3Rank Set!")
-					RankEditBox:addElement( LUI.UITimer.newElementTimer( 300, true, function ()
-						if isPrestigeMaster == true then
-							f331_arg0:set(Engine[@"getstatbyname"](Engine[@"getprimarycontroller"](), "paragon_rank"))
-						else
-							f331_arg0:set(Engine[@"getstatbyname"](Engine[@"getprimarycontroller"](), "RANK"))
-						end
-					end ) )
 
 					-- shield api here later..
 					CoD.RankUtils.SetRank(RankData)
 				end
+
+				-- the box shows the rank again once the word was read
+				RankEditBox:addElement( LUI.UITimer.newElementTimer( 300, true, function ()
+					f331_arg0:set( ( CurrentRank() ) )
+				end ) )
 			end
 		else
 			f331_arg0:set("") -- reset it
 		end
 	end )
 
-
-	local PrestigeEditBox = CoD.Shield_PrestigeEditBox.new( f1_arg0, f1_arg1, 0.5, 0.5, -20 - 350, 350 - 350, 0.5, 0.5, 230 - 100, 280 - 100 )
+	local PrestigeEditBox = CoD.Shield_PrestigeEditBox.new( f1_arg0, f1_arg1, 0.5, 0.5, BODY_LEFT + CARD_PADDING + 414, BODY_LEFT + COLUMN_WIDTH - CARD_PADDING, 0, 0, BODY_TOP + RankTop, BODY_TOP + RankTop + BUTTON_HEIGHT )
 	PrestigeEditBox:linkToElementModel( self, nil, false, function ( model )
 		PrestigeEditBox:setModel( model, f1_arg1 )
 	end )
-	PrestigeEditBox.TextBox:setLeftRight(0, 0, 20 + 100, 320 + 100)
-	PrestigeEditBox.RankHighlight:setText("^2Set Prestige: ")
+	PrestigeEditBox.TextBox:setLeftRight( 0, 0, 110, 380 )
+	PrestigeEditBox.RankHighlight:setText( "Prestige:" )
 	self:addElement( PrestigeEditBox )
 	self.PrestigeEditBox = PrestigeEditBox
 
-	local PrestigeEditModel = Engine[@"getmodel"]( Engine[@"getmodelforcontroller"]( f1_arg1 ), "Shield_Prestige" )
-
-	if PrestigeEditModel == nil then
-		PrestigeEditModel = Engine[@"createmodel"]( Engine[@"getmodelforcontroller"]( f1_arg1 ), "Shield_Prestige" )
-	end
-
-	if PrestigeEditModel:get() == nil then
-		PrestigeEditModel:set( "" )
-	end
-
+	local PrestigeEditModel = EditModel( f1_arg1, "Shield_Prestige" )
 	PrestigeEditModel:set(Engine[@"getstatbyname"](Engine[@"getprimarycontroller"](), "plevel"))
 
 	CoD.PCUtility.SetupEditControlWithModel( PrestigeEditBox, f1_arg1, f1_arg0, PrestigeEditModel, function ( f331_arg0, f331_arg1, f331_arg2 )
@@ -761,51 +627,23 @@ CoD.ShieldOptionsMenu_SafeAreaFront.new = function ( f1_arg0, f1_arg1, f1_arg2, 
 
 				if not CoD.isInteger(PrestigeData) or tonumber(PrestigeData) > 11 or tonumber(PrestigeData) < 0 then
 					f331_arg0:set("^1Invalid Prestige!")
-					PrestigeEditBox:addElement( LUI.UITimer.newElementTimer( 300, true, function ()
-						f331_arg0:set(Engine[@"getstatbyname"](Engine[@"getprimarycontroller"](), "plevel"))
-					end ) )
 				else
 					f331_arg0:set("^3Prestige Set!")
-					PrestigeEditBox:addElement( LUI.UITimer.newElementTimer( 300, true, function ()
-						f331_arg0:set(Engine[@"getstatbyname"](Engine[@"getprimarycontroller"](), "plevel"))
-					end ) )
 
 					-- shield api here later..
 					CoD.RankUtils.SetPrestige(PrestigeData)
 				end
+
+				PrestigeEditBox:addElement( LUI.UITimer.newElementTimer( 300, true, function ()
+					f331_arg0:set(Engine[@"getstatbyname"](Engine[@"getprimarycontroller"](), "plevel"))
+				end ) )
 			end
 		else
 			f331_arg0:set("") -- reset it
 		end
 	end )
 
-	local PrestigeMasterButton = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 0.5, 0.5, 70, 370, 0.5, 0.5, 227.5 - 100, 277.5 - 100 )
-	
-	PrestigeMasterButton.MiddleText:setTTF( "notosans_bold" )
-	PrestigeMasterButton.MiddleText:setText("Prestige Master")
-
-	PrestigeMasterButton.MiddleTextFocus:setText("Prestige Master")
-	PrestigeMasterButton.MiddleTextFocus:setTTF( "notosans_bold" )
-
-	PrestigeMasterButton:mergeStateConditions( {
-		{
-			stateName = "Locked",
-			condition = function ( menu, element, event )
-				return AlwaysFalse()
-			end
-		}
-	} )
-
-	PrestigeMasterButton:linkToElementModel( self, nil, false, function ( model )
-		PrestigeMasterButton:setModel( model, f1_arg1 )
-	end )
-	self:addElement( PrestigeMasterButton )
-	self.PrestigeMasterButton = PrestigeMasterButton
-
-	f1_arg0:AddButtonCallbackFunction( PrestigeMasterButton, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		PlaySoundAlias( "uin_paint_image_flip_toggle" )
-		CoD.EnhPrintInfo("PrestigeMasterButton")
-		
+	AddButton( self, f1_arg0, f1_arg1, "PrestigeMasterButton", "PRESTIGE MASTER", CARD_PADDING, RankTop + 72, function ( menu, controller )
 		local sessionmode = Engine[@"CurrentSessionMode"]()
 		local RankSet = 55
 
@@ -821,33 +659,72 @@ CoD.ShieldOptionsMenu_SafeAreaFront.new = function ( f1_arg0, f1_arg1, f1_arg2, 
 		Engine[@"exec"](Engine[@"getprimarycontroller"](), "PrestigeStatsMaster " .. tostring(Engine[@"CurrentSessionMode"]()))
 
 		CoD.OverlayUtility.CreateOverlay(controller, menu, "PrestigeMasterActivated")
+	end )
 
-	end, function ( element, menu, controller )
-		if IsGamepad( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
-			return true
-		elseif IsMouseOrKeyboard( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-			return false
-		else
-			return false
-		end
-	end, false )
+	Add( NewHint( CARD_PADDING + BUTTON_WIDTH + 24, COLUMN_WIDTH - CARD_PADDING, RankTop + 76, "Prestige 11 and the top rank, in one click." ) )
 
-	PrestigeMasterButton.id = "PrestigeMasterButton"
-	
+	---------------------------
+	-- the size of the lobby
+
+	local LobbyTop = AddCard( Add, 0, LOBBY_CARD, CardColors.lobby, "HOW MANY CAN PLAY", "Lobby Size" )
+
+	-- a list of one slider, 375 by 60
+	local actionsListPCEnh = LUI.UIList.new( f1_arg0, f1_arg1, 0, 0, nil, false, false, false, false )
+	actionsListPCEnh:setLeftRight( 0.5, 0.5, BODY_LEFT + CARD_PADDING, BODY_LEFT + CARD_PADDING + 375 )
+	actionsListPCEnh:setTopBottom( 0, 0, BODY_TOP + LobbyTop, BODY_TOP + LobbyTop + 60 )
+	actionsListPCEnh:setAlpha( 1 )
+	actionsListPCEnh:setWidgetType( CoD.CraftActionHeaderEnhShield )
+	actionsListPCEnh:setVerticalCount( 15 )
+	actionsListPCEnh:setSpacing( 0 )
+	actionsListPCEnh:setDataSource( "EnhActionsShieldPC" )
+	self:addElement( actionsListPCEnh )
+	self.actionsListPCEnh = actionsListPCEnh
+
+	actionsListPCEnh.id = "actionsListPCEnh"
+
+	Add( NewHint( CARD_PADDING + BUTTON_WIDTH + 24, COLUMN_WIDTH - CARD_PADDING, LobbyTop + 2, "Sets your party and engine player limit. For Zombies with more than 4 players, use the Enhancement Mod for its fixes and improvements." ) )
+
+	---------------------------
+	-- right: the settings, each in a menu of its own
+
+	local SettingsTop = AddCard( Add, RIGHT_COLUMN, SETTINGS_CARD, CardColors.settings, "EACH OPENS ITS OWN MENU", "Settings" )
+
+	-- the buttons share the card: 86 apart while they fit, closer when there are more
+	local SettingsStep = math.min( 86, math.floor( ( SETTINGS_CARD[2] - SettingsTop - BUTTON_HEIGHT - 24 ) / math.max( #SettingsMenus - 1, 1 ) ) )
+
+	for index, entry in ipairs( SettingsMenus ) do
+		local top = SettingsTop + ( index - 1 ) * SettingsStep
+
+		AddButton( self, f1_arg0, f1_arg1, entry.id, entry.label, RIGHT_COLUMN + CARD_PADDING, top, function ( menu, controller )
+			OpenOverlay( self, entry.menu, controller )
+		end )
+
+		Add( NewHint( RIGHT_COLUMN + CARD_PADDING + BUTTON_WIDTH + 24, RIGHT_COLUMN + COLUMN_WIDTH - CARD_PADDING, top + 4, entry.about ) )
+	end
+
+	---------------------------
+	-- the mods
+
+	local ModsTop = AddCard( Add, RIGHT_COLUMN, MODS_CARD, CardColors.mods, "AFTER YOU CHANGED ONE", "Mods" )
+
+	AddButton( self, f1_arg0, f1_arg1, "ReloadModsButton", "RELOAD MODS", RIGHT_COLUMN + CARD_PADDING, ModsTop, function ( menu, controller )
+		-- reload with killserver
+		CoD.VM_ReloadMods()
+	end )
+
+	Add( NewHint( RIGHT_COLUMN + CARD_PADDING + BUTTON_WIDTH + 24, RIGHT_COLUMN + COLUMN_WIDTH - CARD_PADDING, ModsTop + 4, "Loads every Shield mod again and restarts the menus." ) )
+
 	RankEditBox.id = "RankEditBox"
 	PrestigeEditBox.id = "PrestigeEditBox"
-
 	NameEditBox.id = "NameEditBox"
 
 	ShieldSettingsTabs.id = "ShieldSettingsTabs"
 	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
-	
+
 	if PostLoadFunc then
 		PostLoadFunc( self, f1_arg1, f1_arg0 )
 	end
-	
+
 	return self
 end
 
@@ -855,19 +732,410 @@ CoD.ShieldOptionsMenu_SafeAreaFront.__onClose = function ( f8_arg0 )
 	f8_arg0.HeaderStripe:close()
 	f8_arg0.ShieldSettingsTabs:close()
 	f8_arg0.actionsListPCEnh:close()
-	f8_arg0.actionsListPCEnhHint:close()
 	f8_arg0.CommonHeader:close()
 	f8_arg0.TabBacking:close()
 
-	f8_arg0.PrestigeMasterButton:close()
-	f8_arg0.AimAssistSettings:close()
-	f8_arg0.WaterMarkSettings:close()
 	f8_arg0.PrestigeEditBox:close()
 	f8_arg0.RankEditBox:close()
-	f8_arg0.NameHint:close()
 	f8_arg0.NameEditBox:close()
-	f8_arg0.ReloadModsButton:close()
-	f8_arg0.sizeReloadModsButton:close()
 
-	f8_arg0.MiscModsButton:close()
+	for _, element in ipairs( f8_arg0.Parts ) do
+		element:close()
+	end
+	for _, button in ipairs( f8_arg0.Buttons ) do
+		button:close()
+	end
+end
+
+---------------------------
+
+--[[
+	The frame of the settings menus this one opens (unlock all, fov and aim assist, misc, watermark):
+	the screen behind goes dark, and a card 1024 wide stands in its middle. Left in the card the settings,
+	right of them what the one in focus does, with room under it for the buttons of a menu; at the foot
+	the prompts and "close". Places are from the middle of the screen, as those menus count.
+
+	options: title, caption, color { r, g, b }, rows (settings shown), spacing between two of them (3),
+	extra (buttons under the description). A menu reads listLeft, listTop, listHeight, rightLeft,
+	rightRight, descTop and extraTop of the frame to place its own things.
+]]
+local FRAME_HALF = 512
+local FRAME_PADDING = 28
+local FRAME_HEADER = 112
+local FRAME_FOOT = 100
+local FRAME_ROW = 60
+local FRAME_RIGHT = 132
+
+CoD.ShieldSettingsFrame = InheritFrom( LUI.UIElement )
+CoD.ShieldSettingsFrame.__defaultWidth = 1920
+CoD.ShieldSettingsFrame.__defaultHeight = 1080
+
+-- the settings side of the card: 500 wide for a gamepad, 580 with a mouse, as the rows are made
+CoD.ShieldSettingsFrame.LIST_LEFT = -FRAME_HALF + FRAME_PADDING
+CoD.ShieldSettingsFrame.LIST_RIGHT = CoD.ShieldSettingsFrame.LIST_LEFT + 500
+CoD.ShieldSettingsFrame.LIST_RIGHT_KBM = CoD.ShieldSettingsFrame.LIST_LEFT + 580
+CoD.ShieldSettingsFrame.RIGHT_LEFT = FRAME_RIGHT
+CoD.ShieldSettingsFrame.RIGHT_RIGHT = FRAME_HALF - FRAME_PADDING
+
+CoD.ShieldSettingsFrame.new = function ( menu, controller, options )
+	local self = LUI.UIElement.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	self:setClass( CoD.ShieldSettingsFrame )
+	self.id = "ShieldSettingsFrame"
+	self.soundSet = "default"
+	self.onlyChildrenFocusable = true
+	self.anyChildUsesUpdateState = true
+
+	local color = options.color or { r = 0.35, g = 0.75, b = 1 }
+	local rows = options.rows or 4
+	local spacing = options.spacing or 3
+	local extra = options.extra or 0
+
+	local listHeight = rows * FRAME_ROW + ( rows - 1 ) * spacing
+	-- the right side needs its room too: the description, and the buttons under it
+	local body = math.max( listHeight, 190 + extra * 62 )
+	local top = -math.floor( ( FRAME_HEADER + body + FRAME_FOOT ) / 2 )
+	local bottom = top + FRAME_HEADER + body + FRAME_FOOT
+
+	self.listLeft = CoD.ShieldSettingsFrame.LIST_LEFT
+	self.listTop = top + FRAME_HEADER
+	self.listHeight = listHeight
+	self.rightLeft = CoD.ShieldSettingsFrame.RIGHT_LEFT
+	self.rightRight = CoD.ShieldSettingsFrame.RIGHT_RIGHT
+	self.descTop = top + FRAME_HEADER + 26
+	self.extraTop = top + FRAME_HEADER + body - extra * 62 + 12
+
+	self.Parts = {}
+
+	local function Add( element )
+		self:addElement( element )
+		table.insert( self.Parts, element )
+		return element
+	end
+
+	local function Box( left, right, boxTop, boxBottom, r, g, b, alpha )
+		local box = LUI.UIImage.new( 0.5, 0.5, left, right, 0.5, 0.5, boxTop, boxBottom )
+		box:setRGB( r, g, b )
+		box:setAlpha( alpha )
+		return Add( box )
+	end
+
+	local function Text( left, right, textTop, size, font )
+		local text = LUI.UIText.new( 0.5, 0.5, left, right, 0.5, 0.5, textTop, textTop + size )
+		text:setTTF( font )
+		text:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
+		text:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
+		return Add( text )
+	end
+
+	local function Caption( left, right, textTop, words )
+		local text = Text( left, right, textTop, 15, "ttmussels_regular" )
+		text:setRGB( 0.55, 0.55, 0.55 )
+		text:setLetterSpacing( 2 )
+		text:setText( words )
+		return text
+	end
+
+	-- the menu behind goes dark
+	local Dim = LUI.UIImage.new( 0, 1, -5, 5, 0, 1, -5, 5 )
+	Dim:setRGB( 0, 0, 0 )
+	Dim:setAlpha( 0.7 )
+	Add( Dim )
+
+	-- the card
+	Box( -FRAME_HALF, FRAME_HALF, top, bottom, 0.06, 0.06, 0.06, 0.96 )
+	Box( -FRAME_HALF, FRAME_HALF, top, top + 4, color.r, color.g, color.b, 1 )
+
+	local Frame = LUI.UIImage.new( 0.5, 0.5, -FRAME_HALF - 1, FRAME_HALF + 1, 0.5, 0.5, top - 1, bottom + 1 )
+	Frame:setAlpha( 0.2 )
+	Frame:setImage( RegisterImage( @"uie_ui_menu_store_common_frame" ) )
+	Frame:setMaterial( LUI.UIImage.GetCachedMaterial( @"uie_nineslice_add" ) )
+	Frame:setShaderVector( 0, 0, 0, 0, 0 )
+	Frame:setupNineSliceShader( 12, 12 )
+	Add( Frame )
+
+	Caption( self.listLeft, self.rightRight, top + 24, options.caption or "" )
+
+	local Title = Text( self.listLeft, self.rightRight, top + 44, 34, "notosans_bold" )
+	Title:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+	Title:setText( options.title or "" )
+	self.TitleText = Title
+
+	Box( self.listLeft, self.rightRight, top + 94, top + 95, 1, 1, 1, 0.1 )
+
+	-- between the settings and what they do
+	Box( FRAME_RIGHT - 18, FRAME_RIGHT - 17, top + FRAME_HEADER, top + FRAME_HEADER + body, 1, 1, 1, 0.1 )
+	Caption( self.rightLeft, self.rightRight, top + FRAME_HEADER, "WHAT IT DOES" )
+
+	-- the foot: the prompts of the menu, and "close" for a mouse
+	Box( self.listLeft, self.rightRight, top + FRAME_HEADER + body + 20, top + FRAME_HEADER + body + 21, 1, 1, 1, 0.1 )
+
+	local buttons = CoD.fe_LeftContainer_NOTLobby.new( menu, controller, 0.5, 0.5, self.listLeft, self.listLeft + 648, 0.5, 0.5, bottom - 64, bottom - 16 )
+	self:addElement( buttons )
+	self.buttons = buttons
+
+	local featureOverlayButtonMouseOnly = CoD.featureOverlay_Button.new( menu, controller, 0.5, 0.5, self.rightRight - 186, self.rightRight, 0.5, 0.5, bottom - 70, bottom - 10 )
+	featureOverlayButtonMouseOnly.ButtonContainer.Title:setText( Engine[@"hash_4F9F1239CFD921FE"]( @"hash_778D439E1B360368" ) )
+	featureOverlayButtonMouseOnly:registerEventHandler( "gain_focus", function ( element, event )
+		local f2_local0 = nil
+		if element.gainFocus then
+			f2_local0 = element:gainFocus( event )
+		elseif element.super.gainFocus then
+			f2_local0 = element.super:gainFocus( event )
+		end
+		CoD.Menu.UpdateButtonShownState( element, menu, controller, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"] )
+		return f2_local0
+	end )
+	menu:AddButtonCallbackFunction( featureOverlayButtonMouseOnly, controller, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"], "ui_confirm", function ( element, menu, controller, model )
+		GoBack( self, controller )
+		return true
+	end, function ( element, menu, controller )
+		CoD.Menu.SetButtonLabel( menu, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"], @"hash_0", nil, "ui_confirm" )
+		return false
+	end, false )
+	self:addElement( featureOverlayButtonMouseOnly )
+	self.featureOverlayButtonMouseOnly = featureOverlayButtonMouseOnly
+
+	buttons.id = "buttons"
+	featureOverlayButtonMouseOnly.id = "featureOverlayButtonMouseOnly"
+
+	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
+
+	return self
+end
+
+CoD.ShieldSettingsFrame.__onClose = function ( f8_arg0 )
+	for _, element in ipairs( f8_arg0.Parts ) do
+		element:close()
+	end
+	f8_arg0.buttons:close()
+	f8_arg0.featureOverlayButtonMouseOnly:close()
+end
+
+---------------------------
+
+--[[
+	The bot settings: how good the bots of multiplayer are, read by the scripts of the mod when a match
+	starts (BotSkill.gsc). Each is a dvar kept in the config under "lua": the name of the dvar, its key
+	there, what it is when nothing was picked, and its choices by their number.
+]]
+local BotSettings = {
+	{
+		dvar = "shield_bot_skill", key = "bot_skill", default = 0, name = @"shield/bot_skill", desc = @"shield/bot_skill_desc",
+		choices = { "Game Default", "Recruit", "Regular", "Hardened", "Veteran", "Ruthless" }
+	},
+	{
+		dvar = "shield_bot_aim", key = "bot_aim", default = 0, name = @"shield/bot_aim", desc = @"shield/bot_aim_desc",
+		choices = { "By Skill", "Sloppy", "Steady", "Sharp", "Deadly", "Aimbot" }
+	},
+	{
+		dvar = "shield_bot_reaction", key = "bot_reaction", default = 0, name = @"shield/bot_reaction", desc = @"shield/bot_reaction_desc",
+		choices = { "By Skill", "Slow", "Normal", "Fast", "Very Fast", "Instant" }
+	},
+	{
+		dvar = "shield_bot_awareness", key = "bot_awareness", default = 0, name = @"shield/bot_awareness", desc = @"shield/bot_awareness_desc",
+		choices = { "By Skill", "Tunnel Vision", "Normal", "Alert", "Sharp", "Sees All Around" }
+	},
+	{
+		dvar = "shield_bot_headshots", key = "bot_headshots", default = 0, name = @"shield/bot_headshots", desc = @"shield/bot_headshots_desc",
+		choices = { "By Skill", "Never", "Rare", "Sometimes", "Often", "Very Often" }
+	},
+	{
+		dvar = "shield_bot_objectives", key = "bot_objectives", default = 1, name = @"shield/bot_objectives", desc = @"shield/bot_objectives_desc",
+		choices = { "Game Default", "Always" }
+	}
+}
+
+-- what was picked before, out of the config
+for _, setting in ipairs( BotSettings ) do
+	Engine[@"exec"]( Engine[@"getprimarycontroller"](), "readjson " .. setting.dvar .. " lua " .. setting.key .. " uint64_t " .. setting.default )
+end
+
+-- a choice was made: the dvar, and the config for the next start of the game
+local function OnBotSettingChange( f137_arg0, f137_arg1, f137_arg2, f137_arg3, f137_arg4 )
+	local dvar_name = f137_arg3
+	local current_val = f137_arg1.value
+	CoD.OptionsUtility.UpdateInfoModels( f137_arg1 )
+
+	if current_val == Engine[@"getdvarint"]( dvar_name ) then
+		return
+	end
+
+	Engine[@"setdvar"]( dvar_name, current_val )
+
+	for _, setting in ipairs( BotSettings ) do
+		if setting.dvar == dvar_name then
+			Engine[@"exec"]( Engine[@"getprimarycontroller"](), "writejson lua " .. setting.key .. " " .. current_val .. " uint64_t" )
+		end
+	end
+end
+
+DataSources.ShieldBotSkillSettings = DataSourceHelpers.ListSetup( "ShieldBotSkillSettings", function ( f138_arg0 )
+	local data = {}
+
+	for _, setting in ipairs( BotSettings ) do
+		local options = {}
+
+		for index, choice in ipairs( setting.choices ) do
+			table.insert( options, {
+				option = choice,
+				value = index - 1,
+				default = index - 1 == setting.default
+			} )
+		end
+
+		table.insert( data, CoD.OptionsUtility.CreateDvarSettings( f138_arg0, setting.name, setting.desc, setting.dvar, setting.dvar, options, nil, OnBotSettingChange ) )
+	end
+
+	return data
+end, nil, nil, function ( f139_arg0, f139_arg1, f139_arg2 )
+	local f139_local0 = Engine[@"createmodel"]( Engine[@"getglobalmodel"](), "GametypeSettings.Update" )
+	if f139_arg1.updateSubscription then
+		f139_arg1:removeSubscription( f139_arg1.updateSubscription )
+	end
+	f139_arg1.updateSubscription = f139_arg1:subscribeToModel( f139_local0, function ()
+		f139_arg1:updateDataSource()
+	end, false )
+end )
+
+-- the menu of the bot settings: as the other settings menus, see CoD.ShieldSettingsFrame
+CoD.Shield_Bot_SettingsPopup = InheritFrom( CoD.Menu )
+LUI.createMenu.Shield_Bot_SettingsPopup = function ( f1_arg0, f1_arg1 )
+	local self = CoD.Menu.NewForUIEditor( "Shield_Bot_SettingsPopup", f1_arg0 )
+	local f1_local1 = self
+	self:setClass( CoD.Shield_Bot_SettingsPopup )
+	self.soundSet = "none"
+	self:setOwner( f1_arg0 )
+	self:setLeftRight( 0, 1, 0, 0 )
+	self:setTopBottom( 0, 1, 0, 0 )
+	self:playSound( "menu_open", f1_arg0 )
+	self.anyChildUsesUpdateState = true
+	f1_local1:addElementToPendingUpdateStateList( self )
+
+	local CommomCenteredPopup = CoD.ShieldSettingsFrame.new( f1_local1, f1_arg0, {
+		title = "Bots",
+		caption = "HOW GOOD THE BOTS OF MULTIPLAYER ARE",
+		color = { r = 1, g = 0.38, b = 0.28 },
+		rows = #BotSettings
+	} )
+	self:addElement( CommomCenteredPopup )
+	self.CommomCenteredPopup = CommomCenteredPopup
+
+	local BotSettingsList = LUI.UIList.new( f1_local1, f1_arg0, 3, 3, nil, false, false, false, false )
+	BotSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT )
+	BotSettingsList:setTopBottom( 0.5, 0.5, CommomCenteredPopup.listTop, CommomCenteredPopup.listTop + CommomCenteredPopup.listHeight )
+	BotSettingsList:setAutoScaleContent( true )
+	BotSettingsList:setVerticalCount( #BotSettings )
+	BotSettingsList:setHorizontalCount( 1 )
+	BotSettingsList:setWidgetType( CoD.CustomGames_SettingSliderNoCustom )
+	BotSettingsList:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
+	BotSettingsList:setDataSource( "ShieldBotSkillSettings" )
+	self:addElement( BotSettingsList )
+	self.BotSettingsList = BotSettingsList
+
+	if Engine[@"getdvarint"]("shield_ui_color") == 0 then
+		BotSettingsList:setRGB(0, 1, 1)
+	elseif Engine[@"getdvarint"]("shield_ui_color") == 1 then
+		BotSettingsList:setRGB(1, 0, 0)
+	elseif Engine[@"getdvarint"]("shield_ui_color") == 2 then
+		BotSettingsList:setRGB(0, 1, 0)
+	end
+
+	local SettingDescription = LUI.UIText.new( 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, 0.5, 0.5, CommomCenteredPopup.descTop, CommomCenteredPopup.descTop + 21 )
+	SettingDescription:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+	SettingDescription:setTTF( "notosans_regular" )
+	SettingDescription:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
+	SettingDescription:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
+	self:addElement( SettingDescription )
+	self.SettingDescription = SettingDescription
+
+	SettingDescription:linkToElementModel( BotSettingsList, "desc", true, function ( model )
+		local f7_local0 = model:get()
+		if f7_local0 ~= nil then
+			SettingDescription:setText( Engine[@"hash_4F9F1239CFD921FE"]( f7_local0 ) )
+		end
+	end )
+
+	self:mergeStateConditions( {
+		{
+			stateName = "KBM",
+			condition = function ( menu, element, event )
+				return IsMouseOrKeyboard( f1_arg0 )
+			end
+		}
+	} )
+	self:appendEventHandler( "input_source_changed", function ( f9_arg0, f9_arg1 )
+		f9_arg1.menu = f9_arg1.menu or f1_local1
+		f1_local1:updateElementState( self, f9_arg1 )
+	end )
+	local f1_local6 = self
+	local f1_local7 = self.subscribeToModel
+	local f1_local8 = Engine[@"getmodelforcontroller"]( f1_arg0 )
+	f1_local7( f1_local6, f1_local8.LastInput, function ( f10_arg0 )
+		f1_local1:updateElementState( self, {
+			name = "model_validation",
+			menu = f1_local1,
+			controller = f1_arg0,
+			modelValue = f10_arg0:get(),
+			modelName = "LastInput"
+		} )
+	end, false )
+	f1_local1:AddButtonCallbackFunction( self, f1_arg0, Enum[@"luibutton"][@"lui_key_xbb_pscircle"], nil, function ( element, menu, controller, model )
+		GoBack( self, controller )
+		ClearMenuSavedState( menu )
+		ForceNotifyGlobalModel( controller, "GametypeSettings.Update" )
+		return true
+	end, function ( element, menu, controller )
+		CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xbb_pscircle"], @"menu/back", nil, nil )
+		return true
+	end, false )
+	CommomCenteredPopup.buttons:setModel( self.buttonModel, f1_arg0 )
+	if CoD.isPC then
+		CommomCenteredPopup.id = "CommomCenteredPopup"
+	end
+	BotSettingsList.id = "BotSettingsList"
+	self:processEvent( {
+		name = "menu_loaded",
+		controller = f1_arg0
+	} )
+	self.__defaultFocus = BotSettingsList
+	if CoD.isPC and (IsKeyboard( f1_arg0 ) or self.ignoreCursor) then
+		self:restoreState( f1_arg0 )
+	end
+	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
+	if PostLoadFunc then
+		PostLoadFunc( self, f1_arg0 )
+	end
+
+	CoD.EnhPrintInfo("Called", "Shield's Bot Settings Menu")
+
+	return self
+end
+
+CoD.Shield_Bot_SettingsPopup.__resetProperties = function ( f13_arg0 )
+	f13_arg0.BotSettingsList:completeAnimation()
+	f13_arg0.BotSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT )
+end
+
+CoD.Shield_Bot_SettingsPopup.__clipsPerState = {
+	DefaultState = {
+		DefaultClip = function ( f14_arg0, f14_arg1 )
+			f14_arg0:__resetProperties()
+			f14_arg0:setupElementClipCounter( 0 )
+		end
+	},
+	KBM = {
+		DefaultClip = function ( f15_arg0, f15_arg1 )
+			f15_arg0:__resetProperties()
+			f15_arg0:setupElementClipCounter( 1 )
+			f15_arg0.BotSettingsList:completeAnimation()
+			f15_arg0.BotSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT_KBM )
+			f15_arg0.clipFinished( f15_arg0.BotSettingsList )
+		end
+	}
+}
+
+CoD.Shield_Bot_SettingsPopup.__onClose = function ( f16_arg0 )
+	f16_arg0.SettingDescription:close()
+	f16_arg0.CommomCenteredPopup:close()
+	f16_arg0.BotSettingsList:close()
 end

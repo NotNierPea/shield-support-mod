@@ -408,7 +408,7 @@ CoD.MapVote.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_arg
 	self:addElement( MapVoteItemNext )
 	self.MapVoteItemNext = MapVoteItemNext
 	
-	LobbyStatus = LUI.UIText.new( 0, 0, 5, 384, 0, 0, 12, 32 )
+	local LobbyStatus = LUI.UIText.new( 0, 0, 5, 384, 0, 0, 12, 32 )
 	LobbyStatus:setRGB( 0.63, 0.62, 0.61 )
 	LobbyStatus:setTTF( "ttmussels_regular" )
 	LobbyStatus:setLetterSpacing( 6 )
@@ -1402,7 +1402,7 @@ CoD.MapVoteZM.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_a
 	self:addElement( MapVoteItemNextZM )
 	self.MapVoteItemNextZM = MapVoteItemNextZM
 	
-	LobbyStatus = LUI.UIText.new( 0, 0, 5, 384, 0, 0, 12, 32 )
+	local LobbyStatus = LUI.UIText.new( 0, 0, 5, 384, 0, 0, 12, 32 )
 	LobbyStatus:setRGB( 0.63, 0.62, 0.61 )
 	LobbyStatus:setTTF( "ttmussels_regular" )
 	LobbyStatus:setLetterSpacing( 6 )
@@ -2186,6 +2186,11 @@ CoD.FooterButton_PartyCount.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3,
 
 		Dvar[@"shield_rpc_lobby_clients"]:set(ClientsCount)
 		Dvar[@"shield_rpc_lobby_clients_max"]:set(MaxClients)
+
+		-- the lobby menu the game is in, by its name: the client tells the master server from it whether
+		-- the lobby is one of matchmaking, which anyone joins at once, or a private match, which is asked first
+		local LobbyMenu = LobbyData.GetCurrentMenuTarget()
+		Engine[@"setdvar"]( "shield_rpc_lobby_menu", LobbyMenu and LobbyMenu[@"name"] or "" )
 	end
 	
 	MatchmakingCount.__String_Reference()
@@ -2211,6 +2216,11 @@ CoD.FooterButton_PartyCount.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3,
 	f1_local7 = MatchmakingCount.subscribeToModel
 	f1_local8 = Engine[@"hash_78DF2E5447F384B9"]()
 	f1_local7( f1_local6, f1_local8["lobbyRoot.gameClient.update"], MatchmakingCount.__String_Reference )
+	-- and when the lobby menu changes: the name of the menu is told with the counts
+	f1_local6 = MatchmakingCount
+	f1_local7 = MatchmakingCount.subscribeToModel
+	f1_local8 = Engine[@"hash_78DF2E5447F384B9"]()
+	f1_local7( f1_local6, f1_local8["lobbyRoot.lobbyNav"], MatchmakingCount.__String_Reference )
 	self:mergeStateConditions( {
 		{
 			stateName = "Matchmaking",

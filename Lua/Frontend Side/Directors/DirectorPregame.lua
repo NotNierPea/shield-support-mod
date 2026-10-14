@@ -1013,8 +1013,9 @@ CoD.directorPregame.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4
 	    elseif not CoD.ModelUtility.IsGlobalModelValueGreaterThan( "lobbyRoot.lobbyTimeRemaining", 0 ) and IsLobbyHostOfCurrentMenu() and not IsZombies() then
 		    SetFocusToElement( self, "ShieldOfflineStartButton", controller ) 
 		    SetLoseFocusToElement( self, "SetUpMatchButton", controller ) 
-		    CoD.DirectorUtility.DirectorOpenOverlayWithCurrentMenuMode( menu, controller, "DirectorCustomGameSetUp" ) 
-		    PlaySoundAlias( "uin_toggle_generic" ) 
+		    CoD.DirectorUtility.DirectorOpenOverlayWithCurrentMenuMode( menu, controller, "DirectorCustomGameSetUp" )
+		    PlaySoundAlias( "uin_toggle_generic" )
+
 			Engine[@"setlobbymaxclients"](Enum[@"lobbytype"][@"lobby_type_game"], 12)
 			Engine[@"setlobbymaxclients"](Enum[@"lobbytype"][@"lobby_type_private"], 12)
 			Engine[@"setlobbymaxclients"](Engine[@"getprimarycontroller"](), 12)

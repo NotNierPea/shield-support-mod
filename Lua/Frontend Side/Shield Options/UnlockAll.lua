@@ -140,6 +140,11 @@ local function ShieldShouldUnlockItem_Dvar()
 	return Engine[@"getdvarint"]("allitemsunlocked") == 1
 end
 
+-- the loot is unlocked: by "unlock all", or by "unlock loot" alone. Outfits go by this, not by the camos.
+local function ShieldLootUnlocked()
+	return Engine[@"getdvarint"]("shield_unlock_all") == 1 or Engine[@"getdvarint"]("shield_unlock_loot") == 1
+end
+
 local function OnUnlockDataChange ( f137_arg0, f137_arg1, f137_arg2, f137_arg3, f137_arg4 )
 	local dvar_name = f137_arg3
 	local dvar_val = Engine[@"getdvarint"]( dvar_name )
@@ -230,7 +235,9 @@ local function ShieldCreateOutfits(f40_arg0, f40_arg1, f40_arg2, f40_arg3, f40_a
 		for f41_local15, f41_local16 in ipairs( f40_arg4.presets ) do
 			if f41_local16.isValid then
 				local f41_local4 = CoD.BlackMarketTableUtility.LootInfoLookup( f41_arg0, f41_local16.lootId )
-				f41_local4.owned = true
+				if ShieldLootUnlocked() then
+					f41_local4.owned = true
+				end
 				local f41_local5 = f41_local16.entitlement
 				if f41_local5 then
 					f41_local5 = f41_local16.entitlement ~= @"hash_0"
@@ -289,7 +296,7 @@ local function ShieldCreateOutfits(f40_arg0, f40_arg1, f40_arg2, f40_arg3, f40_a
 				if not f41_local14 then
 					f41_local14 = not f41_local4.isLoot
 				end
-				f41_local13.available = true
+				f41_local13.available = f41_local14 or ShieldLootUnlocked()
 				f41_local14 = f41_local4.owned
 				if not f41_local14 then
 					f41_local14 = not f41_local4.isLoot
@@ -302,7 +309,7 @@ local function ShieldCreateOutfits(f40_arg0, f40_arg1, f40_arg2, f40_arg3, f40_a
 						f41_local14 = f41_local4.disableWhenAvailable
 					end
 				end
-				f41_local13.disabled = false
+				f41_local13.disabled = ( f41_local14 and not ShieldLootUnlocked() ) or false
 				f41_local13.skipDefaultTitle = f41_local4.isNotDefault
 				f41_local14 = f41_local4.hideRarity
 				if not f41_local14 then
@@ -350,15 +357,10 @@ local function ShieldCreateOutfits(f40_arg0, f40_arg1, f40_arg2, f40_arg3, f40_a
 					end
 				end
 				return f43_local0
-			else
-				local f43_local0
-				if f43_arg1.properties.entitlement ~= @"hash_0" then
-					f43_local0 = Engine[@"hasentitlement"]( f41_arg0, f43_arg1.properties.entitlement )
-				else
-					f43_local0 = true
-				end
+			elseif f43_arg1.properties.entitlement ~= nil and f43_arg1.properties.entitlement ~= @"hash_0" then
+				return ShieldLootUnlocked() or Engine[@"hasentitlement"]( f41_arg0, f43_arg1.properties.entitlement )
 			end
-			return f43_local0
+			return true
 		end ) do
 			table.insert( f41_local1, f41_local6 )
 		end
@@ -367,8 +369,93 @@ local function ShieldCreateOutfits(f40_arg0, f40_arg1, f40_arg2, f40_arg3, f40_a
 	return f40_local0
 end
 
+--[[
+	An outfit is a loot item, or it is given by an entitlement: something the player owns outside the game, as
+	"The Numbers" of every specialist is. The unlock of the client gives the loot, not the entitlements. The game
+	looks over the equipped outfits whenever the lobby changes, and puts back to the default one any whose
+	preset it does not take for owned: an unlocked outfit of an entitlement went that way a while after it was
+	put on. With the unlock on, a preset is owned.
+]]
+local function ShieldOwnPresets()
+	-- the game's own, kept once: this runs again whenever the overrides are put back
+	if CoD.PlayerRoleUtility.ShieldGameIsPresetOwned == nil then
+		CoD.PlayerRoleUtility.ShieldGameIsPresetOwned = CoD.PlayerRoleUtility.IsPresetOwned
+	end
+
+	CoD.PlayerRoleUtility.IsPresetOwned = function ( controller, preset )
+		if ShieldLootUnlocked() then
+			return true
+		end
+		return CoD.PlayerRoleUtility.ShieldGameIsPresetOwned( controller, preset )
+	end
+
+	--[[
+		That same look over the equipped asks the inventory itself for what a zombies character wears, a
+		warpaint as well, and takes off what the account does not own: what Unlock All let be picked was
+		gone at the next change of lobby. With the unlock on, nothing is taken off.
+	]]
+	if CoD.PlayerRoleUtility.ShieldGameCheckEquipped == nil then
+		CoD.PlayerRoleUtility.ShieldGameCheckEquipped = CoD.PlayerRoleUtility[@"hash_12B307D12327547E"]
+	end
+
+	CoD.PlayerRoleUtility[@"hash_12B307D12327547E"] = function ( controller )
+		if ShieldLootUnlocked() then
+			return
+		end
+		return CoD.PlayerRoleUtility.ShieldGameCheckEquipped( controller )
+	end
+end
+
+ShieldOwnPresets()
+
+--[[
+	The game marks what is new among the items of a character, and counts the marks of each set when the
+	menus are made: only for a character the account has unlocked. When a marked item loses focus the
+	mark is taken off and the count of its set lowered. For a character with no counts, a Tag der Toten
+	one with warpaints on an account that never unlocked it, that was a Lua error at every warpaint. The
+	count about to be lowered is made here when it is missing.
+]]
+local function ShieldOutfitMarkCounts()
+	if CoD.BreadcrumbUtility == nil or CoD.BreadcrumbUtility.SetSpecialistOutfitItemAsOld == nil then
+		return
+	end
+
+	if CoD.BreadcrumbUtility.ShieldGameSetOutfitItemAsOld == nil then
+		CoD.BreadcrumbUtility.ShieldGameSetOutfitItemAsOld = CoD.BreadcrumbUtility.SetSpecialistOutfitItemAsOld
+	end
+
+	CoD.BreadcrumbUtility.SetSpecialistOutfitItemAsOld = function ( menu, element, controller )
+		local model = element:getModel()
+		local characterIndex = CoD.SafeGetModelValue( menu:getModel(), "characterIndex" )
+
+		if characterIndex and model and model.outfitIndex then
+			local mode = Engine[@"currentsessionmode"]()
+			local outfitIndex = model.outfitIndex:get()
+			local counted = { DataSources.SpecialistOutfitBreadcrumbs.getBreadcrumbModelForThemePreset( controller, mode, characterIndex, outfitIndex ) }
+
+			if model.itemType then
+				table.insert( counted, DataSources.SpecialistOutfitBreadcrumbs.getBreadcrumbModelForThemeItemType( controller, mode, characterIndex, outfitIndex, model.itemType:get() ) )
+			end
+
+			for _, set in ipairs( counted ) do
+				if not set.breadcrumbCount then
+					local count = set:create( "breadcrumbCount" )
+					count:set( 0 )
+				end
+			end
+		end
+
+		return CoD.BreadcrumbUtility.ShieldGameSetOutfitItemAsOld( menu, element, controller )
+	end
+end
+
+ShieldOutfitMarkCounts()
+
 -- Reactives and Calling Card Fixes
 CoD.UnlockReload = function()
+	ShieldOwnPresets()
+	ShieldOutfitMarkCounts()
+
 	-- Outfits Theme Unlocking, even some unused ones
 	DataSources.MPSpecialistThemes = DataSourceHelpers.ListSetup( "MPSpecialistThemes", function ( f56_arg0, f56_arg1 )
 		local f56_local0 = f56_arg1.menu:getModel()
@@ -408,7 +495,7 @@ CoD.UnlockReload = function()
 							category = @"hash_54106C155ACE8F96",
 							rarity = f56_local14,
 							available = true,
-							disabled = false,
+							disabled = f56_local15,
 							hideRarity = f56_local14 == Enum[@"lootraritytype"][@"loot_rarity_type_count"],
 							unlockInfo = f56_local6.getUnlockInfo( f56_local17 ),
 							alertMessage = f56_local6.getAlertMessage( f56_local17 ),
@@ -1470,11 +1557,13 @@ LUI.createMenu.Shield_Unlocks_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	self.anyChildUsesUpdateState = true
 	f1_local1:addElementToPendingUpdateStateList( self )
 	
-	local CommomCenteredPopup = CoD.CommonCenteredPopup.new( f1_local1, f1_arg0, 0, 1, 0, 0, 0, 1, 0, 0 )
-	CommomCenteredPopup.TitleText:setText("Unlock All Settings")
-	CommomCenteredPopup.HeaderBackground:setAlpha( 0 )
-	CommomCenteredPopup.HeaderTopBar:setAlpha( 0 )
-	CommomCenteredPopup.HeaderBottomBar:setAlpha( 0 )
+	-- the card of the settings menus, see ShieldOptions.lua
+	local CommomCenteredPopup = CoD.ShieldSettingsFrame.new( f1_local1, f1_arg0, {
+		title = "Unlock All",
+		caption = "WHAT IS UNLOCKED FOR YOU",
+		color = { r = 1, g = 0.8, b = 0.25 },
+		rows = 6
+	} )
 	self:addElement( CommomCenteredPopup )
 	self.CommomCenteredPopup = CommomCenteredPopup
 	
@@ -1489,13 +1578,12 @@ LUI.createMenu.Shield_Unlocks_SettingsPopup = function ( f1_arg0, f1_arg1 )
 		UnlockSettingsList:setRGB(0, 1, 0)
 	end
 
-	UnlockSettingsList:setLeftRight( 0.5, 0.5, -250, 250 )
-	UnlockSettingsList:setTopBottom( 0.50, 0.50, -240 + 30, -180 + 30 )
+	UnlockSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT )
+	UnlockSettingsList:setTopBottom( 0.5, 0.5, CommomCenteredPopup.listTop, CommomCenteredPopup.listTop + CommomCenteredPopup.listHeight )
 	--UnlockSettingsList:setScale(0.90, 0.90)
 	--UnlockSettingsList:setAutoScaleContent( true )
-	UnlockSettingsList:setVerticalCount(9) -- fix
+	UnlockSettingsList:setVerticalCount( 6 )
 	UnlockSettingsList:setHorizontalCount(1)
-	UnlockSettingsList:setSpacing(10) -- spacing needed..
 	UnlockSettingsList:setWidgetType( CoD.CustomGames_SettingSliderNoCustom )
 	UnlockSettingsList:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
 	UnlockSettingsList:setDataSource( "ShieldUnlockData" )
@@ -1505,14 +1593,9 @@ LUI.createMenu.Shield_Unlocks_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	UnlockSettingsList.id = "UnlockSettingsList"
 
 	-- desc
-	local UnlockSettingDescription = LUI.UIText.new( 0.5, 0.5, -300, 250, 0.65, 0.65, 150, 180 )
+	local UnlockSettingDescription = LUI.UIText.new( 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, 0.5, 0.5, CommomCenteredPopup.descTop, CommomCenteredPopup.descTop + 21 )
 	UnlockSettingDescription:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	UnlockSettingDescription:setTTF("notosans_bold")
-	UnlockSettingDescription:setBackingType( 2 )
-	UnlockSettingDescription:setBackingColor( 0.04, 0.81, 1 )
-	UnlockSettingDescription:setBackingAlpha( 0.01 )
-	UnlockSettingDescription:setBackingXPadding( 12 )
-	UnlockSettingDescription:setBackingYPadding( 6 )
+	UnlockSettingDescription:setTTF( "notosans_regular" )
 	UnlockSettingDescription:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
 	UnlockSettingDescription:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
 	self:addElement( UnlockSettingDescription )
@@ -1623,8 +1706,8 @@ end
 CoD.Shield_Unlocks_SettingsPopup.__resetProperties = function ( f13_arg0 )
 	f13_arg0.UnlockSettingsList:completeAnimation()
 	f13_arg0.UnlockSettingDescription:completeAnimation()
-	f13_arg0.UnlockSettingsList:setLeftRight( 0.5, 0.5, -250, 250 )
-	f13_arg0.UnlockSettingDescription:setLeftRight( 0.5, 0.5, -250, 250 )
+	f13_arg0.UnlockSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT )
+	f13_arg0.UnlockSettingDescription:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT )
 end
 
 CoD.Shield_Unlocks_SettingsPopup.__clipsPerState = {
@@ -1639,10 +1722,10 @@ CoD.Shield_Unlocks_SettingsPopup.__clipsPerState = {
 			f15_arg0:__resetProperties()
 			f15_arg0:setupElementClipCounter( 2 )
 			f15_arg0.UnlockSettingsList:completeAnimation()
-			f15_arg0.UnlockSettingsList:setLeftRight( 0.5, 0.5, -290, 290 )
+			f15_arg0.UnlockSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT_KBM )
 			f15_arg0.clipFinished( f15_arg0.UnlockSettingsList )
 			f15_arg0.UnlockSettingDescription:completeAnimation()
-			f15_arg0.UnlockSettingDescription:setLeftRight( 0.5, 0.5, -290, 290 )
+			f15_arg0.UnlockSettingDescription:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT )
 			f15_arg0.clipFinished( f15_arg0.UnlockSettingDescription )
 		end
 	}

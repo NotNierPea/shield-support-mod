@@ -310,6 +310,91 @@ CoD.EnhPrintInfo = function(PrintInfo, DebugName)
 	end
 end
 
+---------------------------
+
+--[[
+	A subscription to a UI model made with no function (subscribeToModel( model, nil ), also through
+	linkToElementModel and subscribeToGlobalModel, which end there) is called with the rest when the model changes:
+	"Attempt to call a nil value" with no stack, UI error 74046. The engine calls them (sub_143AD1010), so nothing
+	tells which. Here such a subscription gets a function that does nothing, and the log says who made it.
+]]
+local function ElementPath( element )
+	local path = {}
+	local current = element
+
+	while current ~= nil and #path < 8 do
+		table.insert( path, 1, tostring( current.id ) )
+		current = current.getParent and current:getParent() or nil
+	end
+
+	return table.concat( path, " > " )
+end
+
+--[[
+	Who made each subscription, by its number, for the client to ask when one has lost its function (lua.cpp,
+	find_dead_subscriptions): the functions of subscriptions are held weakly, and are collected with an element
+	that was dropped without being closed. What the element was called is kept as words, and the element weakly,
+	to say where it is if it is still there.
+	The engine gives some classes of LUI their own subscribeToModel (a list has its own, not the one of
+	LUI.UIElement): each class of LUI with one of its own gets the guard, with its own as the one it calls.
+]]
+local SubscriptionOwners = {}
+local SubscriptionElements = setmetatable( {}, { __mode = "v" } )
+
+CoD.ShieldDeadSubscription = function ( id )
+	local element = SubscriptionElements[id]
+	CoD.EnhPrintInfo( "subscription " .. tostring( id ) .. " made by " .. tostring( SubscriptionOwners[id] ) .. ", the element is " ..
+		( element ~= nil and "still at " .. ElementPath( element ) or "gone" ), "Model subscription" )
+end
+
+-- the guards made, so a class that takes its function from a guarded one is not guarded twice
+local SubscriptionGuards = setmetatable( {}, { __mode = "k" } )
+
+local function GuardSubscriptions( class, className )
+	local subscribe = class.subscribeToModel
+
+	if type( subscribe ) ~= "function" or SubscriptionGuards[subscribe] then
+		return false
+	end
+
+	local guard = function ( self, model, callback, ... )
+		if callback == nil then
+			CoD.EnhPrintInfo( "no function, by " .. ElementPath( self ), "Model subscription" )
+			callback = function () end
+		end
+
+		local id = subscribe( self, model, callback, ... )
+
+		if id ~= nil then
+			SubscriptionOwners[id] = ElementPath( self ) .. " (" .. className .. ")"
+			SubscriptionElements[id] = self
+		end
+
+		return id
+	end
+
+	SubscriptionGuards[guard] = true
+	class.subscribeToModel = guard
+	return true
+end
+
+if LUI then
+	local guarded = {}
+
+	-- the base first, so the classes that inherit its function are seen as guarded
+	if type( LUI.UIElement ) == "table" and GuardSubscriptions( LUI.UIElement, "UIElement" ) then
+		table.insert( guarded, "UIElement" )
+	end
+
+	for name, class in pairs( LUI ) do
+		if type( class ) == "table" and type( name ) == "string" and GuardSubscriptions( class, name ) then
+			table.insert( guarded, name )
+		end
+	end
+
+	CoD.EnhPrintInfo( "subscriptions of " .. ( #guarded > 0 and table.concat( guarded, ", " ) or "no class" ) .. " are guarded", "Model subscription" )
+end
+
 CoD.GetErrorText = function(controller)
 	local errortext = Engine[@"getmodelvalue"]( Engine[@"getmodel"]( DataSources.MessageDialog.getModel(controller), "message" ) )
 	if errortext ~= nil then

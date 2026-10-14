@@ -152,19 +152,21 @@ LUI.createMenu.Shield_WaterMark_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	self.anyChildUsesUpdateState = true
 	f1_local1:addElementToPendingUpdateStateList( self )
 	
-	local CommomCenteredPopup = CoD.CommonCenteredPopup.new( f1_local1, f1_arg0, 0, 1, 0, 0, 0, 1, 0, 0 )
-	CommomCenteredPopup.TitleText:setText("Watermark Settings")
-	CommomCenteredPopup.HeaderBackground:setAlpha( 0 )
-	CommomCenteredPopup.HeaderTopBar:setAlpha( 0 )
-	CommomCenteredPopup.HeaderBottomBar:setAlpha( 0 )
+	-- the card of the settings menus, see ShieldOptions.lua
+	local CommomCenteredPopup = CoD.ShieldSettingsFrame.new( f1_local1, f1_arg0, {
+		title = "Watermark",
+		caption = "WHAT THE WATERMARK SHOWS",
+		color = { r = 1, g = 0.38, b = 0.28 },
+		rows = 4
+	} )
 	self:addElement( CommomCenteredPopup )
 	self.CommomCenteredPopup = CommomCenteredPopup
 	
 	local WaterMarkSettingsList = LUI.UIList.new( f1_local1, f1_arg0, 3, 3, nil, false, false, false, false )
-	WaterMarkSettingsList:setLeftRight( 0.5, 0.5, -250, 250 )
-	WaterMarkSettingsList:setTopBottom( 0.55, 0.55, -380 + 30, -320 + 30 )
+	WaterMarkSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT )
+	WaterMarkSettingsList:setTopBottom( 0.5, 0.5, CommomCenteredPopup.listTop, CommomCenteredPopup.listTop + CommomCenteredPopup.listHeight )
 	WaterMarkSettingsList:setAutoScaleContent( true )
-	WaterMarkSettingsList:setVerticalCount(4) -- fix
+	WaterMarkSettingsList:setVerticalCount( 4 )
 	WaterMarkSettingsList:setHorizontalCount(1)
 	WaterMarkSettingsList:setWidgetType( CoD.CustomGames_SettingSliderNoCustom )
 	WaterMarkSettingsList:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
@@ -180,7 +182,7 @@ LUI.createMenu.Shield_WaterMark_SettingsPopup = function ( f1_arg0, f1_arg1 )
 		WaterMarkSettingsList:setRGB(0, 1, 0)
 	end
 	
-	local SettingDescription = LUI.UIText.new( 0.5, 0.5, -250, 250, 0.60, 0.60, -284 + 75, -263 + 75 )
+	local SettingDescription = LUI.UIText.new( 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, 0.5, 0.5, CommomCenteredPopup.descTop, CommomCenteredPopup.descTop + 21 )
 	SettingDescription:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
 	SettingDescription:setTTF( "notosans_regular" )
 	SettingDescription:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
@@ -291,8 +293,8 @@ end
 CoD.Shield_WaterMark_SettingsPopup.__resetProperties = function ( f13_arg0 )
 	f13_arg0.WaterMarkSettingsList:completeAnimation()
 	f13_arg0.SettingDescription:completeAnimation()
-	f13_arg0.WaterMarkSettingsList:setLeftRight( 0.5, 0.5, -250, 250 )
-	f13_arg0.SettingDescription:setLeftRight( 0.5, 0.5, -250, 250 )
+	f13_arg0.WaterMarkSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT )
+	f13_arg0.SettingDescription:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT )
 end
 
 CoD.Shield_WaterMark_SettingsPopup.__clipsPerState = {
@@ -307,10 +309,10 @@ CoD.Shield_WaterMark_SettingsPopup.__clipsPerState = {
 			f15_arg0:__resetProperties()
 			f15_arg0:setupElementClipCounter( 2 )
 			f15_arg0.WaterMarkSettingsList:completeAnimation()
-			f15_arg0.WaterMarkSettingsList:setLeftRight( 0.5, 0.5, -290, 290 )
+			f15_arg0.WaterMarkSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT_KBM )
 			f15_arg0.clipFinished( f15_arg0.WaterMarkSettingsList )
 			f15_arg0.SettingDescription:completeAnimation()
-			f15_arg0.SettingDescription:setLeftRight( 0.5, 0.5, -290, 290 )
+			f15_arg0.SettingDescription:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT )
 			f15_arg0.clipFinished( f15_arg0.SettingDescription )
 		end
 	}

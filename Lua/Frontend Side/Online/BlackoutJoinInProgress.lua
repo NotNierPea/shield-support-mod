@@ -63,30 +63,42 @@ elseif type( Lobby.PartyPrivacy ) == "table" and type( Lobby.PartyPrivacy.GetGam
 	-- the rule is there already: wrapped now
 	Lobby.PartyPrivacy.GetGameLobbyPartyPrivacy = WrapRule( Lobby.PartyPrivacy.GetGameLobbyPartyPrivacy )
 	Note( "the rule is wrapped" )
-elseif type( setmetatable ) ~= "function" or type( getmetatable ) ~= "function" or type( rawset ) ~= "function" or getmetatable( Lobby ) ~= nil then
+elseif type( setmetatable ) ~= "function" or type( getmetatable ) ~= "function" or type( rawset ) ~= "function" then
 	Note( "the rule can't be waited for here, nothing done" )
 else
-	-- the game makes Lobby.PartyPrivacy next, then puts the rule in it
-	setmetatable( Lobby, {
-		__newindex = function ( lobby, key, value )
+	-- The game makes Lobby.PartyPrivacy next, then puts the rule in it. Another file of the mod may watch Lobby too
+	-- (HostTeamSwitch.lua): its watch is kept and called, and whichever is done first leaves the other to go on alone.
+	local other = getmetatable( Lobby )
+	local otherSet = other and other.__newindex
+	local watch = {}
+
+	watch.__newindex = function ( lobby, key, value )
+		if type( otherSet ) == "function" then
+			otherSet( lobby, key, value )
+		else
 			rawset( lobby, key, value )
-
-			if key == "PartyPrivacy" and type( value ) == "table" then
-				setmetatable( lobby, nil )
-				setmetatable( value, {
-					__newindex = function ( privacy, name, func )
-						if name == "GetGameLobbyPartyPrivacy" and type( func ) == "function" then
-							rawset( privacy, name, WrapRule( func ) )
-							setmetatable( privacy, nil )
-							Note( "the rule is wrapped" )
-						else
-							rawset( privacy, name, func )
-						end
-					end
-				} )
-			end
 		end
-	} )
 
+		if key == "PartyPrivacy" and type( value ) == "table" then
+			setmetatable( lobby, otherSet and other or nil )
+			setmetatable( value, {
+				__newindex = function ( privacy, name, func )
+					if name == "GetGameLobbyPartyPrivacy" and type( func ) == "function" then
+						rawset( privacy, name, WrapRule( func ) )
+						setmetatable( privacy, nil )
+						Note( "the rule is wrapped" )
+					else
+						rawset( privacy, name, func )
+					end
+				end
+			} )
+		elseif getmetatable( lobby ) ~= watch then
+			-- the other watch is done: this one goes on alone
+			otherSet = nil
+			setmetatable( lobby, watch )
+		end
+	end
+
+	setmetatable( Lobby, watch )
 	Note( "waiting for the rule" )
 end
