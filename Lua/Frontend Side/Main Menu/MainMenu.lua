@@ -47,6 +47,9 @@ local function ShieldMasterText()
 		portText = "^1CLOSED"
 	elseif port == 2 then
 		portText = "^2OPEN"
+	elseif port == 3 then
+		-- closed, players join through the relay of the master server
+		portText = "^3CLOSED ^7(^2RELAY^7)"
 	end
 
 	return text .. "^7 | PORT " .. ( ShieldMasterModel( "portNumber" ):get() or 0 ) .. " " .. portText
