@@ -35,7 +35,8 @@ local function Enh_GetEditModeActionsShield( f53_arg0, f53_arg1 )
 		widgetType = "slider",
 		perControllerValueModel = "max_clients_com_shield",
 		lowValue = 0,
-		highValue = 127
+		-- the engine has a team for 126 players at most: a mode without teams gives each its own
+		highValue = 126
 	}
 	local f53_local6 = Engine[@"getmodelforcontroller"]( f53_arg0 )
 	f53_local5.currentValue = 0
