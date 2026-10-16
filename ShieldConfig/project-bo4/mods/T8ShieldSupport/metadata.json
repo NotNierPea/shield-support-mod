@@ -434,6 +434,14 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/MovementSettings",
+            "path": "Lua\\Frontend\\MovementSettings.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/RemovePopUps",
             "path": "Lua\\Frontend\\RemovePopUps.luac",
             "hooks_post": [
@@ -834,12 +842,92 @@
         {
             "type": "localizeentry",
             "name": "shield/alt_movement",
-            "value": "Omni Movement Mode"
+            "value": "Movement Patches"
         },
         {
             "type": "localizeentry",
             "name": "shield/alt_movement_desc",
-            "value": "Enables Alternative Movement Mechanics (Like omni movement, infinite sliding, etc, requires restart and will make the gsc/csc checksum always red!)"
+            "value": "Turns on the movement changes below. Needs a restart, and makes the GSC/CSC checksum always show red. The changes below apply at once while this is on."
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_omni",
+            "value": "Omni Movement"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_omni_desc",
+            "value": "Sprint in any direction you move, not only forward."
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_strafe",
+            "value": "Sideways Sprint Speed"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_strafe_desc",
+            "value": "How fast you sprint sideways and backwards with Omni Movement, as a share of the forward sprint. The original game's is 67%."
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_jump_cooldown",
+            "value": "Jump Cooldown"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_jump_cooldown_desc",
+            "value": "How soon after a jump you can jump again. The original game waits half a second."
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_sprint_ramp",
+            "value": "Sprint Jump Build-up"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_sprint_ramp_desc",
+            "value": "How long you sprint before a jump gets the full boost of the sprint. The original game takes one and a half seconds."
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_instant_slide",
+            "value": "Instant Slide"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_instant_slide_desc",
+            "value": "Slides start at once, without the original game's check before a slide."
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_jump_slowdown",
+            "value": "No Jump Slowdown"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_jump_slowdown_desc",
+            "value": "Jumps keep your speed, instead of the original game slowing you down after each one."
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_landing_friction",
+            "value": "No Landing Friction"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_landing_friction_desc",
+            "value": "Less friction right after you land from a jump."
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_slide_chaining",
+            "value": "Slide Chaining"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/mv_slide_chaining_desc",
+            "value": "Slides in a row keep their speed, with or without the PHD Flopper perk, instead of each one being slower."
         },
         {
             "type": "localizeentry",

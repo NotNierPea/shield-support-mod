@@ -18,7 +18,7 @@ Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_director_blu
 Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_diff_rounds lua diff_rounds uint64_t 0")
 Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_performance_frontend lua performance_frontend uint64_t 0")
 Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_show_scripts gsc show_script_usages bool false")
-Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_alt_movement game alt_movement bool false")
+-- the movement setting has its own menu now, MovementSettings.lua
 
 --Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_checksum gsc show_checksum bool false")
 --Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_slide game slide_movement uint64_t 10")
@@ -60,10 +60,6 @@ local function OnExtraDataChange ( f137_arg0, f137_arg1, f137_arg2, f137_arg3, f
 
 	if dvar_name == "shield_show_scripts" then	
 		Engine[@"exec"](Engine[@"getprimarycontroller"](), "writejson gsc show_script_usages " .. dvar_val_new .. " bool")
-	end
-
-	if dvar_name == "shield_alt_movement" then	
-		Engine[@"exec"](Engine[@"getprimarycontroller"](), "writejson game alt_movement " .. dvar_val_new .. " bool")
 	end
 
 	if dvar_name == "shield_performance_frontend" then	
@@ -242,18 +238,6 @@ DataSources.OptionalSettingsData = DataSourceHelpers.ListSetup( "OptionalSetting
 	}, nil, OnExtraDataChange ) )
 
 	table.insert( Settings, CoD.OptionsUtility.CreateDvarSettings( f138_arg0, @"shield/show_script", @"shield/show_script_desc", "shield_show_scripts", "shield_show_scripts", {
-		{
-			option = Engine[@"hash_4F9F1239CFD921FE"]( @"menu/off" ),
-			value = 0,
-			default = true
-		},
-		{
-			option = Engine[@"hash_4F9F1239CFD921FE"]( @"menu/on" ),
-			value = 1
-		}
-	}, nil, OnExtraDataChange ) )
-
-	table.insert( Settings, CoD.OptionsUtility.CreateDvarSettings( f138_arg0, @"shield/alt_movement", @"shield/alt_movement_desc", "shield_alt_movement", "shield_alt_movement", {
 		{
 			option = Engine[@"hash_4F9F1239CFD921FE"]( @"menu/off" ),
 			value = 0,

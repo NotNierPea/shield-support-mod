@@ -284,7 +284,8 @@ local SettingsMenus = {
 	{ id = "UnlockSettings", label = "UNLOCK ALL", menu = "Shield_Unlocks_SettingsPopup", about = "Everything, or only attachments, camos and cards, items, loot or class slots." },
 	{ id = "BotSettings", label = "BOTS", menu = "Shield_Bot_SettingsPopup", about = "How good the bots of multiplayer are: aim, reaction, awareness, headshots, objectives." },
 	{ id = "AimAssistSettings", label = "FOV & AIM ASSIST", menu = "Shield_AimAssist_SettingsPopup", about = "FOV scaling, and the lock-on and slowdown of aim assist." },
-	{ id = "MiscModsButton", label = "MISC SETTINGS", menu = "Shield_Misc_SettingsPopup", about = "Menu colours, Discord presence, bots, round counter, movement and more." },
+	{ id = "MovementSettings", label = "MOVEMENT", menu = "Shield_Movement_SettingsPopup", about = "Omni movement, sideways sprint speed, jump cooldown, slides." },
+	{ id = "MiscModsButton", label = "MISC SETTINGS", menu = "Shield_Misc_SettingsPopup", about = "Menu colours, Discord presence, bots, round counter and more." },
 	{ id = "WaterMarkSettings", label = "WATERMARK", menu = "Shield_WaterMark_SettingsPopup", about = "What the watermark shows: the Shield text, the mods, the checksum." },
 	{ id = "BlackMarketSettings", label = "BLACK MARKET", menu = "Shield_BlackMarket_SettingsPopup", about = "How cases and tiers are earned, the active season, what purchases cost." }
 }
