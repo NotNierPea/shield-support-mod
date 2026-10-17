@@ -130,17 +130,17 @@ local PatchNotes = {
 
 local InfoNotes = {
 	"You can find Mods in the Discord Server, or from Featured Mods in Main Menu",
-	"Voice Chat is not supported yet",
-	"Having NAT Type: Open, will fix some errors when joining lobbies",
+	"Having Port Opened, will make it easier to host lobbies",
 	"To open Console, Press '~'",
 	"To Unlock All, Press Shield Options on the far left",
 	"To View Client's Logs, you can find it in BO4's Files called 'project-bo4.log'"
 }
 
 local Credits = {
-	{ name = "peawhatever", role = "Lua and GSC of the support mod, some C++, and hosting the online server", image = @"peawhatever_cred" },
+	{ name = "peawhatever", role = "Lua and GSC of the support mod, some C++, and reworking the entire client", image = @"peawhatever_cred" },
 	{ name = "Wanted", role = "Hooks and patches in C++", image = @"wanted_cred" },
 	{ name = "ATE47", role = "GSC, CSC and Lua modding, and some custom assets", image = @"ate47_cred" },
+	--{ name = "WIZE", role = "For hosting the Online Servers", image = @"ui_icon_sticker_default_07" }, -- need to fix ui later
 	{ name = "Project-Bo4", role = "By Eagle: the base client in the public GitHub version, and some help", image = @"eagle_cred" }
 }
 

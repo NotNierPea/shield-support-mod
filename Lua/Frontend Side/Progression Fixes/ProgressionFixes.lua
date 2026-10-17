@@ -62,8 +62,9 @@ CoD.PrestigeUtility.FreshStartAction = function ( f18_arg0, f18_arg1, f18_arg2 )
 	CoD.EnhPrintInfo("Fresh Restart Done")
 end
 
+-- on without the live checks, but not in Blackout: stock never locks its armory weapons by progression
 CoD.CACUtility.IsProgressionEnabled = function ( f218_arg0 )
-	return true
+	return f218_arg0 == Enum[@"emodes"][@"mode_multiplayer"] or f218_arg0 == Enum[@"emodes"][@"mode_zombies"]
 end
 
 CoD.CACUtility.IsProgressionWithWarzoneEnabled = function ( f219_arg0 )

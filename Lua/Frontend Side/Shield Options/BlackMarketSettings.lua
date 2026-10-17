@@ -38,7 +38,11 @@ local BlackMarketSettings = {
 	{
 		dvar = "shield_bm_season", key = "season_active", type = "int32_t", default = 8,
 		name = @"shield/bm_season", desc = @"shield/bm_season_desc",
-		choices = { { "Season 2", 2 }, { "Season 3", 3 }, { "Season 4", 4 }, { "Season 5", 5 }, { "Season 6", 6 }, { "Season 7", 7 }, { "Season 8", 8 } }
+		-- 5 and 7 are the second streams of Spectre Rising and Apocalypse Z
+		choices = {
+			{ "First Strike", 1 }, { "Absolute Zero", 2 }, { "Grand Heist", 3 }, { "Spectre Rising", 4 },
+			{ "Spectre Rising II", 5 }, { "Apocalypse Z", 6 }, { "Apocalypse Z II", 7 }, { "Dark Divide", 8 }
+		}
 	},
 	{
 		dvar = "shield_bm_season_rewards", key = "season_grants_rewards", type = "bool", default = 1,

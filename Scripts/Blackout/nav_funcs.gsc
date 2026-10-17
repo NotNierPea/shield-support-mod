@@ -420,7 +420,7 @@ WaterOrOutOfMapRescueLoop()
 
         inWater = IsActuallySwimmingOrWater(self);
         nav = getclosestpointonnavmesh(pos, 256, 16);
-        noNav = !isDefined(nav);
+        noNav = !isDefined(nav) && !IsSparseNavMap();
 
         if (inWater)
         {
@@ -534,7 +534,11 @@ IsLandPlayable(pos)
 
     nav = getclosestpointonnavmesh(pos, 512, 24);
     if (!isDefined(nav))
-        return false;
+    {
+        if (!IsSparseNavMap())
+            return false;
+        nav = TerrainSnap(pos);
+    }
 
     gs = GroundSnap(nav);
     if (!isDefined(gs))
@@ -566,7 +570,12 @@ IsBadLandingPos(pos)
 
     nav = getclosestpointonnavmesh(pos, 384, 24);
     if (!isDefined(nav))
-        return true;
+    {
+        // the big map has navmesh only around the zombie spots: open ground is fine there
+        if (!IsSparseNavMap())
+            return true;
+        nav = TerrainSnap(pos);
+    }
 
     gs = GroundSnap(nav);
     if (!isDefined(gs))
@@ -749,7 +758,7 @@ SpawnSanityRescueLoop()
         }
 
         nav = getclosestpointonnavmesh(self.origin, 256, 16);
-        noNav = !isDefined(nav);
+        noNav = !isDefined(nav) && !IsSparseNavMap();
 
         if (noNav)
         {
@@ -1329,7 +1338,45 @@ NavSnap(pos)
     if (isDefined(nav))
         return (nav[0], nav[1], nav[2] + 10);
 
+    if (IsSparseNavMap())
+        return TerrainSnap(pos);
+
     return GroundSnap(pos);
+}
+
+// maps where most of the ground has no navmesh, so goals there are steered to in a straight line
+IsSparseNavMap()
+{
+    if (!isDefined(level.bo_sparse_nav))
+    {
+        map = util::get_map_name();
+        level.bo_sparse_nav = (map == "wz_open_skyscrapers" || map == "wz_open_skyscrapers_alt");
+    }
+
+    return level.bo_sparse_nav;
+}
+
+/*
+    The ground under a point whose height is a guess (a circle middle, a point around a POI): from 3000
+    above, as from just over it the trace starts inside a hill and finds nothing. That can land on a roof,
+    which matters little for a straight walk across open ground.
+*/
+TerrainSnap(pos)
+{
+    if (!isDefined(pos))
+        return undefined;
+
+    start = (pos[0], pos[1], pos[2] + 3000);
+    end = (pos[0], pos[1], pos[2] - 20000);
+
+    tr = bullettrace(start, end, 0, self);
+    if (isDefined(tr) && isDefined(tr["position"]) && isDefined(tr["fraction"]) && tr["fraction"] < 0.999)
+    {
+        hit = tr["position"];
+        return (hit[0], hit[1], hit[2] + 10);
+    }
+
+    return undefined;
 }
 
 // the navmesh near a point, searched further than NavSnap does
