@@ -260,13 +260,13 @@ end
 ---------------------------
 
 --[[
-	The body, 1744 by 770, in the middle of the screen from 140 down.
+	The body, 1744 by 890, in the middle of the screen from 112 down.
 	Left, 860 wide: the profile, the rank and prestige, the size of the lobby.
 	Right, from 884: the settings, each a button that opens its own menu, and the mods.
 	Everything is placed by its place in the body.
 ]]
 local BODY_LEFT = -872
-local BODY_TOP = 140
+local BODY_TOP = 112
 local COLUMN_WIDTH = 860
 local RIGHT_COLUMN = 884
 local CARD_PADDING = 28
@@ -275,20 +275,22 @@ local BUTTON_HEIGHT = 50
 
 -- the cards, by their top and bottom. The two of each column end and start on the same lines, 24 apart.
 local PROFILE_CARD = { 0, 210 }
-local RANK_CARD = { 234, 536 }
-local LOBBY_CARD = { 560, 770 }
-local SETTINGS_CARD = { 0, 536 }
-local MODS_CARD = { 560, 770 }
+local RANK_CARD = { 234, 666 }
+local LOBBY_CARD = { 690, 890 }
+local SETTINGS_CARD = { 0, 666 }
+local MODS_CARD = { 690, 890 }
 
 -- the settings: what the button says, the menu it opens, and what is in there
 local SettingsMenus = {
 	{ id = "UnlockSettings", label = "UNLOCK ALL", menu = "Shield_Unlocks_SettingsPopup", about = "Everything, or only attachments, camos and cards, items, loot or class slots." },
-	{ id = "BotSettings", label = "BOTS", menu = "Shield_Bot_SettingsPopup", about = "How good the bots of multiplayer are: aim, reaction, awareness, headshots, objectives." },
+	{ id = "BotSettings", label = "BOTS", menu = "Shield_Bot_SettingsPopup", about = "How good multiplayer bots are: aim, reaction, awareness, headshots, objectives." },
 	{ id = "AimAssistSettings", label = "FOV & AIM ASSIST", menu = "Shield_AimAssist_SettingsPopup", about = "FOV scaling, and the lock-on and slowdown of aim assist." },
 	{ id = "MovementSettings", label = "MOVEMENT", menu = "Shield_Movement_SettingsPopup", about = "Omni movement, sideways sprint speed, jump cooldown, slides." },
-	{ id = "MiscModsButton", label = "MISC SETTINGS", menu = "Shield_Misc_SettingsPopup", about = "Menu colours, Discord presence, bots, round counter and more." },
+	{ id = "BlackoutSettings", label = "BLACKOUT", menu = "Shield_Blackout_SettingsPopup", about = "Bots of Blackout, the map of the match, the UAV, and the game rules." },
+	{ id = "SavedRulesSettings", label = "SAVED RULES", menu = "Shield_Rules_SettingsPopup", about = "Save the rules of your custom game under a name, and load them later." },
 	{ id = "WaterMarkSettings", label = "WATERMARK", menu = "Shield_WaterMark_SettingsPopup", about = "What the watermark shows: the Shield text, the mods, the checksum." },
-	{ id = "BlackMarketSettings", label = "BLACK MARKET", menu = "Shield_BlackMarket_SettingsPopup", about = "How cases and tiers are earned, the active season, what purchases cost." }
+	{ id = "BlackMarketSettings", label = "BLACK MARKET", menu = "Shield_BlackMarket_SettingsPopup", about = "How cases and tiers are earned, the active season, what purchases cost." },
+	{ id = "MiscModsButton", label = "MISC SETTINGS", menu = "Shield_Misc_SettingsPopup", about = "Menu colours, Discord presence, bots, round counter and more." }
 }
 
 local CardColors = {
@@ -758,7 +760,7 @@ end
 	the prompts and "close". Places are from the middle of the screen, as those menus count.
 
 	options: title, caption, color { r, g, b }, rows (settings shown), spacing between two of them (3),
-	extra (buttons under the description). A menu reads listLeft, listTop, listHeight, rightLeft,
+	listHeight (instead of rows), rightCaption (over the description), extra (buttons under the description). A menu reads listLeft, listTop, listHeight, rightLeft,
 	rightRight, descTop and extraTop of the frame to place its own things.
 ]]
 local FRAME_HALF = 512
@@ -792,7 +794,7 @@ CoD.ShieldSettingsFrame.new = function ( menu, controller, options )
 	local spacing = options.spacing or 3
 	local extra = options.extra or 0
 
-	local listHeight = rows * FRAME_ROW + ( rows - 1 ) * spacing
+	local listHeight = options.listHeight or rows * FRAME_ROW + ( rows - 1 ) * spacing
 	-- the right side needs its room too: the description, and the buttons under it
 	local body = math.max( listHeight, 190 + extra * 62 )
 	local top = -math.floor( ( FRAME_HEADER + body + FRAME_FOOT ) / 2 )
@@ -866,7 +868,7 @@ CoD.ShieldSettingsFrame.new = function ( menu, controller, options )
 
 	-- between the settings and what they do
 	Box( FRAME_RIGHT - 18, FRAME_RIGHT - 17, top + FRAME_HEADER, top + FRAME_HEADER + body, 1, 1, 1, 0.1 )
-	Caption( self.rightLeft, self.rightRight, top + FRAME_HEADER, "WHAT IT DOES" )
+	Caption( self.rightLeft, self.rightRight, top + FRAME_HEADER, options.rightCaption or "WHAT IT DOES" )
 
 	-- the foot: the prompts of the menu, and "close" for a mouse
 	Box( self.listLeft, self.rightRight, top + FRAME_HEADER + body + 20, top + FRAME_HEADER + body + 21, 1, 1, 1, 0.1 )

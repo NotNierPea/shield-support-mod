@@ -267,7 +267,8 @@ AutoRespawnLoop()
             continue;
         }
 
-        if (self isinvehicle() || (isDefined(self.bo_insertion_active) && self.bo_insertion_active))
+        // in the plane or still high up: on the ground the jump-out buttons made it hop in place
+        if (self isinvehicle() || (isDefined(self.bo_insertion_active) && self.bo_insertion_active && GetDzToGroundSafe(self) > 300))
         {
             self disableweapons();
             self InsertionDisarmCombat();
@@ -278,7 +279,7 @@ AutoRespawnLoop()
             continue;
         }
 
-        if (IsLandedStable())
+        if (self isonground())
             self enableweapons();
     }
 }

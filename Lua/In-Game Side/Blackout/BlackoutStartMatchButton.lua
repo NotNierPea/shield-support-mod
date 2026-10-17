@@ -63,3 +63,28 @@ CoD.BlackoutStartButtonReload = function()
 		return bool_v
 	end
 end
+
+---------------------------
+
+--[[
+	The host leaving a public Blackout match after it ended (a win): QuitGame of the game sends the leave of a host
+	of a ranked game only while g_gameEnded is not 1, so after the end the button did nothing and the host waited
+	out the timer. It is sent then too, and the scripts of the mod end the match on it (MenuReponses.gsc).
+]]
+local SharedTable = type( CoDShared ) == "table" and CoDShared._originalTable or nil
+
+if SharedTable ~= nil and type( SharedTable.QuitGame ) == "function" and not SharedTable.ShieldHostQuitAfterEnd then
+	local QuitGame = SharedTable.QuitGame
+
+	SharedTable.QuitGame = function ( controller, unbalanced )
+		local result = QuitGame( controller, unbalanced )
+
+		if Engine[@"currentsessionmode"]() == Enum[@"emodes"][@"mode_warzone"] and Engine[@"getdvarint"]( "g_gameEnded" ) == 1 and CoDShared.IsHost() and CoDShared.IsRankedGame() then
+			Engine[@"sendmenuresponse"]( controller, "popup_leavegame", "endround", 0 )
+		end
+
+		return result
+	end
+
+	SharedTable.ShieldHostQuitAfterEnd = true
+end

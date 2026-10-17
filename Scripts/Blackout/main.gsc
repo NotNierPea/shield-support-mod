@@ -82,7 +82,7 @@ onPlayerSpawned()
         self setclientuivisibilityflag("g_compassShowEnemies", 1); // Infinite sensor dart
     
     map = util::get_map_name(); 
-    bots = getDvarInt(#"shield_wz_bots_num", 1);
+    bots = getDvarInt(#"shield_wz_bots_num", 0);
 
     if(Blackout()){
         if ( !self isTestClient() )
@@ -97,9 +97,7 @@ onPlayerSpawned()
 
         self InitBotDifficulty();
 
-        self notify("bo_brain_restart");
-        self endon("bo_brain_restart");
-
+        // Brain ends the brain of the last life itself
         self thread Brain();
     }
 }
@@ -154,28 +152,6 @@ AddBotsToGame(Amount)
 
     BotTeams = array(#"axis", #"allies");
 
-    BotNames = array(
-        "xXGhostXx","V1p3r","R0gu3","Reap3r_99","Sh4d0w",
-        "H4v0c","Str1k3r","Bulle7","Fr0stBite","V3n0mX",
-        "B1aze","Rapt0r_77","Hunt3rX","C0brA","Ph03n1x",
-        "DrakeXx","F4lc0n","St0rm99","Tit4n_21","Mav3rickX",
-        "Band1t_OG","Kn0x","N0vaX","Ra1der77","EchoX",
-        "SkullCr4sh","NightH4wk","ZeroCool","Bl4ck0ut","Sn1perWolf",
-        "IronCl4d","GhostUnit","R3dF0x","Cry0tic","VoidRunn3r",
-        "D34dSh0t","StormBr1ng3r","H3llR4z0r","ShadowSix","OmegaX",
-        "Vortex99","SilentF4ng","DarkR1der","NoMercyX","KillSw1tch",
-        "BlitzKr13g","GrimShot","IceV3in","RuinX","Spectr4",
-        "Deadlock","Phantomz","R3apX","BlackFang","ZeroSignal",
-        "SavageOne","NovaPulse","Skirmish","R0cketMan","HavocUnit",
-        "RazorEdge","KillZone","Crossh4ir","Ghosted","WarpDrive",
-        "T0xicRain","FrostByteX","ArcWarden","Shad0wByte","TitanRage",
-        "V1rtu0so","Cr1msonFox","DuskReaper","Gh0stM4sk","NeonR1ot",
-        "S1lentStorm","W1d0wM4ker","AshenWolf","M1dn1ghtOps","R3dC0m3t",
-        "NullVector","CipherX","R4venClaw","HyperNova","PulseR1der",
-        "SkullV0lt","Gr1mF4ng","N1ghtShift","M0d3rnW4r","D3lt4Viper",
-        "ClutchK1ng","QuickSc0pe","Sh0ckWav3","B1ackoutKid","F0xH0und",
-        "Z3r0Mercy","SpectralX","VantaRay","R1otM0de","LethalEcho"
-    );
 
     level.BotsInGame = array();
 
@@ -203,9 +179,9 @@ AddBotsToGame(Amount)
     for (i = 0; i < int(Amount); i++)
     {
         team = BotTeams[randomint(BotTeams.size)];
-        name = BotNames[randomint(BotNames.size)];
 
-        botEnt = addtestclient(name);
+        // the client gives bots their names
+        botEnt = addtestclient();
 
         if (isDefined(botEnt))
         {
@@ -247,7 +223,7 @@ WaitAndStartBrain()
 
     self thread AutoRespawnLoop();
 
-    self thread Brain();
+    // the brain is started by onPlayerSpawned, which runs on this spawn too
 }
 
 PregameSpreadNearAnchor(anchor, botIndex, botCount)
@@ -494,8 +470,13 @@ GiveInventoryItem(itemName, count)
     #endif
 }
 
-Brain()
+// resume: started again by ArmWatcher in the same life, without the threads of a new life
+Brain(resume)
 {
+    // one brain per bot: a new one ends the one before
+    self notify("bo_brain_restart");
+    self.bo_brain_beat = gettime();
+
     self endon("disconnect");
     level endon("game_ended");
     self endon("bo_brain_restart");
@@ -507,14 +488,26 @@ Brain()
         wait 0.10;
     }
 
+    // the stock bot code picks its own enemy and fires at it too: this brain does the fighting alone
+    self.ignoreall = 1;
+
+    // a burst ended by a brain restart can leave aim down sights held
+    self botreleasebutton(11);
+
     for (;;)
     {
         if (!isAlive(self) || !isDefined(self.origin)) self waittill("spawned_player");
 
         wait 0.05;
-        self thread LifeStartThreads();
-        self.bo_loot_given_life = false;
-        self.bo_armor_given_life = false;
+
+        if (!isDefined(resume) || !resume)
+        {
+            self thread LifeStartThreads();
+            self.bo_loot_given_life = false;
+            self.bo_armor_given_life = false;
+        }
+
+        resume = false;
 
         wait 0.05;
 
@@ -529,6 +522,10 @@ Brain()
         self.bo_roam_commit_until = 0;
         self.bo_sprint_until = 0;
         self.bo_gas_enter_time = undefined;
+        self.bo_gas_goal = undefined;
+        self.bo_enemy_goal = undefined;
+        self.bo_path_goal = undefined;
+        self.bo_path_fails = 0;
 
         self.bo_target = undefined;
         self.bo_target_next_recheck = 0;
@@ -542,8 +539,21 @@ Brain()
 
         for (;;)
         {
+            // for ArmWatcher: the brain is still going
+            self.bo_brain_beat = gettime();
+
             if (!HasGun() && randomint(100) < 25)
                 self EnsureArmedImmediate();
+
+            // before the drop: nothing, a crowd of bots firing in pregame drowned the sounds
+            if (IsPregame())
+            {
+                self clearentitytarget();
+                self.bo_target = undefined;
+                self botsetmovemagnitude(0.0);
+                wait 0.25;
+                continue;
+            }
 
             if (ShouldSuppressCombatNow())
             {
@@ -581,6 +591,10 @@ Brain()
                 }
 
                 best = PickBestThreatNow(7000);
+
+                // no player to fight: a zombie close by
+                if (!isDefined(best))
+                    best = self PickZombieThreat(2200);
 
                 if (isDefined(best))
                 {
@@ -644,25 +658,44 @@ Brain()
                 if (!isDefined(self.bo_gas_enter_time))
                     self.bo_gas_enter_time = gettime();
 
-                safeGoal = undefined;
-
-                poiGoal = self GetCurrentPOIObjective();
-                if (isDefined(poiGoal))
+                // the way out is searched again every 2.5 s or for a new circle, not on every pass
+                // a new circle: everyone looks again, spread over 1.5 s instead of all in one frame
+                if (isDefined(self.bo_gas_goal_circle) && self.bo_gas_goal_circle != CircleIndex())
                 {
-                    safeGoal = PickGoalNear(poiGoal, 900);
-                    safeGoal = FixBadSpawnLocation(safeGoal);
+                    self.bo_gas_goal_circle = CircleIndex();
+                    self.bo_gas_goal_until = gettime() + randomintRange(50, 1500);
+
+                    if (!isDefined(self.bo_gas_goal))
+                        self.bo_gas_goal_until = 0;
                 }
 
-                if (!isDefined(safeGoal))
-                    safeGoal = GetCircleSafeGoal();
+                if (!isDefined(self.bo_gas_goal_until) || gettime() > self.bo_gas_goal_until)
+                {
+                    self.bo_gas_goal_until = gettime() + 2500;
+                    self.bo_gas_goal_circle = CircleIndex();
+
+                    safeGoal = undefined;
+
+                    poiGoal = self GetCurrentPOIObjective();
+                    if (isDefined(poiGoal) && IsPosInsideCircle(poiGoal))
+                    {
+                        safeGoal = PickGoalNear(poiGoal, 900);
+                        safeGoal = FixBadSpawnLocation(safeGoal);
+                    }
+
+                    if (!isDefined(safeGoal))
+                        safeGoal = GetCircleSafeGoal();
+
+                    self.bo_gas_goal = safeGoal;
+                }
+
+                safeGoal = self.bo_gas_goal;
 
                 if (isDefined(safeGoal))
                 {
                     self clearentitytarget();
 
-                    self botsetmovepoint(safeGoal);
-                    self botsetmovemagnitude(1.0);
-                    UnstuckCheck(safeGoal);
+                    self BotMoveTo(safeGoal, true);
 
                     if (randomint(100) < 22) self ScanLook();
 
@@ -673,6 +706,20 @@ Brain()
             else
             {
                 self.bo_gas_enter_time = undefined;
+            }
+
+            // a downed teammate close by comes first, unless an enemy is in sight
+            if (gettime() >= self.bo_revive_next_time)
+            {
+                self.bo_revive_next_time = gettime() + 1000;
+
+                mate = self FindDownedTeammate();
+                if (isDefined(mate) && !(isDefined(enemy) && CanSeeTarget(enemy)))
+                {
+                    self DoReviveTeammate(mate);
+                    self.bo_revive_next_time = gettime() + 1500;
+                    continue;
+                }
             }
 
             if (isDefined(enemy) && isAlive(enemy) && isDefined(enemy.origin))
@@ -690,17 +737,36 @@ Brain()
                 if (diff == 2) nearDist = 780;
                 else if (diff == 3) nearDist = 650;
 
-                goal = PickGoalNear(enemy.origin, nearDist);
-                goal = NavSnap(goal);
+                // in sight and in range: hold the spot and shoot, walking spoiled the aim
+                shootRange = ShootRange(diff);
+                inRange = canSee && distanceSquared(self.origin, enemy.origin) < (shootRange * shootRange * 0.7);
 
-                self botsetmovepoint(goal);
-                self botsetmovemagnitude(1.0);
-                UnstuckCheck(goal);
+                // a new spot near the enemy only when the old one is far from it: each one is a new path
+                if (!isDefined(self.bo_enemy_goal) || distanceSquared(self.bo_enemy_goal, enemy.origin) > (nearDist * nearDist * 1.6))
+                    self.bo_enemy_goal = NavSnap(PickGoalNear(enemy.origin, nearDist));
+
+                goal = self.bo_enemy_goal;
+                if (!isDefined(goal))
+                    goal = enemy.origin;
+
+                // still only while it fires: a bot held there without shooting looked stuck
+                if (!inRange)
+                    self.bo_engage_time = undefined;
+                else if (!isDefined(self.bo_engage_time))
+                    self.bo_engage_time = gettime();
+
+                firing = isDefined(self.bo_last_burst_time) && gettime() - self.bo_last_burst_time < 2500;
+                hold = inRange && (firing || gettime() - self.bo_engage_time < 1500);
+
+                if (hold)
+                    self BotHoldPosition();
+                else
+                    self BotMoveTo(goal, true);
 
                 if (canSee)
                 {
                     self botsetlookpoint(enemy.origin);
-                    self setentitytarget(enemy, 1);
+                    self SetBotEntityTarget(enemy);
 
                     if (HasGun())
                     {
@@ -796,7 +862,7 @@ Brain()
                     self.bo_roam_commit_until = gettime() + randomintRange(1800, 3200);
                 }
 
-                self botsetmovepoint(self.bo_search_goal);
+                self BotMoveTo(self.bo_search_goal, false);
 
                 if (!isDefined(self.bo_sprint_until))
                     self.bo_sprint_until = 0;
@@ -815,8 +881,6 @@ Brain()
                     if (randomint(100) < 15)
                         self.bo_sprint_until = gettime() + randomintRange(900, 1900);
                 }
-
-                UnstuckCheck(self.bo_search_goal);
 
                 if (randomint(100) < 22)
                     self ScanLook();
@@ -857,6 +921,9 @@ LifeStartThreads()
     self thread InsertionSkyStuckWatchdog();
     self thread InsertionAirSteerWatchdog();
 
+    self thread PathFailedWatcher();
+    self thread PathSuccessWatcher();
+
     if (IsOnRealSurface())
     {
         self.bo_insertion_active = false;
@@ -867,6 +934,8 @@ LifeStartThreads()
 
     self thread EnsureArmedAfterLanding();
     self thread RearmAfterRedeployLanding();
+
+    self thread ArmWatcher();
 
     self thread SpawnSanityRescueLoop();
     self thread WaterOrOutOfMapRescueLoop();
@@ -935,7 +1004,7 @@ BO_TeamSpreadSpawn_OnLifeStart(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q
 
     base = isDefined(center) ? center : self.origin;
 
-    for (i = 0; i < 28; i++)
+    for (i = 0; i < 10; i++)
     {
         ang = randomFloatRange(0, 360);
         r = randomFloatRange(1300, 3200);
@@ -986,4 +1055,10 @@ GetBotDifficulty()
 
 Blackout() {
     return sessionmodeiswarzonegame();
+}
+
+// the time before the drop
+IsPregame()
+{
+    return isDefined(game.state) && game.state == "pregame";
 }

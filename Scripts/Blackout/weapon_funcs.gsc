@@ -165,21 +165,84 @@ CanArmNowFast()
     return IsLandedStable();
 }
 
+// the weapons as Blackout items
+BlackoutWeaponItems()
+{
+    if (!isDefined(level.bo_weapon_items))
+    {
+        level.bo_weapon_items = array(
+            #"ar_accurate_t8_item",
+            #"ar_fastfire_t8_item",
+            #"ar_an94_t8_item",
+            #"ar_peacekeeper_t8_item",
+            #"ar_doublebarrel_t8_item",
+            #"ar_damage_t8_item",
+            #"ar_stealth_t8_item",
+            #"ar_modular_t8_item",
+            #"ar_standard_t8_item",
+            #"ar_galil_t8_item",
+            #"smg_vmp_t8_item",
+            #"smg_minigun_t8_item",
+            #"smg_standard_t8_item",
+            #"smg_handling_t8_item",
+            #"smg_fastfire_t8_item",
+            #"smg_capacity_t8_item",
+            #"smg_accurate_t8_item",
+            #"smg_fastburst_t8_item",
+            #"smg_folding_t8_item",
+            #"tr_powersemi_t8_item",
+            #"tr_longburst_t8_item",
+            #"tr_midburst_t8_item",
+            #"tr_flechette_t8_item",
+            #"tr_damageburst_t8_item",
+            #"lmg_spray_t8_item",
+            #"lmg_stealth_t8_item",
+            #"lmg_standard_t8_item",
+            #"lmg_heavy_t8_item",
+            #"shotgun_pump_t8_item",
+            #"shotgun_semiauto_t8_item",
+            #"shotgun_fullauto_t8_item",
+            #"shotgun_precision_t8_item",
+            #"sniper_powerbolt_t8_item",
+            #"sniper_damagesemi_t8_item",
+            #"sniper_locus_t8_item",
+            #"sniper_mini14_t8_item",
+            #"sniper_quickscope_t8_item",
+            #"sniper_fastrechamber_t8_item",
+            #"sniper_powersemi_t8_item",
+            #"pistol_standard_t8_item",
+            #"pistol_fullauto_t8_item",
+            #"pistol_burst_t8_item",
+            #"pistol_revolver_t8_item"
+        );
+    }
+
+    return level.bo_weapon_items;
+}
+
+// a random gun in the hands, an item gun only when that fails
 GiveRandomPrimary()
 {
-    if (!isDefined(level.AllBlackoutWeapons))
-        return;
+    // in the hands, given straight: as items they piled up in the backpack
+    if (isDefined(level.AllBlackoutWeapons) && level.AllBlackoutWeapons.size > 0)
+    {
+        for (i = 0; i < 3; i++)
+        {
+            wname = level.AllBlackoutWeapons[randomint(level.AllBlackoutWeapons.size)];
+            if (!isDefined(wname) || wname == "")
+                continue;
 
-    if (level.AllBlackoutWeapons.size <= 0)
-        return;
+            self GivePrimarySafe(wname);
+            waitframe(1);
 
-    idx = randomint(level.AllBlackoutWeapons.size);
-    wname = level.AllBlackoutWeapons[idx];
+            if (self HasRealGun())
+                return;
+        }
+    }
 
-    if (!isDefined(wname) || wname == "")
-        return;
-
-    self GivePrimarySafe(wname);
+    // that failed: one as an item
+    items = BlackoutWeaponItems();
+    self GiveInventoryItem(items[randomint(items.size)], 1);
 }
 
 GivePrimarySafe(weaponName)
@@ -319,13 +382,6 @@ ForceArmBurst(msTotal)
         if (HasGun())
             return;
 
-        prims = self getweaponslistprimaries();
-        if (isDefined(prims))
-        {
-            foreach (pw in prims)
-                self takeweapon(pw);
-        }
-
         self enableweapons();
         self GiveRandomPrimary();
         self enableweapons();
@@ -355,19 +411,202 @@ HasGun()
     if (isDefined(self.sessionstate) && self.sessionstate != "playing")
         return false;
 
+    // the empty hands of Blackout are a primary weapon too: only a real gun counts
     prims = self getweaponslistprimaries();
-    if (isDefined(prims) && prims.size > 0)
-        return true;
+    if (isDefined(prims))
+    {
+        foreach (w in prims)
+        {
+            if (IsRealGun(w))
+                return true;
+        }
+    }
 
-    cw = self getcurrentweapon();
-    if (isDefined(cw) && cw != "none")
-        return true;
+    return IsRealGun(self getcurrentweapon());
+}
 
-    all = self getweaponslist();
-    if (isDefined(all) && all.size > 0)
-        return true;
+// a real gun in its hands or slots, whatever the bot is doing
+HasRealGun()
+{
+    if (!isAlive(self))
+        return false;
 
-    return false;
+    prims = self getweaponslistprimaries();
+    if (isDefined(prims))
+    {
+        foreach (w in prims)
+        {
+            if (IsRealGun(w))
+                return true;
+        }
+    }
+
+    return IsRealGun(self getcurrentweapon());
+}
+
+// the first real gun in its slots, or undefined
+FirstRealGun()
+{
+    prims = self getweaponslistprimaries();
+    if (!isDefined(prims))
+        return undefined;
+
+    foreach (w in prims)
+    {
+        if (IsRealGun(w))
+            return w;
+    }
+
+    return undefined;
+}
+
+/*
+    Every 1.5 s, for a bot on the ground: it gets a gun if it has none, and draws the one on its back
+    while its hands are empty (after the drop the game puts the bare hands in them). It also clears an
+    insertion flag still set 4 s after landing, and starts the brain again if it stopped. Now and then
+    a status line goes to project-bo4.log.
+*/
+ArmWatcher()
+{
+    self notify("bo_arm_watcher");
+    self endon("bo_arm_watcher");
+    self endon("disconnect");
+    self endon("death");
+    level endon("game_ended");
+
+    n = self getentitynumber();
+    logs = 0;
+    groundSince = 0;
+    nextState = gettime() + 6000;
+    stuckPos = undefined;
+    stuckSince = 0;
+
+    for (;;)
+    {
+        wait 1.5;
+
+        if (!isAlive(self))
+            continue;
+
+        // near the ground, not on it: a bot hopping in place is down too
+        onGround = !self isinvehicle() && GetDzToGroundSafe(self) < 150;
+
+        if (gettime() >= nextState && logs < 12)
+        {
+            logs++;
+            nextState = gettime() + 20000;
+
+            ins = isDefined(self.bo_insertion_active) && self.bo_insertion_active;
+            brainAge = isDefined(self.bo_brain_beat) ? gettime() - self.bo_brain_beat : -1;
+            state = isDefined(self.sessionstate) ? self.sessionstate : "none";
+
+            ShieldLog("^3[bo state] bot " + n + " ground " + onGround + " vehicle " + self isinvehicle() + " insertion " + ins + " gun " + self HasRealGun() + " in hand " + IsRealGun(self getcurrentweapon()) + " brain age " + brainAge + " state " + state);
+        }
+
+        if (!onGround)
+        {
+            groundSince = 0;
+            continue;
+        }
+
+        if (groundSince == 0)
+            groundSince = gettime();
+
+        // landed 4 s ago: the insertion is over, whatever its threads think
+        if (gettime() - groundSince > 4000 && isDefined(self.bo_insertion_active) && self.bo_insertion_active)
+        {
+            self.bo_insertion_active = false;
+            ShieldLog("^3[bo arm] bot " + n + " insertion flag cleared on the ground");
+        }
+
+        // the brain stopped: again, without the start of a life (no spawn teleport)
+        if (isDefined(self.bo_brain_beat) && gettime() - self.bo_brain_beat > 6000)
+        {
+            ShieldLog("^3[bo arm] bot " + n + " brain restarted, it stopped " + (gettime() - self.bo_brain_beat) + " ms ago");
+            self.bo_brain_beat = gettime();
+            self thread Brain(true);
+        }
+
+        if (isDefined(self.sessionstate) && self.sessionstate != "playing")
+            continue;
+
+        /*
+            In one place for 10 s without a fight (or a revive, or a swim): set it on the navmesh close by.
+            The last way out when steering could not get it loose.
+        */
+        busy = (isDefined(self.bo_last_burst_time) && gettime() - self.bo_last_burst_time < 4000) || self isplayerswimming() || IsPregame();
+
+        if (busy || !isDefined(stuckPos) || distanceSquared(self.origin, stuckPos) > (120 * 120))
+        {
+            stuckPos = self.origin;
+            stuckSince = gettime();
+        }
+        else if (gettime() - stuckSince > 10000)
+        {
+            free = getclosestpointonnavmesh(self.origin + (randomFloatRange(-200, 200), randomFloatRange(-200, 200), 0), 512, 24);
+            if (!isDefined(free))
+                free = FindNearestDryNavFrom(self.origin);
+
+            if (isDefined(free))
+            {
+                ShieldLog("^3[bo arm] bot " + n + " stuck 10 s, set on the navmesh close by");
+                self setorigin((free[0], free[1], free[2] + 10));
+
+                self.bo_search_goal = undefined;
+                self.bo_next_goal_time = 0;
+                self.bo_path_goal = undefined;
+                self.bo_path_fails = 0;
+            }
+
+            stuckPos = self.origin;
+            stuckSince = gettime();
+        }
+
+        if (!self HasRealGun())
+        {
+            self enableweapons();
+            self GiveRandomPrimary();
+
+            ShieldLog("^3[bo arm] bot " + n + " given a gun: " + self HasRealGun());
+            continue;
+        }
+
+        // a gun on the back and empty hands: take it out
+        if (!IsRealGun(self getcurrentweapon()) && !self isswitchingweapons())
+        {
+            gun = self FirstRealGun();
+
+            if (isDefined(gun))
+            {
+                self enableweapons();
+                self switchtoweapon(gun);
+            }
+        }
+    }
+}
+
+// a weapon that shoots: not none, not the bare hands everyone holds after the drop
+IsRealGun(w)
+{
+    if (!isDefined(w))
+        return false;
+
+    if (isDefined(level.weaponnone) && w == level.weaponnone)
+        return false;
+
+    if (isDefined(level.weaponbasemeleeheld) && w == level.weaponbasemeleeheld)
+        return false;
+
+    if (!isDefined(level.bo_bare_hands))
+        level.bo_bare_hands = getweapon(#"bare_hands");
+
+    if (isDefined(level.bo_bare_hands) && w == level.bo_bare_hands)
+        return false;
+
+    if (isDefined(w.name) && (w.name == #"none" || w.name == #"bare_hands" || w.name == #"null_offhand_primary"))
+        return false;
+
+    return true;
 }
 
 EnsureArmedImmediate()
@@ -402,13 +641,6 @@ EnsureArmedImmediate()
 
         if (HasGun())
             return;
-
-        prims = self getweaponslistprimaries();
-        if (isDefined(prims))
-        {
-            foreach (pw in prims)
-                self takeweapon(pw);
-        }
 
         self enableweapons();
         self GiveRandomPrimary();
@@ -488,7 +720,10 @@ EnsureArmedAfterLanding()
             continue;
         }
 
-        self GiveRandomPrimary();
+        // ammo for the gun it has: a new random gun every 7 s meant a weapon swap, model and sound each time
+        weapon = self getcurrentweapon();
+        if (isDefined(weapon))
+            self givemaxammo(weapon);
     }
 }
 
@@ -582,7 +817,8 @@ GroundSnap(pos)
     if (!isDefined(pos))
         return undefined;
 
-    start = (pos[0], pos[1], pos[2] + 4096);
+    // from just over the point: from far up the trace stops on the roof above it
+    start = (pos[0], pos[1], pos[2] + 72);
     end = (pos[0], pos[1], pos[2] - 20000);
 
     tr = bullettrace(start, end, 0, self);

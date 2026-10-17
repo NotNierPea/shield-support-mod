@@ -61,7 +61,8 @@ PostInit()
 
 WZChanges()
 {
-    if (getDvarInt(#"shield_wz_bots_num", 1) > 0)
+    // no dvar means the slider was never moved: no bots
+    if (getDvarInt(#"shield_wz_bots_num", 0) > 0)
         level BotsInitWZ();
 }
 
@@ -223,6 +224,7 @@ detour stats<scripts\core_common\player\player_stats.gsc>::function_f94325d3()
         return true;
     }
 
+    // no dedicated server check: a host of ours is never one, and the stats (character unlocks too) would not save
     if (sessionmodeiswarzonegame()) {
         if (getdvarint(#"scr_disable_merits", 0) == 1) {
             return false;
@@ -230,11 +232,14 @@ detour stats<scripts\core_common\player\player_stats.gsc>::function_f94325d3()
         if (!isdefined(game.state) || game.state == "pregame") {
             return false;
         }
-        if (!isdedicated() && getdvarint(#"wz_stat_testing", 0) == 0) {
-            return false;
-        }
     }
     return true;
+}
+
+// the character missions run in online ranked matches only: in ours too, unless the game setting turns them off
+detour character_unlock<scripts\wz_common\character_unlock.gsc>::function_b3681acb()
+{
+    return !isdefined(level.var_b3681acb) || level.var_b3681acb;
 }
 
 detour challenges<scripts\core_common\challenges_shared.gsc>::canprocesschallenges()

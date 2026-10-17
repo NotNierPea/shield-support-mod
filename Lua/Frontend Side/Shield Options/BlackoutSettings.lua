@@ -15,6 +15,13 @@ else
 	Engine[@"exec"](Engine[@"getprimarycontroller"](), "set shield_wz_map 0")
 end
 
+-- the bot count only exists once the slider moved: the scripts must not read a default then
+if Engine[@"getdvarint"]("shield_wz_bots_num") > 0 then
+	-- don't reset it
+else
+	Engine[@"exec"](Engine[@"getprimarycontroller"](), "set shield_wz_bots_num 0")
+end
+
 Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_bots_wz_lives lua bots_wz_lives uint64_t 1")
 Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_wz_uav lua wz_uav uint64_t 1")
 Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_bots_wz_difficulty lua bots_wz_difficulty uint64_t 1")
@@ -214,7 +221,32 @@ end )
 
 ---------------------------
 
--- blackout options
+--[[
+	The menu of Blackout, in the frame of the settings menus (CoD.ShieldSettingsFrame): left the settings
+	and under them how many bots there are, right what the one in focus does, a tip, and the game rules.
+]]
+local BLACKOUT_ROWS = 5
+local BLACKOUT_LIST_HEIGHT = BLACKOUT_ROWS * 60 + ( BLACKOUT_ROWS - 1 ) * 3
+local BLACKOUT_SLIDER_TOP = BLACKOUT_LIST_HEIGHT + 48
+
+-- words of the menu, placed from the middle of the screen
+local function BlackoutText( left, right, top, size, font, r, g, b )
+	local text = LUI.UIText.new( 0.5, 0.5, left, right, 0.5, 0.5, top, top + size )
+	text:setRGB( r, g, b )
+	text:setTTF( font )
+	text:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
+	text:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
+	return text
+end
+
+-- the small grey words over a part
+local function BlackoutCaption( left, right, top, words )
+	local text = BlackoutText( left, right, top, 15, "ttmussels_regular", 0.55, 0.55, 0.55 )
+	text:setLetterSpacing( 2 )
+	text:setText( words )
+	return text
+end
+
 CoD.Shield_Blackout_SettingsPopup = InheritFrom( CoD.Menu )
 LUI.createMenu.Shield_Blackout_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	local self = CoD.Menu.NewForUIEditor( "Shield_Blackout_SettingsPopup", f1_arg0 )
@@ -227,55 +259,54 @@ LUI.createMenu.Shield_Blackout_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	self:playSound( "menu_open", f1_arg0 )
 	self.anyChildUsesUpdateState = true
 	f1_local1:addElementToPendingUpdateStateList( self )
-	
-	local CommomCenteredPopup = CoD.CommonCenteredPopup.new( f1_local1, f1_arg0, 0, 1, 0, 0, 0, 1, 0, 0 )
-	CommomCenteredPopup.TitleText:setText("Blackout Settings")
-	CommomCenteredPopup.HeaderBackground:setAlpha( 0 )
-	CommomCenteredPopup.HeaderTopBar:setAlpha( 0 )
-	CommomCenteredPopup.HeaderBottomBar:setAlpha( 0 )
+
+	-- the words of the menu, closed with it
+	self.Parts = {}
+
+	local function Add( element )
+		self:addElement( element )
+		table.insert( self.Parts, element )
+		return element
+	end
+
+	local CommomCenteredPopup = CoD.ShieldSettingsFrame.new( f1_local1, f1_arg0, {
+		title = "Blackout",
+		caption = "BOTS, MAP AND RULES OF THE MATCH",
+		color = { r = 1, g = 0.62, b = 0.2 },
+		listHeight = BLACKOUT_SLIDER_TOP + 60,
+		extra = 3
+	} )
 	self:addElement( CommomCenteredPopup )
 	self.CommomCenteredPopup = CommomCenteredPopup
-	
-	local MiscSettingsList = LUI.UIList.new( f1_local1, f1_arg0, 3, 3, nil, false, false, false, false )
-	MiscSettingsList:setLeftRight( 0.5, 0.5, -250, 250 )
-	MiscSettingsList:setTopBottom( 0.5, 0.5, -380 + 126, -320 + 126 )
-	MiscSettingsList:setAutoScaleContent( true )
-	MiscSettingsList:setVerticalCount(10)
-	MiscSettingsList:setHorizontalCount(1)
-	MiscSettingsList:setWidgetType( CoD.CustomGames_SettingSliderNoCustom )
-	MiscSettingsList:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	MiscSettingsList:setDataSource( "OptionalSettingsDataBlackout" )
-	self:addElement( MiscSettingsList )
-	self.MiscSettingsList = MiscSettingsList
+
+	local listTop = CommomCenteredPopup.listTop
+
+	local BlackoutSettingsList = LUI.UIList.new( f1_local1, f1_arg0, 3, 3, nil, false, false, false, false )
+	BlackoutSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT )
+	BlackoutSettingsList:setTopBottom( 0.5, 0.5, listTop, listTop + BLACKOUT_LIST_HEIGHT )
+	BlackoutSettingsList:setAutoScaleContent( true )
+	BlackoutSettingsList:setVerticalCount( BLACKOUT_ROWS )
+	BlackoutSettingsList:setHorizontalCount( 1 )
+	BlackoutSettingsList:setWidgetType( CoD.CustomGames_SettingSliderNoCustom )
+	BlackoutSettingsList:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
+	BlackoutSettingsList:setDataSource( "OptionalSettingsDataBlackout" )
+	self:addElement( BlackoutSettingsList )
+	self.BlackoutSettingsList = BlackoutSettingsList
 
 	if Engine[@"getdvarint"]("shield_ui_color") == 0 then
-		MiscSettingsList:setRGB(0, 1, 1)
+		BlackoutSettingsList:setRGB(0, 1, 1)
 	elseif Engine[@"getdvarint"]("shield_ui_color") == 1 then
-		MiscSettingsList:setRGB(1, 0, 0)
+		BlackoutSettingsList:setRGB(1, 0, 0)
 	elseif Engine[@"getdvarint"]("shield_ui_color") == 2 then
-		MiscSettingsList:setRGB(0, 1, 0)
+		BlackoutSettingsList:setRGB(0, 1, 0)
 	end
-	
-	local SettingDescription = LUI.UIText.new( 0.5, 0.5, -250, 250, 0.55, 0.55, -284 + 180, -263 + 180 )
-	SettingDescription:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	SettingDescription:setTTF( "notosans_regular" )
-	SettingDescription:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	SettingDescription:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( SettingDescription )
-	self.SettingDescription = SettingDescription
 
-	local TipSec = LUI.UIText.new( 0.5, 0.5, -250, 250, 0.55, 0.55, -284 + 300, -263 + 300 )
-	TipSec:setText("It is better to use public matches instead of custom games (deploy button for public match)")
-	TipSec:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	TipSec:setTTF( "notosans_regular" )
-	TipSec:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	TipSec:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( TipSec )
-	self.TipSec = TipSec
+	-- how many bots: a list of one slider, 375 by 60
+	Add( BlackoutCaption( CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT, listTop + BLACKOUT_SLIDER_TOP - 24, "BOTS IN THE MATCH" ) )
 
 	local actionsListPCEnh = LUI.UIList.new( f1_local1, f1_arg0, 0, 0, nil, false, false, false, false )
-	actionsListPCEnh:setLeftRight( 0.50, 0.50, -95.52, 69.48 )
-	actionsListPCEnh:setTopBottom( 0.50, 0.50, 268.77 - 300, 368.77 - 300 )
+	actionsListPCEnh:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_LEFT + 375 )
+	actionsListPCEnh:setTopBottom( 0.5, 0.5, listTop + BLACKOUT_SLIDER_TOP, listTop + BLACKOUT_SLIDER_TOP + 60 )
 	actionsListPCEnh:setAlpha( 1 )
 	actionsListPCEnh:setWidgetType( CoD.CraftActionHeaderEnhShield )
 	actionsListPCEnh:setVerticalCount( 15 )
@@ -286,28 +317,54 @@ LUI.createMenu.Shield_Blackout_SettingsPopup = function ( f1_arg0, f1_arg1 )
 
 	actionsListPCEnh.id = "actionsListPCEnh"
 
-	local BlackoutRulesSettings = CoD.DirectorSelectButtonMiniInternal.new( f1_local1, f1_arg0, 0.50, 0.50, -178.50, 131.50, 0.50, 0.50, 329.01, 379.01 )
-	
-	BlackoutRulesSettings.MiddleText:setTTF( "notosans_bold" )
-	BlackoutRulesSettings.MiddleText:setText("Rules Settings")
+	local SettingDescription = LUI.UIText.new( 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, 0.5, 0.5, CommomCenteredPopup.descTop, CommomCenteredPopup.descTop + 21 )
+	SettingDescription:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+	SettingDescription:setTTF( "notosans_regular" )
+	SettingDescription:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
+	SettingDescription:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
+	self:addElement( SettingDescription )
+	self.SettingDescription = SettingDescription
 
-	BlackoutRulesSettings.MiddleTextFocus:setText("Rules Settings")
-	BlackoutRulesSettings.MiddleTextFocus:setTTF( "notosans_bold" )
-	
+	SettingDescription:linkToElementModel( BlackoutSettingsList, "desc", true, function ( model )
+		local f7_local0 = model:get()
+		if f7_local0 ~= nil then
+			SettingDescription:setText( Engine[@"hash_4F9F1239CFD921FE"]( f7_local0 ) )
+		end
+	end )
+
+	-- under the description: a tip, and the rules of the match
+	local extraTop = CommomCenteredPopup.extraTop
+
+	Add( BlackoutCaption( CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, extraTop + 20, "TIP" ) )
+
+	local Tip = Add( BlackoutText( CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, extraTop + 42, 18, "notosans_regular", 0.62, 0.62, 0.62 ) )
+	Tip:setText( "Public matches play better than custom games: start one with the deploy button." )
+
+	local BlackoutRulesSettings = CoD.DirectorSelectButtonMiniInternal.new( f1_local1, f1_arg0, 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, 0.5, 0.5, extraTop + 124, extraTop + 174 )
+	BlackoutRulesSettings.MiddleText:setText( "GAME RULES" )
+	BlackoutRulesSettings.MiddleTextFocus:setText( "GAME RULES" )
+
+	BlackoutRulesSettings:mergeStateConditions( {
+		{
+			stateName = "Locked",
+			condition = function ( menu, element, event )
+				return AlwaysFalse()
+			end
+		}
+	} )
+
 	BlackoutRulesSettings:linkToElementModel( self, nil, false, function ( model )
 		BlackoutRulesSettings:setModel( model, f1_arg1 )
 	end )
 	self:addElement( BlackoutRulesSettings )
 	self.BlackoutRulesSettings = BlackoutRulesSettings
 
-	--LUI_DebugElement(f1_local1, f1_arg0, self, BlackoutRulesSettings, "BlackoutRulesSettings", 10)
-
 	f1_local1:AddButtonCallbackFunction( BlackoutRulesSettings, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
 		PlaySoundAlias( "uin_paint_image_flip_toggle" )
 		CoD.EnhPrintInfo("BlackoutRulesSettings")
-		
-		OpenOverlay( self, "Shield_Blackout_Rules_SettingsPopup", controller )
 
+		OpenOverlay( self, "Shield_Blackout_Rules_SettingsPopup", controller )
+		return true
 	end, function ( element, menu, controller )
 		if IsGamepad( controller ) then
 			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/select", nil, "ui_confirm" )
@@ -321,13 +378,7 @@ LUI.createMenu.Shield_Blackout_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	end, false )
 
 	BlackoutRulesSettings.id = "BlackoutRulesSettings"
-	
-	SettingDescription:linkToElementModel( MiscSettingsList, "desc", true, function ( model )
-		local f7_local0 = model:get()
-		if f7_local0 ~= nil then
-			SettingDescription:setText( Engine[@"hash_4F9F1239CFD921FE"]( f7_local0 ) )
-		end
-	end )
+
 	self:mergeStateConditions( {
 		{
 			stateName = "KBM",
@@ -365,12 +416,12 @@ LUI.createMenu.Shield_Blackout_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	if CoD.isPC then
 		CommomCenteredPopup.id = "CommomCenteredPopup"
 	end
-	MiscSettingsList.id = "MiscSettingsList"
+	BlackoutSettingsList.id = "BlackoutSettingsList"
 	self:processEvent( {
 		name = "menu_loaded",
 		controller = f1_arg0
 	} )
-	self.__defaultFocus = MiscSettingsList
+	self.__defaultFocus = BlackoutSettingsList
 	if CoD.isPC and (IsKeyboard( f1_arg0 ) or self.ignoreCursor) then
 		self:restoreState( f1_arg0 )
 	end
@@ -378,9 +429,6 @@ LUI.createMenu.Shield_Blackout_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	if PostLoadFunc then
 		PostLoadFunc( self, f1_arg0 )
 	end
-	
-	f1_local7 = self
-	--MenuHidesFreeCursor( f1_local1, f1_arg0 )
 
 	CoD.EnhPrintInfo("Called", "Shield_Blackout_SettingsPopup")
 
@@ -388,10 +436,8 @@ LUI.createMenu.Shield_Blackout_SettingsPopup = function ( f1_arg0, f1_arg1 )
 end
 
 CoD.Shield_Blackout_SettingsPopup.__resetProperties = function ( f13_arg0 )
-	f13_arg0.MiscSettingsList:completeAnimation()
-	f13_arg0.SettingDescription:completeAnimation()
-	f13_arg0.MiscSettingsList:setLeftRight( 0.5, 0.5, -250, 250 )
-	f13_arg0.SettingDescription:setLeftRight( 0.5, 0.5, -250, 250 )
+	f13_arg0.BlackoutSettingsList:completeAnimation()
+	f13_arg0.BlackoutSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT )
 end
 
 CoD.Shield_Blackout_SettingsPopup.__clipsPerState = {
@@ -404,13 +450,10 @@ CoD.Shield_Blackout_SettingsPopup.__clipsPerState = {
 	KBM = {
 		DefaultClip = function ( f15_arg0, f15_arg1 )
 			f15_arg0:__resetProperties()
-			f15_arg0:setupElementClipCounter( 2 )
-			f15_arg0.MiscSettingsList:completeAnimation()
-			f15_arg0.MiscSettingsList:setLeftRight( 0.5, 0.5, -290, 290 )
-			f15_arg0.clipFinished( f15_arg0.MiscSettingsList )
-			f15_arg0.SettingDescription:completeAnimation()
-			f15_arg0.SettingDescription:setLeftRight( 0.5, 0.5, -290, 290 )
-			f15_arg0.clipFinished( f15_arg0.SettingDescription )
+			f15_arg0:setupElementClipCounter( 1 )
+			f15_arg0.BlackoutSettingsList:completeAnimation()
+			f15_arg0.BlackoutSettingsList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT_KBM )
+			f15_arg0.clipFinished( f15_arg0.BlackoutSettingsList )
 		end
 	}
 }
@@ -418,8 +461,11 @@ CoD.Shield_Blackout_SettingsPopup.__clipsPerState = {
 CoD.Shield_Blackout_SettingsPopup.__onClose = function ( f16_arg0 )
 	f16_arg0.SettingDescription:close()
 	f16_arg0.BlackoutRulesSettings:close()
-	f16_arg0.TipSec:close()
 	f16_arg0.CommomCenteredPopup:close()
-	f16_arg0.MiscSettingsList:close()
+	f16_arg0.BlackoutSettingsList:close()
 	f16_arg0.actionsListPCEnh:close()
+
+	for _, element in ipairs( f16_arg0.Parts ) do
+		element:close()
+	end
 end

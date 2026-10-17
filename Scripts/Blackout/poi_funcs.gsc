@@ -83,7 +83,7 @@ PickDryPOIInsideStorm(fromPos, botIndex)
         c = level.deathcircle.origin;
         r = level.deathcircle.radius;
 
-        for (i = 0; i < 60; i++)
+        for (i = 0; i < 10; i++)
         {
             ang = randomFloatRange(0, 360);
             maxR = r - 900;
@@ -144,6 +144,10 @@ IsInDeathZone()
 
     d = distance2d(self.origin, level.deathcircle.origin);
     buffer = 520;
+
+    // a small circle would be all edge with the full buffer
+    if (level.deathcircle.radius < 2080)
+        buffer = level.deathcircle.radius * 0.25;
 
     if (d > (level.deathcircle.radius - buffer))
         return true;
@@ -268,31 +272,57 @@ PickIndexedPOIInsideStorm(botIndex, fromPos)
     return PickClosestPOIInsideStorm(fromPos);
 }
 
+// the deathcircle index, -1 before the first
+CircleIndex()
+{
+    if (isDefined(level.deathcircleindex))
+        return level.deathcircleindex;
+
+    return -1;
+}
+
+// where the circle is going (its middle and radius): the next circle once one is set, else the one there is
+GetCircleTarget()
+{
+    next = level.deathcircle.nextcircle;
+
+    if (isDefined(next) && isDefined(next.origin) && isDefined(next.radius) && next.radius > 0)
+        return array(next.origin, next.radius);
+
+    return array(level.deathcircle.origin, level.deathcircle.radius);
+}
+
+// the navmesh in the middle of where the circle is going, for when there is no room left to choose
+CircleCenterGoal()
+{
+    if (!HasDeathCircle())
+        return undefined;
+
+    target = GetCircleTarget();
+    return NavSnapWide(target[0]);
+}
+
 GetCircleSafeGoal()
 {
     if (!HasDeathCircle() || !isDefined(self.origin))
         return undefined;
 
-    center = IsEscapeMap() ? GetLandBiasedCircleCenter() : level.deathcircle.origin;
-    if (!isDefined(center))
-        center = level.deathcircle.origin;
+    target = GetCircleTarget();
+    center = target[0];
+    rad = target[1];
 
-    rad = level.deathcircle.radius;
+    if (rad < 1500 || level.deathcircle.radius < 1500)
+        return CircleCenterGoal();
 
-    margin = 700;
     v = (center[0] - self.origin[0], center[1] - self.origin[1], 0);
 
     if (abs(v[0]) < 1 && abs(v[1]) < 1)
-    {
-        g0 = NavSnap(center);
-        g0 = FixBadSpawnLocation(g0);
-        if (isDefined(g0) && !IsBadLandingPos(g0))
-            return g0;
-    }
+        return FixBadSpawnLocation(center);
 
     dir = vectorNormalize(v);
     d = distance2d(self.origin, center);
 
+    margin = 700;
     desiredD = d - 1800;
     minD = 350;
     maxD = rad - margin;
@@ -301,24 +331,18 @@ GetCircleSafeGoal()
     if (desiredD < minD) desiredD = minD;
     if (desiredD > maxD) desiredD = maxD;
 
-    raw = (center[0] + dir[0] * desiredD, center[1] + dir[1] * desiredD, center[2]);
+    // on the side of the bot, desiredD from the middle
+    raw = (center[0] - dir[0] * desiredD, center[1] - dir[1] * desiredD, center[2]);
 
     safe = FixBadSpawnLocation(raw);
-
-    if (isDefined(safe) && !IsBadLandingPos(safe) && !IsWaterNear(safe, 320))
+    if (isDefined(safe))
         return safe;
 
     poi = PickClosestPOIInsideStorm(self.origin);
-    poi = FixBadSpawnLocation(poi);
-    if (isDefined(poi) && !IsBadLandingPos(poi))
+    if (isDefined(poi))
         return poi;
 
-    land = FindNearestDryNavFrom(self.origin);
-    land = FixBadSpawnLocation(land);
-    if (isDefined(land) && !IsBadLandingPos(land))
-        return land;
-
-    return undefined;
+    return CircleCenterGoal();
 }
 
 PickPOIInsideCircle()
@@ -358,7 +382,7 @@ PickPOIInsideCircle()
             maxR = 3400;
         }
 
-        for (i = 0; i < 24; i++)
+        for (i = 0; i < 8; i++)
         {
             ang = randomFloatRange(0, 360);
             r = randomFloatRange(minR, maxR);
@@ -654,7 +678,7 @@ InsertionFreefallToPOI()
         if (!self isinvehicle())
         {
             self clearentitytarget();
-            self botsetmovepoint(dynGoal);
+            self ManualMovePoint(dynGoal);
             self botsetmovemagnitude(1.0);
         }
 
@@ -757,7 +781,7 @@ InsertionFreefallToPOI()
     self.bo_roam_commit_until = gettime() + randomintRange(2500, 4500);
 
     self clearentitytarget();
-    self botsetmovepoint(self.bo_search_goal);
+    self ManualMovePoint(self.bo_search_goal);
     self botsetmovemagnitude(1.0);
 }
 
@@ -788,6 +812,10 @@ GetAirSteerGoal(rawGoal)
 {
     if (!isDefined(rawGoal) || !isDefined(self.origin))
         return undefined;
+
+    // worked out about twice a second: a falling bot asks every 0.1 s
+    if (isDefined(self.bo_air_goal) && gettime() < self.bo_air_goal_until && distance2d(rawGoal, self.bo_air_goal_raw) < 300)
+        return (self.bo_air_goal[0], self.bo_air_goal[1], self.origin[2]);
 
     g = rawGoal;
 
@@ -855,6 +883,10 @@ GetAirSteerGoal(rawGoal)
         }
     }
 
+    self.bo_air_goal_raw = rawGoal;
+    self.bo_air_goal = ground;
+    self.bo_air_goal_until = gettime() + 600;
+
     return (ground[0], ground[1], self.origin[2]);
 }
 
@@ -894,7 +926,7 @@ StormRunTo(dest)
         return false;
 
     self clearentitytarget();
-    self botsetmovepoint(g);
+    self ManualMovePoint(g);
     self botsetmovemagnitude(1.0);
 
     UnstuckCheck(g);
@@ -918,24 +950,48 @@ GetLandBiasedCircleCenter()
 
     c = level.deathcircle.origin;
 
+    /*
+        Worked out at most every 2 s for all bots. The search below goes through FixBadSpawnLocation, which
+        asks for this again: that call gets the last answer instead of searching again, endlessly.
+    */
+    if (isDefined(level.bo_land_center_time) && gettime() - level.bo_land_center_time < 2000)
+        return level.bo_land_center;
+
+    level.bo_land_center_time = gettime();
+    level.bo_land_center = c;
+
+    result = c;
+
     if (IsWaterAt(c) || IsWaterNear(c, 420) || NoGroundAt(c))
     {
+        result = undefined;
+
         land = FindNearestDryNavFrom(c);
         land = FixBadSpawnLocation(land);
 
         if (isDefined(land) && !IsBadLandingPos(land))
-            return land;
+            result = land;
 
-        poi = PickClosestPOIInsideStorm(c);
-        poi = FixBadSpawnLocation(poi);
+        if (!isDefined(result))
+        {
+            poi = PickClosestPOIInsideStorm(c);
+            poi = FixBadSpawnLocation(poi);
 
-        if (isDefined(poi) && !IsBadLandingPos(poi))
-            return poi;
+            if (isDefined(poi) && !IsBadLandingPos(poi))
+                result = poi;
+        }
 
-        return FixBadSpawnLocation(c);
+        if (!isDefined(result))
+            result = NavSnapWide(c);
+
+        if (!isDefined(result))
+            result = c;
     }
 
-    return c;
+    level.bo_land_center = result;
+    level.bo_land_center_time = gettime();
+
+    return result;
 }
 
 UpdateDropPOIForThisLife()
@@ -1067,7 +1123,8 @@ DeathCircleRecommitWatcher()
     level endon("game_ended");
     self endon("bo_brain_restart");
 
-    lastSig = GetCircleSig();
+    // once per new circle: while the gas closes in its middle and radius change every frame
+    lastIndex = CircleIndex();
     lastBump = 0;
 
     for (;;)
@@ -1077,23 +1134,23 @@ DeathCircleRecommitWatcher()
         if (!HasDeathCircle())
             continue;
 
-        if (!IsEscapeMap())
-        {
-            lastSig = GetCircleSig();
+        index = CircleIndex();
+
+        if (index == lastIndex)
             continue;
-        }
 
-        sig = GetCircleSig();
+        lastIndex = index;
 
-        if (CircleSigChanged(sig, lastSig))
+        if (!IsEscapeMap())
+            continue;
+
+        if (gettime() - lastBump > 1200)
         {
-            if (gettime() - lastBump > 1200)
-            {
-                lastBump = gettime();
-                self ForceRecommitPOI("circle_changed");
-            }
+            // spread over 2 s: all bots search for a new spot on the same circle
+            wait randomFloatRange(0.05, 2.0);
 
-            lastSig = sig;
+            lastBump = gettime();
+            self ForceRecommitPOI("circle_changed");
         }
     }
 }

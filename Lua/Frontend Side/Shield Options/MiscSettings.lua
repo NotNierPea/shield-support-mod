@@ -282,8 +282,7 @@ LUI.createMenu.Shield_Misc_SettingsPopup = function ( f1_arg0, f1_arg1 )
 		title = "Misc Settings",
 		caption = "EVERYTHING ELSE",
 		color = { r = 0.35, g = 0.75, b = 1 },
-		rows = 10,
-		extra = 2
+		rows = 10
 	} )
 	self:addElement( CommomCenteredPopup )
 	self.CommomCenteredPopup = CommomCenteredPopup
@@ -322,80 +321,6 @@ LUI.createMenu.Shield_Misc_SettingsPopup = function ( f1_arg0, f1_arg1 )
 			SettingDescription:setText( Engine[@"hash_4F9F1239CFD921FE"]( f7_local0 ) )
 		end
 	end )
-
-	-- rules options
-	local RulesSettings = CoD.DirectorSelectButtonMiniInternal.new( f1_local1, f1_arg0, 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, 0.5, 0.5, CommomCenteredPopup.extraTop + 62, CommomCenteredPopup.extraTop + 112 )
-	
-	RulesSettings.MiddleText:setTTF( "notosans_bold" )
-	RulesSettings.MiddleText:setText("Saved Custom Rules")
-
-	RulesSettings.MiddleTextFocus:setText("Saved Custom Rules")
-	RulesSettings.MiddleTextFocus:setTTF( "notosans_bold" )
-	
-	RulesSettings:linkToElementModel( self, nil, false, function ( model )
-		RulesSettings:setModel( model, f1_arg1 )
-	end )
-	self:addElement( RulesSettings )
-	self.RulesSettings = RulesSettings
-
-	f1_local1:AddButtonCallbackFunction( RulesSettings, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		PlaySoundAlias( "uin_paint_image_flip_toggle" )
-		CoD.EnhPrintInfo("RulesSettings")
-		
-		OpenOverlay( self, "Shield_Rules_SettingsPopup", controller )
-
-	end, function ( element, menu, controller )
-		if IsGamepad( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/select", nil, "ui_confirm" )
-			return true
-		elseif IsMouseOrKeyboard( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-			return false
-		else
-			return false
-		end
-	end, false )
-
-	RulesSettings.id = "RulesSettings"
-
-	--LUI_DebugElement(f1_local1, f1_arg0, self, RulesSettings, "RulesSettings", 10)
-
-	-- blackout options
-	local BlackoutSettings = CoD.DirectorSelectButtonMiniInternal.new( f1_local1, f1_arg0, 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, 0.5, 0.5, CommomCenteredPopup.extraTop, CommomCenteredPopup.extraTop + 50 )
-	
-	BlackoutSettings.MiddleText:setTTF( "notosans_bold" )
-	BlackoutSettings.MiddleText:setText("Blackout Settings")
-
-	BlackoutSettings.MiddleTextFocus:setText("Blackout Settings")
-	BlackoutSettings.MiddleTextFocus:setTTF( "notosans_bold" )
-	
-	BlackoutSettings:linkToElementModel( self, nil, false, function ( model )
-		BlackoutSettings:setModel( model, f1_arg1 )
-	end )
-	self:addElement( BlackoutSettings )
-	self.BlackoutSettings = BlackoutSettings
-
-	--LUI_DebugElement(f1_local1, f1_arg0, self, BlackoutSettings, "BlackoutSettings", 10)
-
-	f1_local1:AddButtonCallbackFunction( BlackoutSettings, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		PlaySoundAlias( "uin_paint_image_flip_toggle" )
-		CoD.EnhPrintInfo("BlackoutSettings")
-		
-		OpenOverlay( self, "Shield_Blackout_SettingsPopup", controller )
-
-	end, function ( element, menu, controller )
-		if IsGamepad( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/select", nil, "ui_confirm" )
-			return true
-		elseif IsMouseOrKeyboard( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-			return false
-		else
-			return false
-		end
-	end, false )
-
-	BlackoutSettings.id = "BlackoutSettings"
 
 	self:mergeStateConditions( {
 		{
@@ -488,5 +413,4 @@ CoD.Shield_Misc_SettingsPopup.__onClose = function ( f16_arg0 )
 	f16_arg0.SettingDescription:close()
 	f16_arg0.CommomCenteredPopup:close()
 	f16_arg0.MiscSettingsList:close()
-	f16_arg0.BlackoutSettings:close()
 end

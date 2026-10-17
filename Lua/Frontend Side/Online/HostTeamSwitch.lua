@@ -250,7 +250,56 @@ local function WrapLaunch()
 	Note( "teams the host made are launched as they are" )
 end
 
+--[[
+	Deploy right after a match failed ("Failed to host a lobby", then back to the main menu), and worked from the main
+	menu: the game lobby of the last match was most likely still hosted, and hosting the new one failed on it. The
+	process that hosts it now ends that one first, as the game does before hosting in its other processes. Each
+	deploy notes what was there, to see in project-bo4.log whether that was it.
+]]
+local function WrapHostStart()
+	local process = Lobby.Process
+	local actions = Lobby.Actions
+
+	if type( process ) ~= "table" or type( process.CreateAsyncMatchmakingLobby ) ~= "function" or type( process.ForceAction ) ~= "function" then
+		Note( "no lobby process yet (" .. type( process ) .. "), a game lobby left from a match is not ended before hosting" )
+		return
+	end
+
+	if type( actions ) ~= "table" or type( actions.LobbyHostEnd ) ~= "function" then
+		Note( "no host end action (" .. type( actions ) .. "), a game lobby left from a match is not ended before hosting" )
+		return
+	end
+
+	local create = process.CreateAsyncMatchmakingLobby
+
+	process.CreateAsyncMatchmakingLobby = function ( ... )
+		local queued = create( ... )
+
+		local gameType = Enum[@"lobbytype"][@"lobby_type_game"]
+		local hosted = Engine[@"islobbyactive"]( Enum[@"lobbymodule"][@"lobby_module_host"], gameType )
+		local joined = Engine[@"islobbyactive"]( Enum[@"lobbymodule"][@"lobby_module_client"], gameType )
+
+		Note( "hosting a game lobby: one hosted already " .. tostring( hosted ) .. ", one joined " .. tostring( joined ) )
+
+		if hosted and type( queued ) == "table" and queued.head ~= nil then
+			local finish = actions.LobbyHostEnd( gameType )
+
+			process.ForceAction( finish, queued.head )
+			queued.head = finish
+
+			Note( "the game lobby left from the last match is ended first" )
+		end
+
+		return queued
+	end
+
+	Note( "a game lobby left from a match is ended before hosting a new one" )
+end
+
 local function Wrap( selection )
+	-- the lobby process is loaded by the time the events are made
+	WrapHostStart()
+
 	local switchTeam = selection.SwitchTeam
 	local hostAssignment = selection.SwitchTeamHostAssignment
 	local autoSplit = selection.AutoSplitTeam

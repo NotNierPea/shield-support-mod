@@ -15,6 +15,13 @@ Engine[@"setdvar"]("shield_selected_saved_rule_name", "")
 -- vars
 local shield_rules = {}
 
+-- the menu says so when nothing is saved
+local function UpdateNoRulesText()
+	if CoD.Menu.ActiveRulesEmpty ~= nil then
+		CoD.Menu.ActiveRulesEmpty:setAlpha( #shield_rules == 0 and 1 or 0 )
+	end
+end
+
 ---------------------------
 
 local function ShieldSaveGameRules()
@@ -405,6 +412,8 @@ CoD.Shield.RulesListUpdate = function(event_name, event_table)
         --CoD.EnhPrintInfo("Found rule: " .. name)
     --end
 
+	UpdateNoRulesText()
+
 	if CoD.Menu.ActiveRulesList ~= nil then
 		CoD.Menu.ActiveRulesList:setDataSource( "ShieldActiveRulesList" )
 		CoD.Menu.ActiveRulesList:updateDataSource()
@@ -443,95 +452,219 @@ end, true )
 
 ---------------------------
 
+--[[
+	The saved rules, in the frame of the settings menus (CoD.ShieldSettingsFrame): left the rules saved on
+	this PC, the selected one in yellow; right which one Load uses, and the name, save and load buttons.
+]]
+local RULE_ROWS = 8
+local RULE_ROW_WIDTH = 500
+local RULE_ROW_HEIGHT = 48
+local RULE_ROW_SPACING = 6
+local RULE_LIST_TOP = 24
+local RULE_LIST_HEIGHT = RULE_ROWS * RULE_ROW_HEIGHT + ( RULE_ROWS - 1 ) * RULE_ROW_SPACING
+local RULE_COLOR = { r = 0.45, g = 0.9, b = 0.45 }
+
+-- words of the menu, placed from the middle of the screen
+local function RulesText( left, right, top, size, font, r, g, b )
+	local text = LUI.UIText.new( 0.5, 0.5, left, right, 0.5, 0.5, top, top + size )
+	text:setRGB( r, g, b )
+	text:setTTF( font )
+	text:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
+	text:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
+	return text
+end
+
+-- the small grey words over a part
+local function RulesCaption( left, right, top, words )
+	local text = RulesText( left, right, top, 15, "ttmussels_regular", 0.55, 0.55, 0.55 )
+	text:setLetterSpacing( 2 )
+	text:setText( words )
+	return text
+end
+
+-- what of a row changes with the focus
+local RuleRowFocusParts = {
+	{ "BlackBar", function ( element, focus ) element:setAlpha( focus and 0.1 or 0.05 ) end },
+	{ "Tint", function ( element, focus ) element:setAlpha( focus and 0.12 or 0 ) end },
+	{ "FocusFrame", function ( element, focus ) element:setAlpha( focus and 1 or 0 ) end },
+	{ "Accent", function ( element, focus ) element:setLeftRight( 0, 0, 0, focus and 7 or 4 ) end }
+}
+
+-- a clip of a row that ends in the focus or out of it, at once or over some time, as the lobby browser's
+local function RuleRowClip( focus, duration )
+	return function ( self, event )
+		self:__resetProperties()
+		self:setupElementClipCounter( #RuleRowFocusParts )
+
+		for _, part in ipairs( RuleRowFocusParts ) do
+			local element = self[part[1]]
+
+			element:completeAnimation()
+
+			if duration then
+				part[2]( element, not focus )
+				element:beginAnimation( duration )
+				part[2]( element, focus )
+				element:registerEventHandler( "interrupted_keyframe", self.clipInterrupted )
+				element:registerEventHandler( "transition_complete_keyframe", self.clipFinished )
+			else
+				part[2]( element, focus )
+				self.clipFinished( element )
+			end
+		end
+	end
+end
+
 -- rules widget
 CoD.ShieldActiveRuleRow = InheritFrom( LUI.UIElement )
-CoD.ShieldActiveRuleRow.__defaultWidth = 1070
-CoD.ShieldActiveRuleRow.__defaultHeight = 37
+CoD.ShieldActiveRuleRow.__defaultWidth = RULE_ROW_WIDTH
+CoD.ShieldActiveRuleRow.__defaultHeight = RULE_ROW_HEIGHT
 CoD.ShieldActiveRuleRow.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
 	local self = LUI.UIElement.new( f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
 	self:setClass( CoD.ShieldActiveRuleRow )
 	self.id = "ShieldActiveRuleRow"
 	self.soundSet = "default"
 	f1_arg0:addElementToPendingUpdateStateList( self )
-	
-	local BlackBar = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 1, 1 )
-	BlackBar:setRGB( 0.78, 0.78, 0.78 )
-	BlackBar:setAlpha( 0.01 )
+
+	local BlackBar = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	BlackBar:setRGB( 1, 1, 1 )
+	BlackBar:setAlpha( 0.05 )
 	self:addElement( BlackBar )
 	self.BlackBar = BlackBar
-	
-	local RuleName = LUI.UIText.new( 0, 0, 15, 413, 0, 0, 6.5, 30.5 )
+
+	local Tint = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	Tint:setRGB( RULE_COLOR.r, RULE_COLOR.g, RULE_COLOR.b )
+	Tint:setAlpha( 0 )
+	self:addElement( Tint )
+	self.Tint = Tint
+
+	local Accent = LUI.UIImage.new( 0, 0, 0, 4, 0, 1, 0, 0 )
+	Accent:setRGB( RULE_COLOR.r, RULE_COLOR.g, RULE_COLOR.b )
+	self:addElement( Accent )
+	self.Accent = Accent
+
+	local RuleName = LUI.UIText.new( 0, 0, 22, RULE_ROW_WIDTH - 130, 0, 0, 13, 35 )
 	RuleName:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	RuleName:setTTF( "ttmussels_regular" )
-	RuleName:setLetterSpacing( 1 )
-	RuleName:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_558C8A85F2048829"] )
-	RuleName:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
+	RuleName:setTTF( "notosans_bold" )
+	RuleName:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
+	RuleName:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
 	self:addElement( RuleName )
 	self.RuleName = RuleName
-	
-	self.RuleName:linkToElementModel( self, "RuleName", true, function ( model )
-		local f5_local0 = model:get()
-		if f5_local0 ~= nil then
-			RuleName:setText(f5_local0)
 
-			if Engine[@"getdvarstring"]("shield_selected_saved_rule") == f5_local0 then
-				self:setRGB(1, 1, 0)
-			else
-				self:setRGB(1, 1, 1)
-			end
+	-- on the rule Load uses
+	local SelectedTag = LUI.UIText.new( 0, 0, RULE_ROW_WIDTH - 120, RULE_ROW_WIDTH - 16, 0, 0, 17, 32 )
+	SelectedTag:setRGB( 1, 0.85, 0.2 )
+	SelectedTag:setTTF( "ttmussels_regular" )
+	SelectedTag:setLetterSpacing( 2 )
+	SelectedTag:setAlignment( Enum[@"luialignment"][@"lui_alignment_right"] )
+	SelectedTag:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
+	SelectedTag:setText( "SELECTED" )
+	SelectedTag:setAlpha( 0 )
+	self:addElement( SelectedTag )
+	self.SelectedTag = SelectedTag
 
-			self.RuleName = RuleName
+	local FocusFrame = LUI.UIImage.new( 0, 1, -4, 4, 0, 1, -4, 4 )
+	FocusFrame:setRGB( RULE_COLOR.r, RULE_COLOR.g, RULE_COLOR.b )
+	FocusFrame:setAlpha( 0 )
+	FocusFrame:setImage( RegisterImage( @"uie_ui_menu_store_focus_frame" ) )
+	FocusFrame:setMaterial( LUI.UIImage.GetCachedMaterial( @"uie_nineslice_add" ) )
+	FocusFrame:setShaderVector( 0, 0, 0, 0, 0 )
+	FocusFrame:setupNineSliceShader( 10, 10 )
+	self:addElement( FocusFrame )
+	self.FocusFrame = FocusFrame
+
+	RuleName:linkToElementModel( self, "RuleName", true, function ( model )
+		local name = model:get()
+		if name == nil then
+			return
+		end
+
+		RuleName:setText( name )
+
+		if Engine[@"getdvarstring"]("shield_selected_saved_rule") == name then
+			RuleName:setRGB( 1, 0.85, 0.2 )
+			SelectedTag:setAlpha( 1 )
+		else
+			RuleName:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+			SelectedTag:setAlpha( 0 )
 		end
 	end )
 
 	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
-	
+
 	if PostLoadFunc then
 		PostLoadFunc( self, f1_arg1, f1_arg0 )
 	end
-	
+
 	return self
 end
 
 CoD.ShieldActiveRuleRow.__resetProperties = function ( f7_arg0 )
-	f7_arg0.BlackBar:completeAnimation()
-	f7_arg0.RuleName:completeAnimation()
-	f7_arg0.BlackBar:setRGB( 0.78, 0.78, 0.78 )
-	f7_arg0.BlackBar:setAlpha( 0.01 )
-	f7_arg0.RuleName:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	f7_arg0.RuleName:setAlpha( 1 )
+	for _, part in ipairs( RuleRowFocusParts ) do
+		local element = f7_arg0[part[1]]
+		element:completeAnimation()
+		part[2]( element, false )
+	end
 end
 
 CoD.ShieldActiveRuleRow.__clipsPerState = {
 	DefaultState = {
-		DefaultClip = function ( f8_arg0, f8_arg1 )
-			f8_arg0:__resetProperties()
-			f8_arg0:setupElementClipCounter( 2 )
-			f8_arg0.BlackBar:completeAnimation()
-			f8_arg0.BlackBar:setRGB( 0.71, 0.71, 0.71 )
-			f8_arg0.BlackBar:setAlpha( 0.01 )
-			f8_arg0.clipFinished( f8_arg0.BlackBar )
-			f8_arg0.RuleName:completeAnimation()
-			f8_arg0.RuleName:setAlpha( 1 )
-			f8_arg0.clipFinished( f8_arg0.RuleName )
-		end,
-		Focus = function ( f9_arg0, f9_arg1 )
-			f9_arg0:__resetProperties()
-			f9_arg0:setupElementClipCounter( 5 )
-			f9_arg0.BlackBar:completeAnimation()
-			f9_arg0.BlackBar:setRGB( 0.82, 0.82, 0.82 )
-			f9_arg0.BlackBar:setAlpha( 0.05 )
-			f9_arg0.clipFinished( f9_arg0.BlackBar )
-			f9_arg0.RuleName:completeAnimation()
-			f9_arg0.RuleName:setRGB( 0.93, 0.93, 0 )
-			f9_arg0.clipFinished( f9_arg0.RuleName )
-		end
+		DefaultClip = RuleRowClip( false ),
+		Focus = RuleRowClip( true ),
+		GainFocus = RuleRowClip( true, 120 ),
+		LoseFocus = RuleRowClip( false, 120 )
 	}
 }
 
 CoD.ShieldActiveRuleRow.__onClose = function ( f10_arg0 )
-	f10_arg0.RuleName:close()
 	f10_arg0.BlackBar:close()
+	f10_arg0.Tint:close()
+	f10_arg0.Accent:close()
+	f10_arg0.RuleName:close()
+	f10_arg0.SelectedTag:close()
+	f10_arg0.FocusFrame:close()
+end
+
+-- a button of the game with its own words, never locked
+local function NewRulesButton( self, menu, controller, label, top )
+	local button = CoD.DirectorSelectButtonMiniInternal.new( menu, controller, 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, 0.5, 0.5, top, top + 50 )
+
+	button.MiddleText:setText( label )
+	button.MiddleTextFocus:setText( label )
+
+	button:mergeStateConditions( {
+		{
+			stateName = "Locked",
+			condition = function ( menu, element, event )
+				return AlwaysFalse()
+			end
+		}
+	} )
+
+	button:linkToElementModel( self, nil, false, function ( model )
+		button:setModel( model, controller )
+	end )
+
+	self:addElement( button )
+	return button
+end
+
+local function OnRulesButton( menu, controller, button, action )
+	menu:AddButtonCallbackFunction( button, controller, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
+		PlaySoundAlias( "uin_paint_image_flip_toggle" )
+		action()
+		return true
+	end, function ( element, menu, controller )
+		if IsGamepad( controller ) then
+			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/select", nil, "ui_confirm" )
+			return true
+		elseif IsMouseOrKeyboard( controller ) then
+			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
+			return false
+		else
+			return false
+		end
+	end, false )
 end
 
 -- rules options
@@ -547,31 +680,46 @@ LUI.createMenu.Shield_Rules_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	self:playSound( "menu_open", f1_arg0 )
 	self.anyChildUsesUpdateState = true
 	f1_local1:addElementToPendingUpdateStateList( self )
-	
-	local CommomCenteredPopup = CoD.CommonCenteredPopup.new( f1_local1, f1_arg0, 0, 1, 0, 0, 0, 1, 0, 0 )
-	CommomCenteredPopup.TitleText:setText("Saved Rules Settings")
-	CommomCenteredPopup.HeaderBackground:setAlpha( 0 )
-	CommomCenteredPopup.HeaderTopBar:setAlpha( 0 )
-	CommomCenteredPopup.HeaderBottomBar:setAlpha( 0 )
+
+	-- the words of the menu, closed with it
+	self.Parts = {}
+
+	local function Add( element )
+		self:addElement( element )
+		table.insert( self.Parts, element )
+		return element
+	end
+
+	local CommomCenteredPopup = CoD.ShieldSettingsFrame.new( f1_local1, f1_arg0, {
+		title = "Saved Rules",
+		caption = "THE RULES OF YOUR CUSTOM GAMES",
+		color = RULE_COLOR,
+		listHeight = RULE_LIST_TOP + RULE_LIST_HEIGHT,
+		rightCaption = "SAVE OR LOAD",
+		extra = 3
+	} )
 	self:addElement( CommomCenteredPopup )
 	self.CommomCenteredPopup = CommomCenteredPopup
-	
-	local TipSec = LUI.UIText.new( 0.50, 0.50, -310.25, 380.75, 0.55, 0.55, -476.25, -438.25 )
-	TipSec:setText("Saved Game Rules:")
-	TipSec:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	TipSec:setTTF( "notosans_regular" )
-	TipSec:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	TipSec:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( TipSec )
-	self.TipSec = TipSec
 
-	local ActiveRulesList = LUI.UIList.new( f1_local1, f1_arg0, 10, 0, nil, false, false, false, false )
-	ActiveRulesList:setLeftRight( 0.50, 0.50, -306.76, 265.24 )
-	ActiveRulesList:setTopBottom( 0.00, 0.00, 170.74, 770.74 )
+	local listTop = CommomCenteredPopup.listTop
+	local extraTop = CommomCenteredPopup.extraTop
+
+	---------------------------
+	-- left: what is saved
+
+	Add( RulesCaption( CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT, listTop, "SAVED ON THIS PC" ) )
+
+	local NoRulesText = Add( RulesText( CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_RIGHT, listTop + RULE_LIST_TOP + 12, 18, "notosans_regular", 0.62, 0.62, 0.62 ) )
+	NoRulesText:setText( "Nothing saved yet. Name the rules of your lobby on the right and save them." )
+	NoRulesText:setAlpha( #shield_rules == 0 and 1 or 0 )
+
+	local ActiveRulesList = LUI.UIList.new( f1_local1, f1_arg0, RULE_ROW_SPACING, 0, nil, false, false, false, false )
+	ActiveRulesList:setLeftRight( 0.5, 0.5, CoD.ShieldSettingsFrame.LIST_LEFT, CoD.ShieldSettingsFrame.LIST_LEFT + RULE_ROW_WIDTH )
+	ActiveRulesList:setTopBottom( 0.5, 0.5, listTop + RULE_LIST_TOP, listTop + RULE_LIST_TOP + RULE_LIST_HEIGHT )
 	ActiveRulesList:setAutoScaleContent( true )
-	ActiveRulesList:setVerticalCount(10)
-	ActiveRulesList:setHorizontalCount(1)
-	ActiveRulesList:setSpacing( 10 )
+	ActiveRulesList:setVerticalCount( RULE_ROWS )
+	ActiveRulesList:setHorizontalCount( 1 )
+	ActiveRulesList:setSpacing( RULE_ROW_SPACING )
 	ActiveRulesList:setWidgetType( CoD.ShieldActiveRuleRow )
 	ActiveRulesList:setVerticalCounter( CoD.verticalCounter )
 	ActiveRulesList:setDataSource( "ShieldActiveRulesList" )
@@ -579,50 +727,80 @@ LUI.createMenu.Shield_Rules_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	self:addElement( ActiveRulesList )
 	self.ActiveRulesList = ActiveRulesList
 
+	---------------------------
+	-- right: which one Load uses
+
+	Add( RulesText( CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, CommomCenteredPopup.descTop, 21, "notosans_regular", ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b ) ):setText( "Select a rule on the left to load it into the lobby you are in. To keep the rules of this lobby, give them a name and save them." )
+
+	Add( RulesCaption( CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, extraTop - 62, "SELECTED" ) )
+
+	local SelectedRule = Add( RulesText( CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, extraTop - 40, 24, "notosans_bold", 1, 0.85, 0.2 ) )
+
+	local function ShowSelectedRule()
+		local name = Engine[@"getdvarstring"]("shield_selected_saved_rule")
+
+		if name == "" then
+			SelectedRule:setRGB( 0.62, 0.62, 0.62 )
+			SelectedRule:setText( "None" )
+		else
+			SelectedRule:setRGB( 1, 0.85, 0.2 )
+			SelectedRule:setText( name )
+		end
+	end
+
+	ShowSelectedRule()
+
+	local function SelectRule( name )
+		if name == nil then
+			return
+		end
+
+		CoD.EnhPrintInfo("selected rule -> " .. name)
+
+		Engine[@"setdvar"]("shield_selected_saved_rule", name)
+		ActiveRulesList:setDataSource( "ShieldActiveRulesListEmpty" )
+		ActiveRulesList:setDataSource( "ShieldActiveRulesList" )
+		ShowSelectedRule()
+	end
+
+	local function RemoveRule( name )
+		if name == nil then
+			return
+		end
+
+		CoD.EnhPrintInfo("remove rule -> " .. name)
+
+		Engine[@"exec"](Engine[@"getprimarycontroller"](), 'rules_remove ' .. '"' .. name .. '"')
+	end
+
+	-- the name of a row, nil when the list is empty
+	local function RuleNameOf( element, model )
+		local RuleName = element:getModel( model, "RuleName" )
+		return RuleName and RuleName:get()
+	end
+
+	-- for updates, until the menu closes
+	CoD.Menu.ActiveRulesList = ActiveRulesList
+	CoD.Menu.ActiveRulesEmpty = NoRulesText
+
 	Engine[@"exec"](Engine[@"getprimarycontroller"](), "rules_push")
 	ActiveRulesList:AddContextualMenuAction( f1_local1, f1_arg0, @"menu/select", function ( f13_arg0, f13_arg1, f13_arg2, f13_arg3 )
-		if AlwaysTrue() then
-			return function ( f14_arg0, f14_arg1, f14_arg2, f14_arg3 )
-				local RuleName = f14_arg0:getModel(f14_arg2, "RuleName")
-				CoD.EnhPrintInfo("selected rule -> " .. RuleName:get())
-
-				Engine[@"setdvar"]("shield_selected_saved_rule", RuleName:get())
-				ActiveRulesList:setDataSource( "ShieldActiveRulesListEmpty" )
-				ActiveRulesList:setDataSource( "ShieldActiveRulesList" )
-				--CoD.OverlayUtility.ShowToast("Saved Rules", "Update", "Selected Rule " .. RuleName:get() .. "!", "mm_icon")
-			end
-			
-		else
-			CoD.EnhPrintInfo("WTF")
+		return function ( f14_arg0, f14_arg1, f14_arg2, f14_arg3 )
+			SelectRule( RuleNameOf( f14_arg0, f14_arg2 ) )
 		end
-	end ) 
+	end )
 
 	ActiveRulesList:AddContextualMenuAction( f1_local1, f1_arg0, @"menu/remove", function ( f13_arg0, f13_arg1, f13_arg2, f13_arg3 )
-		if AlwaysTrue() then
-			return function ( f14_arg0, f14_arg1, f14_arg2, f14_arg3 )
-				local RuleName = f14_arg0:getModel(f14_arg2, "RuleName")
-				CoD.EnhPrintInfo("remove rule -> " .. RuleName:get())
-
-				Engine[@"exec"](Engine[@"getprimarycontroller"](), 'rules_remove ' .. '"' .. RuleName:get() .. '"')
-			end
-			
-		else
-			CoD.EnhPrintInfo("WTF")
+		return function ( f14_arg0, f14_arg1, f14_arg2, f14_arg3 )
+			RemoveRule( RuleNameOf( f14_arg0, f14_arg2 ) )
 		end
-	end ) 
+	end )
 
 	CoD.PCWidgetUtility.SetupContextualMenu( ActiveRulesList, f1_arg0, "RuleName", "", "" )
 
 	f1_local1:AddButtonCallbackFunction( ActiveRulesList, f1_arg0, Enum[@"luibutton"][@"lui_key_xbx_pssquare"], "ui_remove", function ( element, menu, controller, model )
-		if AlwaysTrue() then
-			local RuleName = element:getModel(model, "RuleName")
-			CoD.EnhPrintInfo("remove rule -> " .. RuleName:get())
-
-			Engine[@"exec"](Engine[@"getprimarycontroller"](), 'rules_remove ' .. '"' .. RuleName:get() .. '"')
-			return true
-		else
-			
-		end
+		RemoveRule( RuleNameOf( element, model ) )
+		return true
 	end, function ( element, menu, controller )
 		if IsGamepad( controller ) then
 			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xbx_pssquare"], @"menu/remove", nil, "ui_remove" )
@@ -636,18 +814,8 @@ LUI.createMenu.Shield_Rules_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	end, false )
 
 	f1_local1:AddButtonCallbackFunction( ActiveRulesList, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		if AlwaysTrue() then
-			local RuleName = element:getModel(model, "RuleName")
-			CoD.EnhPrintInfo("selected rule -> " .. RuleName:get())
-
-			Engine[@"setdvar"]("shield_selected_saved_rule", RuleName:get())
-			ActiveRulesList:setDataSource( "ShieldActiveRulesListEmpty" )
-			ActiveRulesList:setDataSource( "ShieldActiveRulesList" )
-			--CoD.OverlayUtility.ShowToast("Saved Rules", "Update", "Selected Rule " .. RuleName:get() .. "!", "mm_icon")
-			return true
-		else
-			
-		end
+		SelectRule( RuleNameOf( element, model ) )
+		return true
 	end, function ( element, menu, controller )
 		if IsGamepad( controller ) then
 			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/select", nil, "ui_confirm" )
@@ -660,87 +828,17 @@ LUI.createMenu.Shield_Rules_SettingsPopup = function ( f1_arg0, f1_arg1 )
 		end
 	end, false )
 
-	-- for updates
-	CoD.Menu.ActiveRulesList = ActiveRulesList
-
 	ActiveRulesList.id = "ActiveRulesList"
 
-	--LUI_DebugElement(f1_local1, f1_arg0, self, ActiveRulesList, "ActiveRulesList", 10)
+	---------------------------
+	-- right: the name, save and load
 
-	-- ...
-	local SaveRuleButton = CoD.DirectorSelectButtonMiniInternal.new( f1_local1, f1_arg0, 0.50, 0.50, -319.00, -9.00, 0.50, 0.50, 352.25, 402.25 )
-	
-	SaveRuleButton.MiddleText:setTTF( "notosans_bold" )
-	SaveRuleButton.MiddleText:setText("Save Current Rules")
-
-	SaveRuleButton.MiddleTextFocus:setText("Save Current Rules")
-	SaveRuleButton.MiddleTextFocus:setTTF( "notosans_bold" )
-	
-	SaveRuleButton:linkToElementModel( self, nil, false, function ( model )
-		SaveRuleButton:setModel( model, f1_arg1 )
-	end )
-	self:addElement( SaveRuleButton )
-	self.SaveRuleButton = SaveRuleButton
-
-	f1_local1:AddButtonCallbackFunction( SaveRuleButton, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		PlaySoundAlias( "uin_paint_image_flip_toggle" )
-		CoD.EnhPrintInfo("SaveRuleButton")
-		ShieldSaveGameRules()
-	end, function ( element, menu, controller )
-		if IsGamepad( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/select", nil, "ui_confirm" )
-			return true
-		elseif IsMouseOrKeyboard( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-			return false
-		else
-			return false
-		end
-	end, false )
-
-	SaveRuleButton.id = "SaveRuleButton"
-
-	local LoadRuleButton = CoD.DirectorSelectButtonMiniInternal.new( f1_local1, f1_arg0, 0.50, 0.50, 2.75, 312.75, 0.50, 0.50, 352.25, 402.25 )
-	
-	LoadRuleButton.MiddleText:setTTF( "notosans_bold" )
-	LoadRuleButton.MiddleText:setText("Load Selected Rules")
-
-	LoadRuleButton.MiddleTextFocus:setText("Load Selected Rules")
-	LoadRuleButton.MiddleTextFocus:setTTF( "notosans_bold" )
-	
-	LoadRuleButton:linkToElementModel( self, nil, false, function ( model )
-		LoadRuleButton:setModel( model, f1_arg1 )
-	end )
-	self:addElement( LoadRuleButton )
-	self.LoadRuleButton = LoadRuleButton
-
-	f1_local1:AddButtonCallbackFunction( LoadRuleButton, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
-		PlaySoundAlias( "uin_paint_image_flip_toggle" )
-		CoD.EnhPrintInfo("LoadRuleButton")
-		ShieldLoadGameRules()
-		-- ...
-
-	end, function ( element, menu, controller )
-		if IsGamepad( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/select", nil, "ui_confirm" )
-			return true
-		elseif IsMouseOrKeyboard( controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
-			return false
-		else
-			return false
-		end
-	end, false )
-
-	LoadRuleButton.id = "LoadRuleButton"
-
-	-- text box
-	local NameEditBox = CoD.Shield_NameEditBox.new( self, f1_arg0, 0.50, 0.50, -319.00, -7.00, 0.50, 0.50, 283.76, 333.76 )
+	local NameEditBox = CoD.Shield_NameEditBox.new( self, f1_arg0, 0.5, 0.5, CoD.ShieldSettingsFrame.RIGHT_LEFT, CoD.ShieldSettingsFrame.RIGHT_RIGHT, 0.5, 0.5, extraTop, extraTop + 50 )
 	NameEditBox:linkToElementModel( self, nil, false, function ( model )
 		NameEditBox:setModel( model, f1_arg1 )
 	end )
-	NameEditBox.TextBox:setLeftRight(0, 0, 20 + 110, 320 + 110)
-	NameEditBox.RankHighlight:setText("^2Save as Name: ")
+	NameEditBox.TextBox:setLeftRight( 0, 0, 90, 340 )
+	NameEditBox.RankHighlight:setText( "Name:" )
 	self:addElement( NameEditBox )
 	self.NameEditBox = NameEditBox
 
@@ -751,7 +849,8 @@ LUI.createMenu.Shield_Rules_SettingsPopup = function ( f1_arg0, f1_arg1 )
 		NameEditBoxModel = Engine[@"createmodel"]( Engine[@"getmodelforcontroller"]( f1_arg1 ), "Shield_Rule_Name" )
 	end
 
-	NameEditBoxModel:set("")
+	-- the name saved under last
+	NameEditBoxModel:set( Engine[@"getdvarstring"]("shield_selected_saved_rule_name") )
 
 	CoD.PCUtility.SetupEditControlWithModel( NameEditBox, f1_arg0, self, NameEditBoxModel, function ( f331_arg0, f331_arg1, f331_arg2 )
 		if not f331_arg2.canceled and f331_arg2.name == "textbox_editdone" then
@@ -759,19 +858,35 @@ LUI.createMenu.Shield_Rules_SettingsPopup = function ( f1_arg0, f1_arg1 )
 
 			CoD.EnhPrintInfo("Rule Name", NameData)
 			PlaySoundAlias( "uin_paint_image_flip_toggle" )
-			
+
 			f331_arg0:set(NameData)
 			Engine[@"setdvar"]("shield_selected_saved_rule_name", NameData)
 		else
-			f331_arg0:set("") -- reset it
+			f331_arg0:set( Engine[@"getdvarstring"]("shield_selected_saved_rule_name") )
 		end
 	end )
 
 	self.NameEditBoxModel = NameEditBoxModel
 	NameEditBox.id = "NameEditBox"
 
-	--LUI_DebugElement(f1_local1, f1_arg0, self, NameEditBox, "NameEditBox", 10)
-	
+	local SaveRuleButton = NewRulesButton( self, f1_local1, f1_arg0, "SAVE CURRENT RULES", extraTop + 62 )
+	self.SaveRuleButton = SaveRuleButton
+	SaveRuleButton.id = "SaveRuleButton"
+
+	OnRulesButton( f1_local1, f1_arg0, SaveRuleButton, function ()
+		CoD.EnhPrintInfo("SaveRuleButton")
+		ShieldSaveGameRules()
+	end )
+
+	local LoadRuleButton = NewRulesButton( self, f1_local1, f1_arg0, "LOAD SELECTED RULE", extraTop + 124 )
+	self.LoadRuleButton = LoadRuleButton
+	LoadRuleButton.id = "LoadRuleButton"
+
+	OnRulesButton( f1_local1, f1_arg0, LoadRuleButton, function ()
+		CoD.EnhPrintInfo("LoadRuleButton")
+		ShieldLoadGameRules()
+	end )
+
 	self:mergeStateConditions( {
 		{
 			stateName = "KBM",
@@ -824,9 +939,6 @@ LUI.createMenu.Shield_Rules_SettingsPopup = function ( f1_arg0, f1_arg1 )
 	if PostLoadFunc then
 		PostLoadFunc( self, f1_arg0 )
 	end
-	
-	f1_local7 = self
-	--MenuHidesFreeCursor( f1_local1, f1_arg0 )
 
 	CoD.EnhPrintInfo("Called", "Shield's Rules Settings Menu")
 
@@ -834,7 +946,7 @@ LUI.createMenu.Shield_Rules_SettingsPopup = function ( f1_arg0, f1_arg1 )
 end
 
 CoD.Shield_Rules_SettingsPopup.__resetProperties = function ( f13_arg0 )
-	
+
 end
 
 CoD.Shield_Rules_SettingsPopup.__clipsPerState = {
@@ -847,15 +959,24 @@ CoD.Shield_Rules_SettingsPopup.__clipsPerState = {
 	KBM = {
 		DefaultClip = function ( f15_arg0, f15_arg1 )
 			f15_arg0:__resetProperties()
-			f15_arg0:setupElementClipCounter( 2 )
+			f15_arg0:setupElementClipCounter( 0 )
 		end
 	}
 }
 
 CoD.Shield_Rules_SettingsPopup.__onClose = function ( f16_arg0 )
+	if CoD.Menu.ActiveRulesList == f16_arg0.ActiveRulesList then
+		CoD.Menu.ActiveRulesList = nil
+		CoD.Menu.ActiveRulesEmpty = nil
+	end
+
 	f16_arg0.CommomCenteredPopup:close()
 	f16_arg0.NameEditBox:close()
 	f16_arg0.LoadRuleButton:close()
 	f16_arg0.SaveRuleButton:close()
 	f16_arg0.ActiveRulesList:close()
+
+	for _, element in ipairs( f16_arg0.Parts ) do
+		element:close()
+	end
 end
