@@ -166,9 +166,11 @@ local function ShieldSaveGameRules()
 end
 
 local function ShieldLoadGameRules()
+	-- nothing selected: nothing to load (it used to load a rule called "Unnamed Rule")
 	local Name_To_Use = Engine[@"getdvarstring"]("shield_selected_saved_rule")
 	if Name_To_Use == "" then
-		Name_To_Use = "Unnamed Rule"
+		CoD.OverlayUtility.ShowToast("Mod Manager", "Update", "^1Select a rule to load first", "mm_icon")
+		return
 	end
 
 	-- preload the datasources first!
@@ -354,9 +356,11 @@ CoD.Shield.RuleLoadCallback = function(event_name, event_table)
 					local bodyName = tostring(Roster.assetName)
 					local bodyIndex = Roster.bodyIndex
 					local game_settings = Engine[@"getgametypesettings"]()
+					local role_limits = game_settings and game_settings[@"maxuniquerolesperteam"]
 
-					if setting_name == bodyName then
-						game_settings[@"maxuniquerolesperteam"][bodyIndex]:set(tonumber(setting_value) or setting_value)
+					-- the limits of specialists are not there in every mode (none in blackout): a rule saved elsewhere skips them
+					if setting_name == bodyName and role_limits ~= nil and role_limits[bodyIndex] ~= nil then
+						role_limits[bodyIndex]:set(tonumber(setting_value) or setting_value)
 					end
 				end
 			end
