@@ -451,10 +451,66 @@ end
 
 ShieldOutfitMarkCounts()
 
+--[[
+	The Ultimis crews of Classified (_ofc) and Alpha Omega (_whi) are hidden from the zombies character menu.
+	Both wear the same outfit and warpaints; the client keeps what is picked for a _whi one in the place of
+	its _ofc twin, so the two share it. Taken out of the hidden list whenever the character list is built,
+	in case the game's list came back.
+]]
+local ShieldUltimisRoles = {
+	@"hash_36BC80636F0FDAC4", -- prt_zm_dempsey_ofc
+	@"hash_46B92E1337B43236", -- prt_zm_nikolai_ofc
+	@"hash_2BCEBDF1BEF33311", -- prt_zm_richtofen_ofc
+	@"hash_6DF0037E3F390B15", -- prt_zm_takeo_ofc
+	@"hash_4CB4663E341A940", -- prt_zm_dempsey_whi
+	@"hash_78AA6812C38263BA", -- prt_zm_nikolai_whi
+	@"hash_73D71FF1E886BBE9", -- prt_zm_richtofen_whi
+	@"hash_1FD4157DCAFC6E45" -- prt_zm_takeo_whi
+}
+
+local function ShieldUnhideUltimis()
+	local hidden = CoD.PlayerRoleUtility.ZMHiddenFrontendPositionRoles
+	if hidden == nil then
+		return
+	end
+
+	local shown = 0
+	for _, role in ipairs( ShieldUltimisRoles ) do
+		if hidden[role] then
+			hidden[role] = nil
+			shown = shown + 1
+		end
+	end
+
+	if shown > 0 then
+		CoD.EnhPrintInfo( shown, "Ultimis characters shown" )
+	end
+end
+
+local function ShieldShowUltimisCrew()
+	if CoD.PlayerRoleUtility == nil then
+		return
+	end
+
+	ShieldUnhideUltimis()
+
+	if CoD.PlayerRoleUtility.ShieldGameGetPlayerRolesListHelper == nil then
+		CoD.PlayerRoleUtility.ShieldGameGetPlayerRolesListHelper = CoD.PlayerRoleUtility.GetPlayerRolesListHelper
+	end
+
+	CoD.PlayerRoleUtility.GetPlayerRolesListHelper = function ( menu, controller, mode, filter )
+		ShieldUnhideUltimis()
+		return CoD.PlayerRoleUtility.ShieldGameGetPlayerRolesListHelper( menu, controller, mode, filter )
+	end
+end
+
+ShieldShowUltimisCrew()
+
 -- Reactives and Calling Card Fixes
 CoD.UnlockReload = function()
 	ShieldOwnPresets()
 	ShieldOutfitMarkCounts()
+	ShieldShowUltimisCrew()
 
 	-- Outfits Theme Unlocking, even some unused ones
 	DataSources.MPSpecialistThemes = DataSourceHelpers.ListSetup( "MPSpecialistThemes", function ( f56_arg0, f56_arg1 )

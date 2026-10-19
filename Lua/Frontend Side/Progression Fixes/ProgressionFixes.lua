@@ -53,9 +53,9 @@ CoD.PrestigeUtility.FreshStartAction = function ( f18_arg0, f18_arg1, f18_arg2 )
 	Engine[@"exec"](Engine[@"getprimarycontroller"](), "exec gamedata/stats/zm/playerstats_reset.cfg")
 	Engine[@"exec"](Engine[@"getprimarycontroller"](), "exec gamedata/stats/mp/playerstats_reset.cfg")
 
-	-- live stats
-	CoD.RankUtils.SetRank(0)
+	-- live stats, the prestige first: at prestige master, rank 0 would be a paragon rank
 	CoD.RankUtils.SetPrestige(0)
+	CoD.RankUtils.SetRank(0)
 
 	OpenSystemOverlay(f18_arg0, f18_arg0, f18_arg1, "ShieldFreshStartActivate", nil)
 

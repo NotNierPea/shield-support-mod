@@ -11,140 +11,112 @@ CoD.ShieldInitLuaFile()
 -- Wanted Stuff and Utils for Stats..
 CoD.RankUtils = {}
 
-CoD.RankUtils.GetLevelXP = function(level)
+local PRESTIGE_MASTER = 11
+
+--[[
+	The rank stats are 0 based (rank 0 is level 1). Weapons and items unlock by the rank of rankxp
+	(LiveStats_GetRank -> CL_Rank_GetRankForXP), never by the rank stat, so the two always go together.
+	A row of maxrankdata is the xp a rank ends at, which is the xp the next one starts at.
+]]
+local function ModeData()
 	local sessionmode = Engine[@"CurrentSessionMode"]()
-	local rankTable = ""
-	local rankMult
-	local rankTT
-	local XP = 0
 
+	if sessionmode == Enum[@"emodes"][@"mode_zombies"] then
+		return "gamedata/shield/rankutils/maxrankdata_zm.csv", 54, 57600
+	elseif sessionmode == Enum[@"emodes"][@"mode_warzone"] then
+		return "gamedata/shield/rankutils/maxrankdata_wz.csv", 80, 7500
+	end
+
+	return "gamedata/shield/rankutils/maxrankdata_mp.csv", 54, 55600
+end
+
+local function IsPrestigeMaster()
 	local Prestige = Engine[@"getstatbyname"](Engine[@"getprimarycontroller"](), "plevel")
+	return Prestige ~= nil and tonumber(Prestige) == PRESTIGE_MASTER
+end
 
-	local isPrestigeMaster = Prestige ~= nil and tonumber(Prestige) == 11
+-- queued runs after what the buffer already holds, like PrestigeStatsMaster
+local function SetStat(name, value, queued)
+	local command = "statsetbyname " .. name .. " " .. tostring(value)
 
-	if isPrestigeMaster == false then
-		if sessionmode == Enum[@"emodes"][@"mode_multiplayer"] then -- mp
-			rankTable = "gamedata/shield/rankutils/maxrankdata_mp.csv"
-		end
-		if sessionmode == Enum[@"emodes"][@"mode_zombies"] then -- zm
-			rankTable = "gamedata/shield/rankutils/maxrankdata_zm.csv"
-		end
-		if sessionmode == Enum[@"emodes"][@"mode_warzone"] then -- wz
-			rankTable = "gamedata/shield/rankutils/maxrankdata_wz.csv"
-		end
+	if queued then
+		Engine[@"exec"](Engine[@"getprimarycontroller"](), command)
 	else
-		if sessionmode == Enum[@"emodes"][@"mode_multiplayer"] then -- mp
-			rankMult = 55600
-			rankTT = 55
-		end
-		if sessionmode == Enum[@"emodes"][@"mode_zombies"] then -- zm
-			rankMult = 57600
-			rankTT = 55
-		end
-		if sessionmode == Enum[@"emodes"][@"mode_warzone"] then -- wz
-			rankMult = 7500
-			rankTT = 81
-		end
-		local leveldiff = tonumber(level) - rankTT
-		return rankMult * leveldiff
+		Engine[@"execnow"](Engine[@"getprimarycontroller"](), command)
+	end
+end
+
+local function UploadStats()
+	Engine[@"exec"](Engine[@"getprimarycontroller"](), "uploadstats " .. tostring(Engine[@"CurrentSessionMode"]()))
+end
+
+-- a prestige master stays at the top rank, its unlocks with it
+local function SetTopRank(queued)
+	local _, maxRank = ModeData()
+	SetStat("rank", maxRank, queued)
+	SetStat("rankxp", CoD.RankUtils.GetRankXP(maxRank), queued)
+end
+
+CoD.RankUtils.GetRankXP = function(rank)
+	local rankTable, maxRank = ModeData()
+	rank = math.min(tonumber(rank) or 0, maxRank)
+
+	if rank <= 0 then
+		return 0
 	end
 
-	if rankTable ~= "" then
-		local row = tonumber(level) - 1
-		XP = tonumber(Engine[@"TableLookupGetColumnValueForRow"](rankTable, row, 0))
+	return tonumber(Engine[@"TableLookupGetColumnValueForRow"](rankTable, rank - 1, 0)) or 0
+end
+
+-- paragon ranks follow the top rank, one every paragonXP (CL_Rank_GetParagonRankForXP)
+CoD.RankUtils.GetParagonXP = function(rank)
+	local _, maxRank, paragonXP = ModeData()
+	return math.max((tonumber(rank) or 0) - (maxRank + 1), 0) * paragonXP
+end
+
+CoD.RankUtils.GetLevelXP = function(level)
+	if IsPrestigeMaster() then
+		return CoD.RankUtils.GetParagonXP(level)
 	end
-
-	if XP == nil then
-		XP = 0
-	end
-
-	CoD.EnhPrintInfo(XP, "XP Data")
-
-	return XP
+	return CoD.RankUtils.GetRankXP(level)
 end
 
 CoD.RankUtils.SetRank = function(level)
 	if not level then return end
+	level = tonumber(level)
 
-	-- local currentPrestige = CoD.PrestigeUtility.GetCurrentPLevel(controller, Engine.CurrentSessionMode())
-	-- local currentRank = CoD.BlackMarketUtility.GetCurrentRank(controller) + 1
-
-	local Prestige = Engine[@"getstatbyname"](Engine[@"getprimarycontroller"](), "plevel")
-	local sessionmode = Engine[@"CurrentSessionMode"]()
-
-	local isPrestigeMaster = Prestige ~= nil and tonumber(Prestige) == 11
-	local maxXP = CoD.RankUtils.GetLevelXP(tonumber(level))
-
-	if isPrestigeMaster == false then
-		Engine[@"execnow"](Engine[@"getprimarycontroller"](), "statsetbyname rank " .. tonumber(level))
-		Engine[@"execnow"](Engine[@"getprimarycontroller"](), "statsetbyname rankxp " .. maxXP)
-		Engine[@"execnow"](Engine[@"getprimarycontroller"](), "statsetbyname paragon_rankxp " .. 0)	
+	if IsPrestigeMaster() then
+		-- the level is a paragon rank, the rank under it stays at the top
+		SetTopRank()
+		SetStat("paragon_rank", level)
+		SetStat("paragon_rankxp", CoD.RankUtils.GetParagonXP(level))
 	else
-		Engine[@"execnow"](Engine[@"getprimarycontroller"](), "statsetbyname rank " .. 55)
+		local _, maxRank = ModeData()
+		level = math.max(math.min(level, maxRank), 0)
 
-		if sessionmode == Enum[@"emodes"][@"mode_warzone"] then
-			Engine[@"execnow"](Engine[@"getprimarycontroller"](), "statsetbyname rankxp " .. CoD.RankUtils.GetLevelXP(81))
-		else
-			Engine[@"execnow"](Engine[@"getprimarycontroller"](), "statsetbyname rankxp " .. CoD.RankUtils.GetLevelXP(55))
-		end
-
-		Engine[@"execnow"](Engine[@"getprimarycontroller"](), "statsetbyname paragon_rank " .. tonumber(level)) -- rank for prestige master
-		Engine[@"execnow"](Engine[@"getprimarycontroller"](), "statsetbyname paragon_rankxp " .. maxXP)
+		SetStat("rank", level)
+		SetStat("rankxp", CoD.RankUtils.GetRankXP(level))
+		SetStat("paragon_rankxp", 0)
 	end
 
-	-- shield api to fix online stats here...
-	local RankFix = string.format("%0.2i", level)
-
-	if sessionmode == Enum[@"emodes"][@"mode_multiplayer"] then -- mp
-		--Engine[@"exec"](Engine[@"getprimarycontroller"](), "setplayerstat mp rank " .. RankFix)
-		--Engine[@"exec"](Engine[@"getprimarycontroller"](), "setplayerstat mp xp " .. maxXP)
-	end
-	if sessionmode == Enum[@"emodes"][@"mode_zombies"] then -- zm
-		--Engine[@"exec"](Engine[@"getprimarycontroller"](), "setplayerstat zm rank " .. RankFix)
-		--Engine[@"exec"](Engine[@"getprimarycontroller"](), "setplayerstat zm xp " .. maxXP)
-	end
-	if sessionmode == Enum[@"emodes"][@"mode_warzone"] then -- wz
-		--Engine[@"exec"](Engine[@"getprimarycontroller"](), "setplayerstat wz rank " .. RankFix)
-		--Engine[@"exec"](Engine[@"getprimarycontroller"](), "setplayerstat wz xp " .. maxXP)
-	end
-
-	Engine[@"exec"](Engine[@"getprimarycontroller"](), "uploadstats " .. tostring(Engine[@"CurrentSessionMode"]()))
+	UploadStats()
 end
 
 CoD.RankUtils.SetPrestige = function(prestige)
 	if not prestige then return end
+	prestige = tonumber(prestige)
 
-	local sessionmode = Engine[@"CurrentSessionMode"]()
+	SetStat("plevel", prestige)
 
-	-- local currentPrestige = CoD.PrestigeUtility.GetCurrentPLevel(controller, Engine.CurrentSessionMode())
-	if tonumber(prestige) == 11 then
-		-- prestige master here..
-		Engine[@"execnow"](Engine[@"getprimarycontroller"](), "statsetbyname plevel " .. tonumber(11))
+	if prestige == PRESTIGE_MASTER then
 		Engine[@"exec"](Engine[@"getprimarycontroller"](), "PrestigeStatsMaster " .. tostring(Engine[@"CurrentSessionMode"]()))
 
-		if sessionmode == Enum[@"emodes"][@"mode_warzone"] then -- wz
-			Engine[@"execnow"](Engine[@"getprimarycontroller"](), "statsetbyname paragon_rank 81") -- rank for prestige master
-		else
-			Engine[@"execnow"](Engine[@"getprimarycontroller"](), "statsetbyname paragon_rank 55")
-		end
-
-		Engine[@"execnow"](Engine[@"getprimarycontroller"](), "statsetbyname paragon_rankxp 0")
-	else
-		Engine[@"execnow"](Engine[@"getprimarycontroller"](), "statsetbyname plevel " .. tonumber(prestige))
+		-- queued after PrestigeStatsMaster so it can't undo them
+		local _, maxRank = ModeData()
+		SetTopRank(true)
+		SetStat("paragon_rank", maxRank + 1, true)
+		SetStat("paragon_rankxp", 0, true)
 	end
 
-	-- shield api to fix online stats here...
-	local PrestigeFix = string.format("%0.2i", prestige)
-
-	if sessionmode == Enum[@"emodes"][@"mode_multiplayer"] then -- mp
-		--Engine[@"exec"](Engine[@"getprimarycontroller"](), "setplayerstat mp prestige " .. PrestigeFix)
-	end
-	if sessionmode == Enum[@"emodes"][@"mode_zombies"] then -- zm
-		--Engine[@"exec"](Engine[@"getprimarycontroller"](), "setplayerstat zm prestige " .. PrestigeFix)
-	end
-	if sessionmode == Enum[@"emodes"][@"mode_warzone"] then -- wz
-		--Engine[@"exec"](Engine[@"getprimarycontroller"](), "setplayerstat wz prestige " .. PrestigeFix)
-	end
-
-	Engine[@"exec"](Engine[@"getprimarycontroller"](), "uploadstats " .. tostring(Engine[@"CurrentSessionMode"]()))
+	UploadStats()
 end

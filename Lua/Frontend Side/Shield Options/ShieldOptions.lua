@@ -648,19 +648,8 @@ CoD.ShieldOptionsMenu_SafeAreaFront.new = function ( f1_arg0, f1_arg1, f1_arg2, 
 	end )
 
 	AddButton( self, f1_arg0, f1_arg1, "PrestigeMasterButton", "PRESTIGE MASTER", CARD_PADDING, RankTop + 72, function ( menu, controller )
-		local sessionmode = Engine[@"CurrentSessionMode"]()
-		local RankSet = 55
-
-		if sessionmode == Enum[@"emodes"][@"mode_warzone"] then -- wz
-			RankSet = 81
-		end
-
+		-- the top rank and the first paragon rank of the mode come with it
 		CoD.RankUtils.SetPrestige(11)
-		CoD.RankUtils.SetRank(RankSet)
-
-		Engine[@"exec"](Engine[@"getprimarycontroller"](), "statsetbyname rankxp 1457200")
-		-- idk if this even exists in bo4.. (nvm it does lol)
-		Engine[@"exec"](Engine[@"getprimarycontroller"](), "PrestigeStatsMaster " .. tostring(Engine[@"CurrentSessionMode"]()))
 
 		CoD.OverlayUtility.CreateOverlay(controller, menu, "PrestigeMasterActivated")
 	end )
