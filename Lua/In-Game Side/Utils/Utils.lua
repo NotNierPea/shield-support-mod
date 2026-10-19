@@ -145,6 +145,12 @@ local function GuardSubscriptions( class, className )
 	end
 
 	local guard = function ( self, model, callback, ... )
+		-- no model (one a custom map's scripts don't make): the engine would stop on it, UI error 28714
+		if model == nil then
+			CoD.EnhPrintInfo( "no model, by " .. ElementPath( self ), "Model subscription" )
+			return nil
+		end
+
 		if callback == nil then
 			CoD.EnhPrintInfo( "no function, by " .. ElementPath( self ), "Model subscription" )
 			callback = function () end

@@ -282,6 +282,14 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/CustomMaps",
+            "path": "Lua\\Frontend\\CustomMaps.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/PatchNotes",
             "path": "Lua\\Frontend\\PatchNotes.luac",
             "hooks_post": [
