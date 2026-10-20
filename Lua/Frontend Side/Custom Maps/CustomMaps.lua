@@ -177,6 +177,33 @@ local function SplitCustomMaps( list )
 	CoD.ShieldCustomMaps.baseCount = #base
 end
 
+--[[
+	A vanilla bug: an entry's "locked" is nil when the map isn't locked, and the list's rows keep their models from the last
+	fill, so a row keeps the lock of the entry it showed before. Beginners (locked above level 20) on the public tab locked
+	the classic map that took its row (Dead of the Night). The rows are unlocked before every fill.
+]]
+local function UnlockRows( controller )
+	local root = Engine[@"getmodel"]( Engine[@"getmodelforcontroller"]( controller ), MapListName )
+
+	if root == nil then
+		return
+	end
+
+	for index = 1, 100 do
+		local row = Engine[@"getmodel"]( root, index )
+
+		if row == nil then
+			break
+		end
+
+		local locked = Engine[@"getmodel"]( row, "locked" )
+
+		if locked ~= nil then
+			locked:set( false )
+		end
+	end
+end
+
 local source = DataSources[MapListName]
 
 if source ~= nil and not source.shieldCustomMaps then
@@ -184,6 +211,7 @@ if source ~= nil and not source.shieldCustomMaps then
 	source.shieldCustomMaps = true
 
 	source.prepare = function ( controller, list, filter )
+		UnlockRows( controller )
 		prepare( controller, list, filter )
 		SplitCustomMaps( list )
 		CoD.ShieldWrapPlaylistInfo()
