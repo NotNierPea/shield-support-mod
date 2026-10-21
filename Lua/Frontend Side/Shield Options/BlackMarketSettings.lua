@@ -61,6 +61,22 @@ local BlackMarketSettings = {
 	}
 }
 
+--[[
+	The gunsmith asks the loot season what it may show, as the live game grew: the row of personalize slots from
+	season 4, death effects and accessories on a base weapon from season 5 (Grand Heist). With an earlier season
+	picked here they were gone. The season only picks the black market's pass, so the gunsmith is the last one's.
+	The game's file makes its table anew when it loads, which can be after this one: ReloadOverrides.lua does it again.
+]]
+CoD.BlackMarketSeasonReload = function()
+	if CoD.BlackMarketUtility then
+		CoD.BlackMarketUtility.IsCurrentLootSeasonAtLeast = function ( season )
+			return true
+		end
+	end
+end
+
+CoD.BlackMarketSeasonReload()
+
 -- what is in the config now
 for _, setting in ipairs( BlackMarketSettings ) do
 	Engine[@"exec"]( Engine[@"getprimarycontroller"](), "readjson " .. setting.dvar .. " blackmarket " .. setting.key .. " " .. setting.type .. " " .. setting.default )

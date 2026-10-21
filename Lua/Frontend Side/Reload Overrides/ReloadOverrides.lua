@@ -398,6 +398,11 @@ CoD.ReloadOverrides = function()
 	if CoD.EarnCodPointsReload then
 		CoD.EarnCodPointsReload()
 	end
+
+	-- the gunsmith of the last season whatever season the pass is on, see BlackMarketSettings.lua
+	if CoD.BlackMarketSeasonReload then
+		CoD.BlackMarketSeasonReload()
+	end
 end
 
 CoD.RefreshShieldShit = function()
