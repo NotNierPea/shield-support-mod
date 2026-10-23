@@ -359,8 +359,9 @@ CoD.ShieldReativesSettingsTab.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg
 	self:addElement( Backing )
 	self.Backing = Backing
 
+	-- shown in every state: it is a category of the Shield tab (CoD.ShieldCamoCategories in ExtraCamos.lua), not of the black market one
 	local ShieldReactiveSettingsList = CoD.ShieldReactiveSettingsList.new( f1_arg0, f1_arg1, 0, 0, 0, 1214, 0, 0, 24, 374 )
-	ShieldReactiveSettingsList:setAlpha( 0 )
+	ShieldReactiveSettingsList:setAlpha( 1 )
 	ShieldReactiveSettingsList.Label:setText( "REACTIVE STAGES SETTINGS" )
 	self:addElement( ShieldReactiveSettingsList )
 	self.ShieldReactiveSettingsList = ShieldReactiveSettingsList
@@ -445,7 +446,7 @@ end
 
 CoD.ShieldReativesSettingsTab.__resetProperties = function ( f11_arg0 )
 	f11_arg0.ShieldReactiveSettingsList:completeAnimation()
-	f11_arg0.ShieldReactiveSettingsList:setAlpha( 0 )
+	f11_arg0.ShieldReactiveSettingsList:setAlpha( 1 )
 end
 
 CoD.ShieldReativesSettingsTab.__clipsPerState = {

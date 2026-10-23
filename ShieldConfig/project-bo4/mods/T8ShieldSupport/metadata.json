@@ -498,6 +498,14 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/CustomCamos",
+            "path": "Lua\\Frontend\\CustomCamos.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/Mastercraft",
             "path": "Lua\\Frontend\\Mastercraft.luac",
             "hooks_post": [
@@ -1627,6 +1635,16 @@
             "type": "localizeentry",
             "name": "shield/extra_camos_tab",
             "value": "Extra Camos"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/custom_camos_tab",
+            "value": "Custom Camos"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/shield_camos_tab",
+            "value": "Shield"
         },
         {
             "type": "localizeentry",

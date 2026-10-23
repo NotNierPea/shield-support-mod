@@ -1,0 +1,10 @@
+{
+    "name": "shield_camo_digital",
+    "template": "../templates/camo_basic.json",
+    "textures": {
+        "colorMap": "shield_camo_digital_col.png"
+    },
+    "values": {
+        "glossRange": [ 4, 8 ]
+    }
+}

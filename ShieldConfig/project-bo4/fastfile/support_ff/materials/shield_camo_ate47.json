@@ -1,0 +1,21 @@
+{
+    "name": "shield_camo_ate47",
+    "template": "../templates/camo_layers.json",
+    "textures": {
+        "colorMap": "#shield_camo_circuit_col",
+        "unk_c089ac16": "#ate47_cred",
+        "unk_c089ac15": "shield_camo_clear.png",
+        "unk_c089ac14": "shield_camo_clear.png"
+    },
+    "values": {
+        "layer1Scroll": [ 0.1, 0.0 ],
+        "layer1Tile": [ 1, 1 ],
+        "layer1Tint": [ 1, 1, 1 ],
+        "layerAlpha": 6,
+        "layer2Scroll": [ 0, 0 ],
+        "layer2Tint": [ 0, 0, 0 ],
+        "layer3Scroll": [ 0, 0 ],
+        "layer3Tint": [ 0, 0, 0 ],
+        "distortionAmount": [ 0, 0, 0 ]
+    }
+}

@@ -23,3 +23,10 @@ image,mod_manager_timers.png
 image,mm_icon.png
 image,shield_public_banner.png
 image,loading_shield.png
+
+// custom camos (camo index 399 and up): shield-client's custom_camos.cpp lays the sets of shield_camos on each
+// weapon's own camo (the set's "template"), materials/ and templates/ are the camo materials, the csv is the menu's list
+weaponcamo,tables/weaponcamo/shield_camos.json
+stringtable,gamedata/shield/custom_camos.csv
+image,shield_camo_circuit_prev.png
+image,shield_camo_digital_prev.png

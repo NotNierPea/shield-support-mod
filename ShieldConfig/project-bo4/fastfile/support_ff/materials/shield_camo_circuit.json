@@ -1,0 +1,25 @@
+{
+    "name": "shield_camo_circuit",
+    "template": "../templates/camo_layers.json",
+    "textures": {
+        "colorMap": "shield_camo_circuit_col.png",
+        "unk_c089ac16": "shield_camo_circuit_lines.png",
+        "unk_c089ac15": "shield_camo_circuit_glow.png",
+        "unk_c089ac14": "shield_camo_circuit_sparks.png"
+    },
+    "values": {
+        "layer1Scroll": [ 0.06, 0.03 ],
+        "layer1Tile": [ 1, 1 ],
+        "layer1Tint": [ 0.2, 0.85, 1.0 ],
+        "layer2Scroll": [ -0.04, 0.02 ],
+        "layer2Tile": [ 1, 1 ],
+        "layer2Pulse": [ 0.9, 1.1 ],
+        "layer2PulseSpeed": 0.5,
+        "layer2Tint": [ 0.55, 0.2, 1.0 ],
+        "layer3Scroll": [ 0.0, -0.25 ],
+        "layer3Tile": [ 1, 1 ],
+        "layer3Tint": [ 1, 1, 1 ],
+        "layerAlpha": 4,
+        "distortionAmount": [ 8, 0, 4 ]
+    }
+}

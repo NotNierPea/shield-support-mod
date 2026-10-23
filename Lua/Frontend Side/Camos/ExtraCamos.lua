@@ -42,6 +42,9 @@ local ApplyExtraCamo = function(Controller, CamoIndex, Menu)
 	end
 end
 
+-- the custom camos tab (CustomCamos.lua) puts its camos on the same way
+CoD.ShieldApplyExtraCamo = ApplyExtraCamo
+
 local IsWeaponOptionEquippedCustom = function ( f61_arg0, f61_arg1, f61_arg2, f61_arg3 )
 	local f61_local0 = CoD.BaseUtility.GetMenuSessionMode( f61_arg0 )
 	if f61_local0 == Enum[@"emodes"][@"mode_zombies"] then
@@ -64,9 +67,128 @@ local IsWeaponOptionEquippedCustom = function ( f61_arg0, f61_arg1, f61_arg2, f6
 	return false
 end
 
+CoD.ShieldIsCamoEquipped = IsWeaponOptionEquippedCustom
+
 ---------------------------
 
+--[[
+	The Shield tab, next to the game's Black Market / Zombies / Multiplayer ones at the top of a weapon's camos
+	(DataSources.WeaponOptionsGroups). Like Black Market it has its own filter, and with it the camo categories on the
+	left are ours: Reactive Stage, Extra Camos, Custom Camos, each with its widget as the frame.
+]]
+local SHIELD_CAMO_FILTER = "shield_camos"
+
+CoD.ShieldCamoCategories = {
+	{ refHash = @"shield_reactive", name = @"shield/reactive_settings_tab", frameWidget = "CoD.ShieldReativesSettingsTab" },
+	{ refHash = @"shield_extra", name = @"shield/extra_camos_tab", frameWidget = "CoD.ShieldExtraCamos" },
+	{ refHash = @"shield_custom", name = @"shield/custom_camos_tab", frameWidget = "CoD.ShieldCustomCamos" }
+}
+
+local function IsShieldCamoFilter()
+	return DataSources.WeaponOptions.getCurrentFilterItem() == SHIELD_CAMO_FILTER
+end
+
+-- the game's tabs, then ours
+if DataSources.WeaponOptionsGroups and not DataSources.WeaponOptionsGroups.shieldTab then
+	local GamePrepareGroups = DataSources.WeaponOptionsGroups.prepare
+
+	DataSources.WeaponOptionsGroups.shieldTab = true
+	DataSources.WeaponOptionsGroups.prepare = function ( controller, list, filter )
+		GamePrepareGroups( controller, list, filter )
+
+		local items = list[list.customDataSourceHelper]
+		local root = ListHelper_GetListHelperModel( list, true )
+
+		if items == nil or root == nil then
+			return
+		end
+
+		local model = Engine[@"createmodel"]( root, #items + 1 )
+		LuaUtils.CreateModelsFromTable( model, {
+			name = @"shield/shield_camos_tab",
+			available = true,
+			originVisible = false,
+			origin = @"hash_0"
+		} )
+		table.insert( items, {
+			model = model,
+			properties = {
+				filter = SHIELD_CAMO_FILTER,
+				mode = Enum[@"emodes"][@"mode_invalid"]
+			}
+		} )
+	end
+end
+
+-- The camos' container shows the category buttons in the black market tab only (its states AllVisible and
+-- CamoOptionsVisible): the Shield tab shows them too. Its state is checked again on the tab's listUpdate.
+local function ShowShieldCategories( menu )
+	local container = menu and menu.OptionsContainer
+
+	if container == nil or container.mergeStateConditions == nil or container.shieldCategories then
+		return
+	end
+
+	container.shieldCategories = true
+	container:mergeStateConditions( {
+		{
+			stateName = "CamoOptionsVisible",
+			condition = function ( menu, element, event )
+				return IsShieldCamoFilter() or CoD.WeaponOptionsUtility.IsBlackMarketCamoFilter() and not CoD.WeaponOptionsUtility.ShouldHideBlackMarketCamoFilters( menu )
+			end
+		}
+	} )
+end
+
+-- A tab picked: the game's sets its filter and picks a category of the game, ours picks its first. The categories
+-- change with the tab, so they are made again first.
+local GameSetFilterFromTab = CoD.WeaponOptionsUtility.SetWeaponOptionsFilterFromTab
+CoD.WeaponOptionsUtility.SetWeaponOptionsFilterFromTab = function ( menu, tabElement )
+	local filter = tabElement and tabElement.filter
+	local list = menu and menu.OptionsContainer and menu.OptionsContainer.CamoOptions and menu.OptionsContainer.CamoOptions.CamoFilterList
+
+	ShowShieldCategories( menu )
+
+	if filter then
+		DataSources.WeaponOptions.setCurrentFilterItem( filter )
+	end
+
+	if list then
+		list:updateDataSource()
+	end
+
+	if not IsShieldCamoFilter() then
+		return GameSetFilterFromTab( menu, tabElement )
+	end
+
+	if list and DataSources.WeaponOptionsCamoCategories.getCount( list ) > 0 then
+		list:findItem( nil, {
+			refHash = CoD.ShieldCamoCategories[1].refHash
+		}, true, nil )
+	end
+end
+
 DataSources.WeaponOptionsCamoCategories = DataSourceHelpers.ListSetup( "WeaponOptionsCamoCategories", function ( f41_arg0, f41_arg1 )
+	-- the Shield tab: our categories
+	if IsShieldCamoFilter() then
+		local categories = {}
+
+		for index, category in ipairs( CoD.ShieldCamoCategories ) do
+			table.insert( categories, {
+				models = {
+					name = category.name,
+					frameWidget = category.frameWidget
+				},
+				properties = {
+					refHash = category.refHash,
+					selectIndex = index == 1
+				}
+			} )
+		end
+
+		return categories
+	end
+
 	local f41_local0 = {}
 	local f41_local1 = {
 		refHash = @"camo_base",
@@ -102,30 +224,6 @@ DataSources.WeaponOptionsCamoCategories = DataSourceHelpers.ListSetup( "WeaponOp
 			} )
 		end
 	end
-
-	table.insert( f41_local4, {
-		models = {
-			name = @"shield/reactive_settings_tab",
-			frameWidget = "CoD.ShieldReativesSettingsTab",
-			breadcrumb = nil
-		},
-		properties = {
-			refHash = f41_local1.refHash,
-			selectIndex = f41_local1.selectIndex
-		}
-	} )
-
-	table.insert( f41_local4, {
-		models = {
-			name = @"shield/extra_camos_tab",
-			frameWidget = "CoD.ShieldExtraCamos",
-			breadcrumb = nil
-		},
-		properties = {
-			refHash = f41_local1.refHash,
-			selectIndex = f41_local1.selectIndex
-		}
-	} )
 
 	return f41_local4
 end, true )
@@ -210,8 +308,9 @@ CoD.ShieldExtraCamos.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg
 	self:addElement( Backing )
 	self.Backing = Backing
 
+	-- shown in every state: it is a category of the Shield tab (CoD.ShieldCamoCategories), no longer of the black market one
 	local ShieldCamosList = CoD.ShieldCamosList.new( f1_arg0, f1_arg1, 0, 0, 0, 1214, 0, 0, 24, 374 )
-	ShieldCamosList:setAlpha( 0 )
+	ShieldCamosList:setAlpha( 1 )
 	ShieldCamosList.Label:setText( "EXTRA/UNUSED CAMOS" )
 	self:addElement( ShieldCamosList )
 	self.ShieldCamosList = ShieldCamosList
@@ -296,7 +395,7 @@ end
 
 CoD.ShieldExtraCamos.__resetProperties = function ( f11_arg0 )
 	f11_arg0.ShieldCamosList:completeAnimation()
-	f11_arg0.ShieldCamosList:setAlpha( 0 )
+	f11_arg0.ShieldCamosList:setAlpha( 1 )
 end
 
 CoD.ShieldExtraCamos.__clipsPerState = {
