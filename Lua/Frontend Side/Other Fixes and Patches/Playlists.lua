@@ -231,6 +231,44 @@ CoD.PlaylistsReload = function()
 		return self
 	end
 
+	--[[
+		The grid puts an item of a row at that row's count of taken cells + 1, so a big (2 rows) card only lays out in the
+		first columns, before any small one ("list/grid was updated recursively and the values changed" otherwise): the
+		featured cards go first, each playlist once, at most 2 of them big (the 3rd would fill row 2 and the next card
+		would land on it), the others small.
+	]]
+	local MAX_BIG_CARDS = 2
+
+	CoD.DirectorUtility.CreateCardListDataSourceBase = CoD.DirectorUtility.CreateCardListDataSourceBase or CoD.DirectorUtility.CreateCardListDataSource
+	CoD.DirectorUtility.CreateCardListDataSource = function ( ... )
+		local list = CoD.DirectorUtility.CreateCardListDataSourceBase( ... )
+		local big, small, seen = {}, {}, {}
+
+		for _, item in ipairs( list ) do
+			local card = item.models or {}
+			local key = card.playlist or item
+			if not seen[key] then
+				seen[key] = true
+				if card.featured and #big < MAX_BIG_CARDS then
+					table.insert( big, item )
+				else
+					if card.featured then
+						card.featured = false
+						if item.properties then
+							item.properties.rowSpan = 1
+						end
+					end
+					table.insert( small, item )
+				end
+			end
+		end
+
+		for _, item in ipairs( small ) do
+			table.insert( big, item )
+		end
+		return big
+	end
+
 	CoD.DirectorFindGame.__onClose = function ( f19_arg0 )
 		f19_arg0.SelectedPlaylistInfo:close()
 		f19_arg0.UpsellBanner:close()
