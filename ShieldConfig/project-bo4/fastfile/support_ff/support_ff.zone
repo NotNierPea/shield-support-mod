@@ -30,3 +30,7 @@ weaponcamo,tables/weaponcamo/shield_camos.json
 stringtable,gamedata/shield/custom_camos.csv
 image,shield_camo_circuit_prev.png
 image,shield_camo_digital_prev.png
+
+// startup video sound: shield-client's intro.cpp gives an overridden video (project-bo4/video/<name>.bk2) the alias
+// shield_bik_<name> in place of the game's bik_<name>; settings copied from core_bootstrap.all's bik_logo_cinematic
+sound,sounds/support_sounds.json

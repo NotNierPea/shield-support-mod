@@ -325,6 +325,74 @@ end
 
 ---------------------------
 
+-- /video <name>: plays a video full screen, a game one or project-bo4/video/<name>.bk2 (shield-client's intro.cpp).
+-- It closes when the video stops playing, or with /video again.
+local function CloseTestVideo()
+	local video = CoD.Shield.TestVideo
+	if video then
+		CoD.Shield.TestVideo = nil
+		video:close()
+	end
+end
+
+local function TryVideo( controller, text, typing )
+	if typing then
+		return false, false, false
+	end
+
+	local name = text and string.match( text, "([%w_]+)" )
+	local wasPlaying = CoD.Shield.TestVideo ~= nil
+	CloseTestVideo()
+
+	if not name then
+		if not wasPlaying then
+			CoD.PCUtility.ShowGameEvent( "^3/video <name>^7 - plays project-bo4/video/<name>.bk2" )
+		end
+		return false, true, false, nil
+	end
+
+	local video = LUI.UIElement.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	local background = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	background:setRGB( 0, 0, 0 )
+	video:addElement( background )
+
+	-- name, additive, looping
+	local movie = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	movie:setupMoviePlayback( name, false, false )
+	video:addElement( movie )
+
+	-- checked 4 times a second: gone once it stops, or when it never starts (10 s), or after 5 minutes
+	local started, ticks = false, 0
+	video:addElement( LUI.UITimer.newElementTimer( 250, false, function ()
+		ticks = ticks + 1
+		local playing = Engine[@"iscinematicplaying"]()
+		if playing then
+			started = true
+		end
+		if ( started and not playing ) or ( not started and ticks > 40 ) or ticks > 1200 then
+			CloseTestVideo()
+		end
+	end ) )
+
+	LUI.roots.UIRootFull:addElement( video )
+	CoD.Shield.TestVideo = video
+	CoD.PCUtility.ShowGameEvent( "^2Playing video " .. name .. "^7 (/video to stop)" )
+	return false, true, false, nil
+end
+
+table.insert(CoD.ChatClientUtility.ChatCommands,
+{
+	strings = {
+		  "video",
+		  "movie"
+	},
+	usage = "/video <name>",
+	help = "play a video full screen (project-bo4/video/<name>.bk2)",
+	fct = TryVideo
+})
+
+---------------------------
+
 -- /help: the commands of the list with what they do, shown in the chat box to this player alone.
 -- A command is listed by its "usage" and "help", one without them by its first name, one with
 -- "hidden" only when it is asked for: "/help guny".
