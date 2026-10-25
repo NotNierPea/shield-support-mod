@@ -661,9 +661,10 @@ CoD.ShieldOptionsMenu_SafeAreaFront.new = function ( f1_arg0, f1_arg1, f1_arg2, 
 
 	local LobbyTop = AddCard( Add, 0, LOBBY_CARD, CardColors.lobby, "HOW MANY CAN PLAY", "Lobby Size" )
 
-	-- a list of one slider, 375 by 60
+	-- a list of one slider, 375 by 60, on the card's right: on its left it was under the custom lobby's Shield Options
+	-- button, and the click that opened the menu set it
 	local actionsListPCEnh = LUI.UIList.new( f1_arg0, f1_arg1, 0, 0, nil, false, false, false, false )
-	actionsListPCEnh:setLeftRight( 0.5, 0.5, BODY_LEFT + CARD_PADDING, BODY_LEFT + CARD_PADDING + 375 )
+	actionsListPCEnh:setLeftRight( 0.5, 0.5, BODY_LEFT + CARD_PADDING + BUTTON_WIDTH + 24, BODY_LEFT + CARD_PADDING + BUTTON_WIDTH + 24 + 375 )
 	actionsListPCEnh:setTopBottom( 0, 0, BODY_TOP + LobbyTop, BODY_TOP + LobbyTop + 60 )
 	actionsListPCEnh:setAlpha( 1 )
 	actionsListPCEnh:setWidgetType( CoD.CraftActionHeaderEnhShield )
@@ -675,7 +676,7 @@ CoD.ShieldOptionsMenu_SafeAreaFront.new = function ( f1_arg0, f1_arg1, f1_arg2, 
 
 	actionsListPCEnh.id = "actionsListPCEnh"
 
-	Add( NewHint( CARD_PADDING + BUTTON_WIDTH + 24, COLUMN_WIDTH - CARD_PADDING, LobbyTop + 2, "Sets your party and engine player limit. For Zombies with more than 4 players, use the Enhancement Mod for its fixes and improvements." ) )
+	Add( NewHint( CARD_PADDING, CARD_PADDING + BUTTON_WIDTH, LobbyTop + 2, "Sets your party and engine player limit. For Zombies with more than 4 players, use the Enhancement Mod for its fixes and improvements." ) )
 
 	---------------------------
 	-- right: the settings, each in a menu of its own
