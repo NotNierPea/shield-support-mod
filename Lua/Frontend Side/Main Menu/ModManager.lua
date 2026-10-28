@@ -1,5 +1,5 @@
 --[[
-		.\hksc.exe ".\Lua\ModManager.Lua" -o "C:\Program Files (x86)\Call of Duty Black Ops 4\project-bo4\mods\T8ShieldSupport\Lua\ModManager.luac"
+		.\hksc.exe ".\Lua\Frontend Side\Main Menu\ModManager.lua" -o "C:\Program Files (x86)\Call of Duty Black Ops 4\project-bo4\internals\T8ShieldSupport\Lua\Frontend\ModManager.luac"
 ]]
 
 ---------------------------
@@ -8,9 +8,152 @@ CoD.ShieldInitLuaFile()
 
 ---------------------------
 
-local shield_mods = {}
+-- custom maps: "link" its zip (one with shield_map.json); "asset" its name in the shield-MM-mods release, whose <asset>_<version>.zip is used when there
+local MapsCatalog = {
+	{
+		id = "zm_park",
+		asset = "zm_park",
+		title = "Giddy Park",
+		modes = { "zm" },
+		author = "peawhatever",
+		base = "zm_towers",
+		image = "zm_park_preview",
+		desc = "Come on down to Giddy Park! We got rides, booths, and water features/bathrooms! Located between Dave Manor and that zombie HQ-we-shall-not-name, Giddy Park is a place to go nuts with your friends.",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/zm_park.zip"
+	},
+	{
+		id = "zm_room",
+		asset = "zm_room",
+		title = "First Room Challenge",
+		modes = { "zm" },
+		author = "peawhatever",
+		base = "zm_towers",
+		image = "zm_room_preview",
+		desc = "One room, the zombies and the way out: hold the room, ride the ferris wheel and the carousel, mind the sawblade, and buy your ending.",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/zm_room.zip"
+	}
+}
+
+-- "folder" is the one the zip puts in project-bo4/mods: how an installed mod is known; "link" its zip; "asset" its name in the shield-MM-mods release
+local ModsCatalog = {
+	{
+		folder = "EnhancementModT8",
+		title = "Enhancement Mod",
+		modes = { "zm" },
+		author = "peawhatever",
+		icon = "ui_menu_ftue_zm_custom_mutations",
+		desc = "Improves the zombies experience with a lot of mods and a config in a menu.",
+		asset = "EnhancementModT8",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/EnhancementModT8.zip"
+	},
+	{
+		folder = "RushModT8",
+		title = "Rush Mod",
+		modes = { "zm" },
+		author = "peawhatever",
+		icon = "mod_manager_rush",
+		desc = "Chaos Mod like for zombies, a lot of ducks too.",
+		asset = "RushModT8",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/RushModT8.zip"
+	},
+	{
+		folder = "atianmenu",
+		title = "Atian Mod Menu",
+		modes = { "mp", "zm", "wz" },
+		author = "ATE47",
+		icon = "mod_manager_french",
+		desc = "A really cool looking mod menu by a french man. Note: might randomly crash in long sessions..",
+		link = "github.com/ate47/t8-atian-menu/releases/download/latest_build/BlackOps4_shield_atianmenu.zip"
+	},
+	{
+		folder = "BlackOps4Menu",
+		title = "Black Ops 4 Menu",
+		modes = { "mp", "zm", "wz" },
+		author = "Kam",
+		icon = "mod_manager_kim",
+		desc = "A menu made for Blackout, Multiplayer and Zombies. The code as easy to read as possible for devs.",
+		asset = "BlackOps4Menu",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/BlackOps4Menu.zip"
+	},
+	{
+		folder = "survival",
+		title = "Survival Maps",
+		modes = { "zm" },
+		author = "GerardS0406",
+		icon = "mod_manager_surv",
+		desc = "Survival mod, first room only like.",
+		asset = "survival",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/survival.zip"
+	},
+	{
+		folder = "abdom",
+		title = "Abomination Menu",
+		modes = { "zm" },
+		author = "SirCryptic",
+		icon = "mod_manager_abom",
+		desc = "Mod Menu made for zombies.",
+		asset = "abdom",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/abdom.zip"
+	},
+	{
+		folder = "Synergy",
+		title = "Synergy Mod Menu",
+		modes = { "mp", "zm" },
+		author = "SyndiShanX",
+		icon = "mod_manager_synergy",
+		desc = "Mod Menu made for zombies and multiplayer.",
+		link = "syndishanx.github.io/Synergy-GSC-Menu/BO4/Synergy.zip"
+	},
+	{
+		folder = "Gun_Game",
+		title = "Gun Game",
+		modes = { "zm" },
+		author = "SyndiShanX",
+		icon = "ui_menu_ftue_zm_tutorial_mode",
+		desc = "Gun Game mod for zombies.",
+		link = "syndishanx.github.io/Synergy-GSC-Menu/BO4/Gun_Game.zip"
+	},
+	{
+		folder = "TimersMod",
+		title = "Round Timer",
+		modes = { "zm" },
+		author = "RealD4rk9",
+		icon = "mod_manager_timers",
+		desc = "Adds a round timer to zombies.",
+		asset = "TimersMod",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/TimersMod.zip"
+	}
+}
 
 ---------------------------
+
+-- what the client told: the mods folders, the maps it installed or found, the files waiting for a restart
+local ModState = {
+	mods = {},
+	maps = {},
+	pending = 0,
+	-- by the release zip's lower case name: { name, version, url }; "loading", "ok" or "failed"
+	releases = {},
+	releasesState = "loading",
+	-- the version each release zip was installed at, by its name
+	versions = {},
+	status = "Idle",
+	tab = "maps",
+	selected = {}
+}
+
+-- the rows of the tab, built again when the client tells something
+local ManagerRows = {}
+
+local function ModManagerModel( name )
+	return Engine[@"createmodel"]( Engine[@"getglobalmodel"](), "ShieldModManager." .. name )
+end
+
+local function ShowManagerStatus()
+	if CoD.Shield.OnModManagerStatus then
+		CoD.Shield.OnModManagerStatus()
+	end
+end
 
 CoD.Shield.ModManagerToastUpdate = function(event_name, event_table)
 	-- Play a little sound
@@ -33,27 +176,21 @@ CoD.Shield.ModManagerToastUpdate = function(event_name, event_table)
 end
 
 CoD.Shield.ModManagerPrecentUpdate = function(event_name, event_table)
-	if CoD.Menu.C_Status ~= nil then
-		CoD.Menu.C_Status:setText("Status: " .. event_table.precent)
+	if type(event_table) == "table" and type(event_table.precent) == "string" then
+		ModState.status = event_table.precent
+		ShowManagerStatus()
 	end
 end
 
 CoD.Shield.DownloadedModCallback = function(event_name, event_table)
-	if CoD.Menu.C_Status ~= nil then
-		CoD.Menu.C_Status:setText("Status: Download and Extraction Complete!")
-	end
-
-	if CoD.Menu.ActiveModsList ~= nil then
-		if CoD.Menu.C_Status ~= nil then
-			CoD.Menu.C_Status:setText("Status: Idle")
-		end
-	end
-
 	local message = "Download and Extraction Complete!"
 
 	if type(event_table) == "table" and type(event_table.message) == "string" then
 		message = event_table.message
 	end
+
+	ModState.status = "Idle"
+	ShowManagerStatus()
 
 	-- Show the toast, with sound
 	CoD.Shield.ModManagerToastUpdate(message)
@@ -61,19 +198,59 @@ end
 
 CoD.Shield.ModManagerModListUpdate = function(event_name, event_table)
 	local raw = event_table.mods or ""
-	shield_mods = {}
+	ModState.mods = {}
 
-    for mod in string.gmatch(raw, "([^,]+)") do
-        table.insert(shield_mods, mod)
-    end
+	-- "Name" enabled, "^1Name" disabled
+	for mod in string.gmatch(raw, "([^,]+)") do
+		if string.sub(mod, 1, 2) == "^1" then
+			table.insert(ModState.mods, { name = string.sub(mod, 3), enabled = false })
+		else
+			table.insert(ModState.mods, { name = mod, enabled = true })
+		end
+		CoD.EnhPrintInfo("Found mod: " .. mod)
+	end
 
-    for i, name in ipairs(shield_mods) do
-        CoD.EnhPrintInfo("Found mod: " .. name)
-    end
+	-- an older client tells no maps
+	ModState.maps = {}
 
-	if CoD.Menu.ActiveModsList ~= nil then
-		CoD.Menu.ActiveModsList:setDataSource( "ShieldActiveModsList" )
-		CoD.Menu.ActiveModsList:updateDataSource()
+	if type(event_table.maps) == "table" then
+		for _, map in ipairs(event_table.maps) do
+			if type(map) == "table" and type(map.id) == "string" then
+				ModState.maps[map.id] = map
+			end
+		end
+	end
+
+	ModState.pending = tonumber(event_table.pending) or 0
+	ModState.versions = {}
+
+	if type(event_table.versions) == "table" then
+		for name, version in pairs(event_table.versions) do
+			ModState.versions[string.lower(name)] = version
+		end
+	end
+
+	if CoD.Shield.OnModListChanged then
+		CoD.Shield.OnModListChanged()
+	end
+end
+
+-- the shield-MM-mods release's zips (MM_check_releases): the newest version of each and its link
+CoD.Shield.ModManagerReleases = function(event_name, event_table)
+	ModState.releases = {}
+
+	if type(event_table.assets) == "table" then
+		for _, asset in ipairs(event_table.assets) do
+			if type(asset) == "table" and type(asset.name) == "string" then
+				ModState.releases[string.lower(asset.name)] = asset
+			end
+		end
+	end
+
+	ModState.releasesState = event_table.ok and "ok" or "failed"
+
+	if CoD.Shield.OnModListChanged then
+		CoD.Shield.OnModListChanged()
 	end
 end
 
@@ -84,2013 +261,1147 @@ CoD.Shield.ModManagerModTestTable = function(event_name, event_table)
 			CoD.EnhPrintInfo("test table: " .. i .. " - " .. mod.code .. " - " .. mod.str .. " - " .. mod.duration)
 		end
 	end
-
-	CoD.EnhPrintInfo("test table index..: " .. stuff[1].code)
 end
 
 ---------------------------
 
--- Mods
-DataSources.ShieldFeaturedModsList = DataSourceHelpers.ListSetup( "ShieldFeaturedModsList", function ( f3_arg0, f3_arg1 )
-	local InfoMods = {
-		{
-			models = {
-				title = "[ZM] - Enhancement Mod",
-				icon = "ui_menu_ftue_zm_custom_mutations",
-				desc = "Improves the zombies experience with a lot of mods and a config in a menu. By peawhatever",
-				link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/EnhancementModT8.zip"
-			},
-			properties = {
-				-- none yet
-			}
-		},
-		{
-			models = {
-				title = "[ZM] - Rush Mod",
-				icon = "mod_manager_rush",
-				desc = "Chaos Mod like for zombies, a lot of ducks too. By peawhatever",
-				link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/RushModT8.zip"
-			},
-			properties = {
-				-- none yet
-			}
-		},
-		{
-			models = {
-				title = "[ALL] - Atian Mod Menu",
-				icon = "mod_manager_french",
-				desc = "A really cool looking mod menu by a french man (ATE47), Note: might randomly crash in long sessions..",
-				link = "github.com/ate47/t8-atian-menu/releases/download/latest_build/BlackOps4_shield_atianmenu.zip"
-			},
-			properties = {
-				-- none yet
-			}
-		},
-		{
-			models = {
-				title = "[ALL] - Black Ops 4 Menu",
-				icon = "mod_manager_kim",
-				desc = "a menu made for Blackout, Multiplayer and Zombies. the code as easy to read as possible for devs. By Kam",
-				link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/BlackOps4Menu.zip"
-			},
-			properties = {
-				-- none yet
-			}
-		},
-		{
-			models = {
-				title = "[ZM] - Survival Maps",
-				icon = "mod_manager_surv",
-				desc = "Survival mod, first room only like, made by GerardS0406",
-				link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/survival.zip"
-			},
-			properties = {
-				-- none yet
-			}
-		},
-		{
-			models = {
-				title = "[ZM] - Abomination Menu",
-				icon = "mod_manager_abom",
-				desc = "Mod Menu made for zombies, by SirCryptic",
-				link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/abdom.zip"
-			},
-			properties = {
-				-- none yet
-			}
-		},
-		{
-			models = {
-				title = "[MP/ZM] - Synergy Mod Menu",
-				icon = "mod_manager_synergy",
-				desc = "Mod Menu made for zombies and multiplayer, by SyndiShanX",
-				link = "github.com/SyndiShanX/Synergy-BO4-GSC-Menu/releases/download/Latest/Synergy.zip"
-			},
-			properties = {
-				-- none yet
-			}
-		},
-		{
-			models = {
-				title = "[ZM] - Gun Game",
-				icon = "ui_menu_ftue_zm_tutorial_mode",
-				desc = "Gun Game mod for zombies, by SyndiShanX",
-				link = "github.com/SyndiShanX/Synergy-BO4-GSC-Menu/releases/download/Latest/Gun_Game.zip"
-			},
-			properties = {
-				-- none yet
-			}
-		},
-		{
-			models = {
-				title = "[ZM] - Round Timer",
-				icon = "mod_manager_timers",
-				desc = "Adds a round timer to zombies. By RealD4rk9",
-				link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/TimersMod.zip"
-			},
-			properties = {
-				-- none yet
-			}
-		}
+-- the colours of a tab and of a row's status
+local TabColors = {
+	maps = { r = 1, g = 0.38, b = 0.28 },
+	mods = { r = 0.35, g = 0.75, b = 1 }
+}
+
+local StatusLooks = {
+	get = { text = "NOT INSTALLED", r = 0.55, g = 0.55, b = 0.55 },
+	installed = { text = "INSTALLED", r = 0.45, g = 0.9, b = 0.45 },
+	update = { text = "UPDATE", r = 1, g = 0.8, b = 0.25 },
+	restart = { text = "RESTART TO PLAY", r = 1, g = 0.8, b = 0.25 },
+	disabled = { text = "DISABLED", r = 1, g = 0.4, b = 0.3 },
+	manual = { text = "INSTALLED BY HAND", r = 0.75, g = 0.75, b = 0.75 }
+}
+
+-- a map the client loaded its zones of this session: its pictures are there
+local function IsMapLoaded( id )
+	return ShieldFuncs ~= nil and ShieldFuncs.IsCustomMap ~= nil and ShieldFuncs.IsCustomMap( id ) == true
+end
+
+local function ModeOfMap( mode )
+	if mode == "mp" or mode == "wz" then
+		return mode
+	end
+	return "zm"
+end
+
+-- "1.2.0" newer than "1.1.5"
+local function IsNewerVersion( version, than )
+	local a, b = {}, {}
+	for part in string.gmatch( version, "%d+" ) do table.insert( a, tonumber( part ) ) end
+	for part in string.gmatch( than, "%d+" ) do table.insert( b, tonumber( part ) ) end
+
+	for i = 1, math.max( #a, #b ), 1 do
+		local x, y = a[i] or 0, b[i] or 0
+		if x ~= y then
+			return x > y
+		end
+	end
+	return false
+end
+
+-- a catalog entry's zip: its release's (the newest version) or its own link elsewhere
+local function ReleaseOf( entry )
+	if entry == nil or entry.asset == nil then
+		return nil
+	end
+	return ModState.releases[string.lower( entry.asset )]
+end
+
+-- the zip of an entry: the release's newest <asset>_<version>.zip when the release has it, else its own link
+local function LinkOf( entry, release )
+	if release ~= nil then
+		return release.url
+	end
+	return entry and entry.link
+end
+
+-- installed at an older version than the release's, or at none known while the release has one
+local function NeedsUpdate( version, installedVersion )
+	if version == "" then
+		return false
+	end
+	return installedVersion == "" or IsNewerVersion( version, installedVersion )
+end
+
+-- a map row: the catalog's entry and what the client has of it, either can be missing
+local function MapRow( entry, installed )
+	local release = ReleaseOf( entry )
+	local row = {
+		kind = "map",
+		key = entry and entry.id or installed.id,
+		title = entry and entry.title or installed.name,
+		author = entry and entry.author or installed.author or "",
+		desc = entry and entry.desc or installed.description or "",
+		modes = entry and entry.modes or { ModeOfMap( installed.mode ) },
+		version = release and release.version or "",
+		installedVersion = installed and installed.version or "",
+		link = LinkOf( entry, release ),
+		asset = entry and entry.asset,
+		shared = entry and entry.shared or {},
+		base = entry and entry.base or "zm_towers",
+		image = entry and entry.image or ( ( entry and entry.id or installed.id ) .. "_preview" )
 	}
-	return InfoMods
+
+	if installed == nil then
+		row.status = "get"
+	elseif installed.state == "manual" then
+		row.status = "manual"
+	elseif NeedsUpdate( row.version, row.installedVersion ) then
+		row.status = "update"
+	elseif not IsMapLoaded( row.key ) then
+		row.status = "restart"
+	else
+		row.status = "installed"
+	end
+
+	if row.installedVersion == "" and installed ~= nil and installed.state == "manual" then
+		row.installedVersion = "-"
+	end
+
+	return row
+end
+
+local function ModRow( entry, installed )
+	local release = ReleaseOf( entry )
+	local row = {
+		kind = "mod",
+		key = entry and entry.folder or installed.name,
+		title = entry and entry.title or installed.name,
+		author = entry and entry.author or "",
+		desc = entry and entry.desc or "A mod in project-bo4\\mods that isn't in the list of downloads.",
+		modes = entry and entry.modes or {},
+		version = release and release.version or "",
+		installedVersion = "",
+		link = LinkOf( entry, release ),
+		asset = entry and entry.asset,
+		icon = entry and entry.icon,
+		-- the folder as it is on disk, for remove and toggle
+		target = installed and installed.name or ( entry and entry.folder )
+	}
+
+	if installed ~= nil and entry ~= nil and entry.asset ~= nil then
+		row.installedVersion = ModState.versions[string.lower( entry.asset )] or ""
+	end
+
+	if installed == nil then
+		row.status = "get"
+	elseif NeedsUpdate( row.version, row.installedVersion ) then
+		row.status = "update"
+	elseif installed.enabled then
+		row.status = "installed"
+	else
+		row.status = "disabled"
+	end
+
+	return row
+end
+
+-- the rows of the tab: the downloads first, then what is installed and isn't one of them
+local function BuildManagerRows()
+	ManagerRows = {}
+
+	if ModState.tab == "maps" then
+		local listed = {}
+
+		for _, entry in ipairs( MapsCatalog ) do
+			listed[entry.id] = true
+			table.insert( ManagerRows, MapRow( entry, ModState.maps[entry.id] ) )
+		end
+
+		local others = {}
+		for id, map in pairs( ModState.maps ) do
+			if not listed[id] then
+				table.insert( others, MapRow( nil, map ) )
+			end
+		end
+
+		table.sort( others, function ( a, b ) return a.key < b.key end )
+
+		for _, row in ipairs( others ) do
+			table.insert( ManagerRows, row )
+		end
+	else
+		local installed = {}
+		for _, mod in ipairs( ModState.mods ) do
+			installed[string.lower( mod.name )] = mod
+		end
+
+		for _, entry in ipairs( ModsCatalog ) do
+			local mod = installed[string.lower( entry.folder )]
+			installed[string.lower( entry.folder )] = nil
+			table.insert( ManagerRows, ModRow( entry, mod ) )
+		end
+
+		-- T8ShieldSupport is this mod: not one to remove from here
+		for _, mod in ipairs( ModState.mods ) do
+			local name = string.lower( mod.name )
+			if installed[name] ~= nil and name ~= "t8shieldsupport" then
+				table.insert( ManagerRows, ModRow( nil, mod ) )
+			end
+		end
+	end
+end
+
+local function FindManagerRow( key )
+	for index, row in ipairs( ManagerRows ) do
+		if row.key == key then
+			return row, index
+		end
+	end
+	return nil
+end
+
+-- "MP", "ZM", "WZ" of a row, "ALL" for none
+local function RowTags( row )
+	if #row.modes == 0 then
+		return { { tag = "ALL", color = { r = 1, g = 1, b = 1 } } }
+	end
+
+	local tags = {}
+	for _, mode in ipairs( row.modes ) do
+		table.insert( tags, { tag = ToUpper( mode ), color = CoD.Shield.BrowserUI.ModeColors[mode] or CoD.Shield.BrowserUI.ModeColors.mp } )
+	end
+	return tags
+end
+
+-- the picture of a row: a map's own once its zones are loaded, its base map's before
+local function RowImage( row )
+	if row.kind == "map" then
+		if IsMapLoaded( row.key ) then
+			return row.image
+		end
+		return MapNameToMapImage( row.base )
+	end
+
+	return row.icon or "ui_menu_ftue_zm_custom_mutations"
+end
+
+DataSources.ShieldModManagerRowsEmpty = DataSourceHelpers.ListSetup( "ShieldModManagerRowsEmpty", function ( f3_arg0, f3_arg1 )
+	return {}
 end, true )
 
--- Active Nods
-DataSources.ShieldActiveModsList = DataSourceHelpers.ListSetup( "ShieldActiveModsList", function ( f3_arg0, f3_arg1 )
-	local InfoMods = {
+DataSources.ShieldModManagerRows = DataSourceHelpers.ListSetup( "ShieldModManagerRows", function ( f3_arg0, f3_arg1 )
+	local items = {}
 
-	}
-
-	for i, name in ipairs(shield_mods) do
-		table.insert( InfoMods, {
+	for index, row in ipairs( ManagerRows ) do
+		table.insert( items, {
 			models = {
-				ModName = name,
+				Title = row.title,
+				Key = row.key,
+				Index = index
 			},
 			properties = {
-	
+
 			}
 		} )
-    end
+	end
 
-	return InfoMods
+	return items
 end, true )
 
 ---------------------------
 
--- Mods Widget Active One
-CoD.ShieldActiveModRow = InheritFrom( LUI.UIElement )
-CoD.ShieldActiveModRow.__defaultWidth = 1070
-CoD.ShieldActiveModRow.__defaultHeight = 37
-CoD.ShieldActiveModRow.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
-	local self = LUI.UIElement.new( f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
-	self:setClass( CoD.ShieldActiveModRow )
-	self.id = "ShieldActiveModRow"
-	self.soundSet = "default"
-	f1_arg0:addElementToPendingUpdateStateList( self )
-	
-	local BlackBar = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 1, 1 )
-	BlackBar:setRGB( 0.78, 0.78, 0.78 )
-	BlackBar:setAlpha( 0.01 )
-	self:addElement( BlackBar )
-	self.BlackBar = BlackBar
-	
-	local ModName = LUI.UIText.new( 0, 0, 15, 413, 0, 0, 6.5, 30.5 )
-	ModName:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	ModName:setTTF( "ttmussels_regular" )
-	ModName:setLetterSpacing( 1 )
-	ModName:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_558C8A85F2048829"] )
-	ModName:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-	self:addElement( ModName )
-	self.ModName = ModName
-	
-	self.ModName:linkToElementModel( self, "ModName", true, function ( model )
-		local f5_local0 = model:get()
-		if f5_local0 ~= nil then
-			ModName:setText(f5_local0)
+-- the body, 1744 by 800 in BrowserUI parts: tabs and rows on the left 1060, the picked row's card and buttons from 1084
+local MM_CARD_LEFT = 1084
+local MM_CARD_RIGHT = 1744
+local MM_CARD_IMAGE_HEIGHT = 330
+local MM_CARD_BOTTOM = 680
+local MM_TEXT_LEFT = MM_CARD_LEFT + 24
+local MM_TEXT_RIGHT = MM_CARD_RIGHT - 24
+local MM_CARD_HALF = MM_CARD_LEFT + 330
+local MM_LIST_TOP = 86
+local MM_ROW_HEIGHT = 60
+local MM_ROW_THUMB_WIDTH = 107
+local MM_ROW_TEXT_LEFT = 127
+local MM_ROW_STATUS_LEFT = 660
+local MM_MAX_TAGS = 3
 
-			self.ModName = ModName
-		end
-	end )
+local function SetButtonWords( button, words )
+	button.MiddleText:setText( words )
+	button.MiddleTextFocus:setText( words )
+end
 
-	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
-	
-	if PostLoadFunc then
-		PostLoadFunc( self, f1_arg1, f1_arg0 )
+-- the line under a button that is on, in that colour
+local function AddActiveMark( button, color )
+	local mark = LUI.UIImage.new( 0, 1, 0, 0, 1, 1, -3, 0 )
+	mark:setRGB( color.r, color.g, color.b )
+	mark:setAlpha( 0 )
+	button:addElement( mark )
+	button.ActiveMark = mark
+end
+
+-- what the card says of a map's or a mod's files
+local function FilesText( row )
+	if row.kind == "mod" then
+		return "project-bo4\\mods\\" .. row.key
 	end
-	
-	return self
-end
 
-CoD.ShieldActiveModRow.__resetProperties = function ( f7_arg0 )
-	f7_arg0.BlackBar:completeAnimation()
-	f7_arg0.ModName:completeAnimation()
-	f7_arg0.BlackBar:setRGB( 0.78, 0.78, 0.78 )
-	f7_arg0.BlackBar:setAlpha( 0.01 )
-	f7_arg0.ModName:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	f7_arg0.ModName:setAlpha( 1 )
-end
+	local text = "Map zone, UI zone, sounds, package index, zone_mods\\" .. row.key
 
-CoD.ShieldActiveModRow.__clipsPerState = {
-	DefaultState = {
-		DefaultClip = function ( f8_arg0, f8_arg1 )
-			f8_arg0:__resetProperties()
-			f8_arg0:setupElementClipCounter( 2 )
-			f8_arg0.BlackBar:completeAnimation()
-			f8_arg0.BlackBar:setRGB( 0.71, 0.71, 0.71 )
-			f8_arg0.BlackBar:setAlpha( 0.01 )
-			f8_arg0.clipFinished( f8_arg0.BlackBar )
-			f8_arg0.ModName:completeAnimation()
-			f8_arg0.ModName:setAlpha( 1 )
-			f8_arg0.clipFinished( f8_arg0.ModName )
-		end,
-		Focus = function ( f9_arg0, f9_arg1 )
-			f9_arg0:__resetProperties()
-			f9_arg0:setupElementClipCounter( 5 )
-			f9_arg0.BlackBar:completeAnimation()
-			f9_arg0.BlackBar:setRGB( 0.82, 0.82, 0.82 )
-			f9_arg0.BlackBar:setAlpha( 0.05 )
-			f9_arg0.clipFinished( f9_arg0.BlackBar )
-			f9_arg0.ModName:completeAnimation()
-			f9_arg0.ModName:setRGB( 0.93, 0.93, 0 )
-			f9_arg0.clipFinished( f9_arg0.ModName )
-		end
-	}
-}
-
-CoD.ShieldActiveModRow.__onClose = function ( f10_arg0 )
-	f10_arg0.ModName:close()
-	f10_arg0.BlackBar:close()
-end
-
--- Mods Style
-CoD.Shield_ModsStyleMain = InheritFrom( LUI.UIElement )
-CoD.Shield_ModsStyleMain.__defaultWidth = 360
-CoD.Shield_ModsStyleMain.__defaultHeight = 126
-CoD.Shield_ModsStyleMain.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
-	local self = LUI.UIElement.new( f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
-	self:setClass( CoD.Shield_ModsStyleMain )
-	self.id = "Shield_ModsStyleMain"
-	self.soundSet = "FrontendMain"
-	self.onlyChildrenFocusable = true
-	self.anyChildUsesUpdateState = true
-	f1_arg0:addElementToPendingUpdateStateList( self )
-	
-	local NoiseTiledBacking = CoD.Shield_ModsStyle.new( f1_arg0, f1_arg1, 0.5, 0.5, -180, 180, 0.5, 0.5, -63, 63 )
-	NoiseTiledBacking:mergeStateConditions( {
-		{
-			stateName = "Locked",
-			condition = function ( menu, element, event )
-				return CoD.BaseUtility.IsSelfInState( self, "Locked" )
-			end
-		},
-		{
-			stateName = "Classified",
-			condition = function ( menu, element, event )
-				return CoD.BaseUtility.IsSelfInState( self, "Classified" )
-			end
-		},
-		{
-			stateName = "ClassifiedShowProgress",
-			condition = function ( menu, element, event )
-				return CoD.BaseUtility.IsSelfInState( self, "ClassifiedShowProgress" )
-			end
-		}
-	} )
-	NoiseTiledBacking:linkToElementModel( self, nil, false, function ( model )
-		NoiseTiledBacking:setModel( model, f1_arg1 )
-	end )
-	NoiseTiledBacking:linkToElementModel( self, "title", true, function ( model )
-		local f6_local0 = model:get()
-		if f6_local0 ~= nil then
-			NoiseTiledBacking.Label:setText( f6_local0 )
-		end
-	end )
-
-	-- get the site for click datasource
-	NoiseTiledBacking:linkToElementModel( self, "link", true, function ( model )
-		local f6_local0 = model:get()
-		if f6_local0 ~= nil then
-			self.site = f6_local0
-		end
-	end )
-
-	self:addElement( NoiseTiledBacking )
-	self.NoiseTiledBacking = NoiseTiledBacking
-	
-	self:mergeStateConditions( {
-		{
-			stateName = "Locked",
-			condition = function ( menu, element, event )
-				return CoD.ModelUtility.IsSelfModelValueTrue( element, f1_arg1, "isLocked" )
-			end
-		},
-		{
-			stateName = "Classified",
-			condition = function ( menu, element, event )
-				return AlwaysFalse()
-			end
-		},
-		{
-			stateName = "ClassifiedShowProgress",
-			condition = function ( menu, element, event )
-				return AlwaysFalse()
-			end
-		}
-	} )
-	self:linkToElementModel( self, "isLocked", true, function ( model )
-		f1_arg0:updateElementState( self, {
-			name = "model_validation",
-			menu = f1_arg0,
-			controller = f1_arg1,
-			modelValue = model:get(),
-			modelName = "isLocked"
-		} )
-	end )
-	LUI.OverrideFunction_CallOriginalFirst( self, "setState", function ( element, controller, f11_arg2, f11_arg3, f11_arg4 )
-		UpdateElementState( self, "NoiseTiledBacking", controller )
-	end )
-	NoiseTiledBacking.id = "NoiseTiledBacking"
-	self.__defaultFocus = NoiseTiledBacking
-	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
-	
-	if PostLoadFunc then
-		PostLoadFunc( self, f1_arg1, f1_arg0 )
+	if #row.shared > 0 then
+		text = text .. "  ^7+ shared: " .. table.concat( row.shared, ", " )
 	end
-	
-	return self
+
+	return text
 end
 
-CoD.Shield_ModsStyleMain.__resetProperties = function ( f12_arg0 )
-	f12_arg0.NoiseTiledBacking:completeAnimation()
-	f12_arg0.NoiseTiledBacking:setScale( 1, 1 )
-end
+CoD.ShieldModManagerBody = InheritFrom( LUI.UIElement )
+CoD.ShieldModManagerBody.__defaultWidth = 1744
+CoD.ShieldModManagerBody.__defaultHeight = 800
+CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
+	local UI = CoD.Shield.BrowserUI
 
-CoD.Shield_ModsStyleMain.__clipsPerState = {
-	DefaultState = {
-		DefaultClip = function ( f13_arg0, f13_arg1 )
-			f13_arg0:__resetProperties()
-			f13_arg0:setupElementClipCounter( 0 )
-		end,
-		ChildFocus = function ( f14_arg0, f14_arg1 )
-			f14_arg0:__resetProperties()
-			f14_arg0:setupElementClipCounter( 1 )
-			f14_arg0.NoiseTiledBacking:completeAnimation()
-			f14_arg0.NoiseTiledBacking:setScale( 1.05, 1.05 )
-			f14_arg0.clipFinished( f14_arg0.NoiseTiledBacking )
-		end,
-		GainChildFocus = function ( f15_arg0, f15_arg1 )
-			f15_arg0:__resetProperties()
-			f15_arg0:setupElementClipCounter( 1 )
-			local f15_local0 = function ( f16_arg0 )
-				f15_arg0.NoiseTiledBacking:beginAnimation( 200 )
-				f15_arg0.NoiseTiledBacking:setScale( 1.05, 1.05 )
-				f15_arg0.NoiseTiledBacking:registerEventHandler( "interrupted_keyframe", f15_arg0.clipInterrupted )
-				f15_arg0.NoiseTiledBacking:registerEventHandler( "transition_complete_keyframe", f15_arg0.clipFinished )
-			end
-			
-			f15_arg0.NoiseTiledBacking:completeAnimation()
-			f15_arg0.NoiseTiledBacking:setScale( 1, 1 )
-			f15_local0( f15_arg0.NoiseTiledBacking )
-		end,
-		LoseChildFocus = function ( f17_arg0, f17_arg1 )
-			f17_arg0:__resetProperties()
-			f17_arg0:setupElementClipCounter( 1 )
-			local f17_local0 = function ( f18_arg0 )
-				f17_arg0.NoiseTiledBacking:beginAnimation( 200 )
-				f17_arg0.NoiseTiledBacking:setScale( 1, 1 )
-				f17_arg0.NoiseTiledBacking:registerEventHandler( "interrupted_keyframe", f17_arg0.clipInterrupted )
-				f17_arg0.NoiseTiledBacking:registerEventHandler( "transition_complete_keyframe", f17_arg0.clipFinished )
-			end
-			
-			f17_arg0.NoiseTiledBacking:completeAnimation()
-			f17_arg0.NoiseTiledBacking:setScale( 1.05, 1.05 )
-			f17_local0( f17_arg0.NoiseTiledBacking )
-		end
-	},
-	Locked = {
-		DefaultClip = function ( f19_arg0, f19_arg1 )
-			f19_arg0:__resetProperties()
-			f19_arg0:setupElementClipCounter( 0 )
-		end
-	},
-	Classified = {
-		DefaultClip = function ( f20_arg0, f20_arg1 )
-			f20_arg0:__resetProperties()
-			f20_arg0:setupElementClipCounter( 0 )
-		end
-	},
-	ClassifiedShowProgress = {
-		DefaultClip = function ( f21_arg0, f21_arg1 )
-			f21_arg0:__resetProperties()
-			f21_arg0:setupElementClipCounter( 0 )
-		end
-	}
-}
-
-CoD.Shield_ModsStyleMain.__onClose = function ( f22_arg0 )
-	f22_arg0.NoiseTiledBacking:close()
-end
-
--- Mods Style Internal
-CoD.Shield_ModsStyle = InheritFrom( LUI.UIElement )
-CoD.Shield_ModsStyle.__defaultWidth = 360
-CoD.Shield_ModsStyle.__defaultHeight = 126
-CoD.Shield_ModsStyle.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
 	local self = LUI.UIElement.new( f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
-	self:setClass( CoD.Shield_ModsStyle )
-	self.id = "Shield_ModsStyle"
-	self.soundSet = "FrontendMain"
-	self.anyChildUsesUpdateState = true
-	f1_arg0:addElementToPendingUpdateStateList( self )
-	
-	local NoiseTiledBacking = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
-	NoiseTiledBacking:setAlpha( 0.8 )
-	NoiseTiledBacking:setImage( RegisterImage( @"uie_ui_menu_specialist_hub_repeat_bg" ) )
-	NoiseTiledBacking:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_16CBE95C250C6D15" ) )
-	NoiseTiledBacking:setShaderVector( 0, 0, 0, 0, 0 )
-	NoiseTiledBacking:setupNineSliceShader( 196, 88 )
-	self:addElement( NoiseTiledBacking )
-	self.NoiseTiledBacking = NoiseTiledBacking
-	
-	local FocusGlow = LUI.UIImage.new( -0.09, 1.1, -110, 110, 0.5, 0.5, -99, 99 )
-	FocusGlow:setAlpha( 0 )
-	FocusGlow:setImage( RegisterImage( @"uie_ui_menu_common_focus_glow_large" ) )
-	FocusGlow:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_6DAB59B2CAE01851" ) )
-	FocusGlow:setShaderVector( 0, 0, 0, 0.25, 0.25 )
-	FocusGlow:setShaderVector( 1, 1.2, 0, 0, 0 )
-	FocusGlow:setupNineSliceShader( 300, 300 )
-	self:addElement( FocusGlow )
-	self.FocusGlow = FocusGlow
-	
-	local FrameBorder = LUI.UIImage.new( 0, 1, -1, 1, 0, 1, -1, 1 )
-	FrameBorder:setAlpha( 0.15 )
-	FrameBorder:setImage( RegisterImage( @"uie_ui_menu_store_common_frame" ) )
-	FrameBorder:setMaterial( LUI.UIImage.GetCachedMaterial( @"uie_nineslice_add" ) )
-	FrameBorder:setShaderVector( 0, 0, 0, 0, 0 )
-	FrameBorder:setupNineSliceShader( 12, 12 )
-	self:addElement( FrameBorder )
-	self.FrameBorder = FrameBorder
-	
-	local FocusBorder = LUI.UIImage.new( 0, 1, -4, 4, 0, 1, -4, 4 )
-	FocusBorder:setRGB( 0.96, 0.94, 0.78 )
-	FocusBorder:setAlpha( 0 )
-	FocusBorder:setImage( RegisterImage( @"uie_ui_menu_store_focus_frame" ) )
-	FocusBorder:setMaterial( LUI.UIImage.GetCachedMaterial( @"uie_nineslice_add" ) )
-	FocusBorder:setShaderVector( 0, 0, 0, 0, 0 )
-	FocusBorder:setupNineSliceShader( 10, 10 )
-	self:addElement( FocusBorder )
-	self.FocusBorder = FocusBorder
-	
-	local SelectorOverlay = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
-	SelectorOverlay:setAlpha( 0.01 )
-	self:addElement( SelectorOverlay )
-	self.SelectorOverlay = SelectorOverlay
-	
-	local FocusBrackets = CoD.CommonFocusBrackets.new( f1_arg0, f1_arg1, 0, 1, -10, 10, 0, 1, -10, 10 )
-	self:addElement( FocusBrackets )
-	self.FocusBrackets = FocusBrackets
-	
-	local CardIcon = LUI.UIImage.new( 0, 1, 1, -1, 0, 0.71, 2, -2 )
-	CardIcon:linkToElementModel( self, "icon", true, function ( model )
-		local f2_local0 = model:get()
-		if f2_local0 ~= nil then
-			CardIcon:setImage( RegisterImage( f2_local0 ) )
-		end
-	end )
-	self:addElement( CardIcon )
-	self.CardIcon = CardIcon
-	
-	local CardIconLockOverlay = LUI.UIImage.new( 0, 1, 1, -1, 0, 0.71, 2, -2 )
-	CardIconLockOverlay:setRGB( 0, 0, 0 )
-	CardIconLockOverlay:setAlpha( 0 )
-	self:addElement( CardIconLockOverlay )
-	self.CardIconLockOverlay = CardIconLockOverlay
-	
-	local DarkOpsClassifiedIcon = LUI.UIImage.new( 0, 1, 1, -1, -0, 0.71, 2, -2 )
-	DarkOpsClassifiedIcon:setAlpha( 0 )
-	DarkOpsClassifiedIcon:setImage( RegisterImage( @"uie_t7_icons_challenges_classified_placeholder" ) )
-	self:addElement( DarkOpsClassifiedIcon )
-	self.DarkOpsClassifiedIcon = DarkOpsClassifiedIcon
-	
-	local Lines = CoD.DirectorSelectButtonLines.new( f1_arg0, f1_arg1, 0, 1, 0, 0, 0, 1, 1, -1 )
-	Lines:setRGB( 0.64, 0.71, 0.78 )
-	self:addElement( Lines )
-	self.Lines = Lines
-	
-	local Label = LUI.UIText.new( 0.5, 0.5, -175, 175, 0, 0, 93, 113 )
-	Label:setAlpha( 0.85 )
-	Label:setTTF( "ttmussels_regular" )
-	Label:setLetterSpacing( 2 )
-	Label:setAlignment( Enum[@"luialignment"][@"lui_alignment_center"] )
-	Label:setAlignment( Enum[@"luialignment"][@"hash_E821F0ECFF8D1C7"] )
-	Label:linkToElementModel( self, "title", true, function ( model )
-		local f3_local0 = model:get()
-		if f3_local0 ~= nil then
-			Label:setText( f3_local0 )
-		end
-	end )
-	self:addElement( Label )
-	self.Label = Label
-	
-	local lockedIcon = CoD.cac_lock.new( f1_arg0, f1_arg1, 0.5, 0.5, -18, 18, 0, 0, 27, 63 )
-	self:addElement( lockedIcon )
-	self.lockedIcon = lockedIcon
-	
-	local TrialWidget = CoD.TrialWidget.new( f1_arg0, f1_arg1, 0, 0, 5, 30, 0, 0, 5, 30 )
-	TrialWidget:setAlpha( 0 )
-	self:addElement( TrialWidget )
-	self.TrialWidget = TrialWidget
-	
-	local ProgressBarBacking = LUI.UIImage.new( 0, 0, 5, 355, 0, 0, 115, 121 )
-	ProgressBarBacking:setRGB( ColorSet.T8__OFF__GRAY.r, ColorSet.T8__OFF__GRAY.g, ColorSet.T8__OFF__GRAY.b )
-	ProgressBarBacking:setAlpha( 0 )
-	self:addElement( ProgressBarBacking )
-	self.ProgressBarBacking = ProgressBarBacking
-	
-	local ProgressBorder = CoD.StartMenuOptionsMainFrame.new( f1_arg0, f1_arg1, 0.5, 0.5, -175, 175, 0, 0, 115, 121 )
-	ProgressBorder:setAlpha( 0 )
-	self:addElement( ProgressBorder )
-	self.ProgressBorder = ProgressBorder
-	
-	local ProgressBar = LUI.UIImage.new( 0, 0, 5, 355, 0, 0, 115, 121 )
-	ProgressBar:setRGB( 1, 0.35, 0 )
-	ProgressBar:setAlpha( 0 )
-	ProgressBar:setMaterial( LUI.UIImage.GetCachedMaterial( @"uie_wipe" ) )
-	ProgressBar:setShaderVector( 1, 0, 0, 0, 0 )
-	ProgressBar:setShaderVector( 2, 1, 0, 0, 0 )
-	ProgressBar:setShaderVector( 3, 0, 0, 0, 0 )
-	ProgressBar:setShaderVector( 4, 0, 0, 0, 0 )
-	ProgressBar:linkToElementModel( self, "statPercent", true, function ( model )
-		local f4_local0 = model:get()
-		if f4_local0 ~= nil then
-			ProgressBar:setShaderVector( 0, CoD.GetVectorComponentFromString( f4_local0, 1 ), CoD.GetVectorComponentFromString( f4_local0, 2 ), CoD.GetVectorComponentFromString( f4_local0, 3 ), CoD.GetVectorComponentFromString( f4_local0, 4 ) )
-		end
-	end )
-	self:addElement( ProgressBar )
-	self.ProgressBar = ProgressBar
-	
-	self:mergeStateConditions( {
-		{
-			stateName = "Locked",
-			condition = function ( menu, element, event )
-				return CoD.ModelUtility.IsSelfModelValueTrue( element, f1_arg1, "isLocked" )
-			end
-		},
-		{
-			stateName = "Classified",
-			condition = function ( menu, element, event )
-				return AlwaysFalse()
-			end
-		},
-		{
-			stateName = "ClassifiedShowProgress",
-			condition = function ( menu, element, event )
-				return AlwaysFalse()
-			end
-		}
-	} )
-	self:linkToElementModel( self, "isLocked", true, function ( model )
-		f1_arg0:updateElementState( self, {
-			name = "model_validation",
-			menu = f1_arg0,
-			controller = f1_arg1,
-			modelValue = model:get(),
-			modelName = "isLocked"
-		} )
-	end )
-	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
-	
-	if PostLoadFunc then
-		PostLoadFunc( self, f1_arg1, f1_arg0 )
-	end
-	
-	return self
-end
-
-CoD.Shield_ModsStyle.__resetProperties = function ( f9_arg0 )
-	f9_arg0.lockedIcon:completeAnimation()
-	f9_arg0.ProgressBar:completeAnimation()
-	f9_arg0.FocusBrackets:completeAnimation()
-	f9_arg0.ProgressBorder:completeAnimation()
-	f9_arg0.TrialWidget:completeAnimation()
-	f9_arg0.SelectorOverlay:completeAnimation()
-	f9_arg0.FocusBorder:completeAnimation()
-	f9_arg0.Lines:completeAnimation()
-	f9_arg0.FocusGlow:completeAnimation()
-	f9_arg0.Label:completeAnimation()
-	f9_arg0.CardIcon:completeAnimation()
-	f9_arg0.ProgressBarBacking:completeAnimation()
-	f9_arg0.CardIconLockOverlay:completeAnimation()
-	f9_arg0.DarkOpsClassifiedIcon:completeAnimation()
-	f9_arg0.lockedIcon:setAlpha( 1 )
-	f9_arg0.ProgressBar:setAlpha( 0 )
-	f9_arg0.FocusBrackets:setLeftRight( 0, 1, -10, 10 )
-	f9_arg0.FocusBrackets:setTopBottom( 0, 1, -10, 10 )
-	f9_arg0.FocusBrackets:setAlpha( 1 )
-	f9_arg0.FocusBrackets:setScale( 1, 1 )
-	f9_arg0.ProgressBorder:setAlpha( 0 )
-	f9_arg0.TrialWidget:setAlpha( 0 )
-	f9_arg0.SelectorOverlay:setAlpha( 0.01 )
-	f9_arg0.FocusBorder:setRGB( 0.96, 0.94, 0.78 )
-	f9_arg0.FocusBorder:setAlpha( 0 )
-	f9_arg0.Lines:setAlpha( 1 )
-	f9_arg0.FocusGlow:setAlpha( 0 )
-	f9_arg0.Label:setRGB( 1, 1, 1 )
-	f9_arg0.CardIcon:setAlpha( 1 )
-	f9_arg0.ProgressBarBacking:setAlpha( 0 )
-	f9_arg0.CardIconLockOverlay:setAlpha( 0 )
-	f9_arg0.DarkOpsClassifiedIcon:setAlpha( 0 )
-end
-
-CoD.Shield_ModsStyle.__clipsPerState = {
-	DefaultState = {
-		DefaultClip = function ( f10_arg0, f10_arg1 )
-			f10_arg0:__resetProperties()
-			f10_arg0:setupElementClipCounter( 5 )
-			f10_arg0.FocusBrackets:completeAnimation()
-			f10_arg0.FocusBrackets:setAlpha( 0 )
-			f10_arg0.clipFinished( f10_arg0.FocusBrackets )
-			f10_arg0.lockedIcon:completeAnimation()
-			f10_arg0.lockedIcon:setAlpha( 0 )
-			f10_arg0.clipFinished( f10_arg0.lockedIcon )
-			f10_arg0.TrialWidget:completeAnimation()
-			f10_arg0.TrialWidget:setAlpha( 1 )
-			f10_arg0.clipFinished( f10_arg0.TrialWidget )
-			f10_arg0.ProgressBorder:completeAnimation()
-			f10_arg0.ProgressBorder:setAlpha( 0 )
-			f10_arg0.clipFinished( f10_arg0.ProgressBorder )
-			f10_arg0.ProgressBar:completeAnimation()
-			f10_arg0.ProgressBar:setAlpha( 0 )
-			f10_arg0.clipFinished( f10_arg0.ProgressBar )
-		end,
-		Focus = function ( f11_arg0, f11_arg1 )
-			f11_arg0:__resetProperties()
-			f11_arg0:setupElementClipCounter( 8 )
-			f11_arg0.FocusGlow:completeAnimation()
-			f11_arg0.FocusGlow:setAlpha( 0.6 )
-			f11_arg0.clipFinished( f11_arg0.FocusGlow )
-			f11_arg0.FocusBorder:completeAnimation()
-			f11_arg0.FocusBorder:setAlpha( 1 )
-			f11_arg0.clipFinished( f11_arg0.FocusBorder )
-			f11_arg0.SelectorOverlay:completeAnimation()
-			f11_arg0.SelectorOverlay:setAlpha( 0.04 )
-			f11_arg0.clipFinished( f11_arg0.SelectorOverlay )
-			f11_arg0.Lines:completeAnimation()
-			f11_arg0.Lines:setAlpha( 0 )
-			f11_arg0.clipFinished( f11_arg0.Lines )
-			f11_arg0.Label:completeAnimation()
-			f11_arg0.Label:setRGB( 0.96, 0.94, 0.78 )
-			f11_arg0.clipFinished( f11_arg0.Label )
-			f11_arg0.lockedIcon:completeAnimation()
-			f11_arg0.lockedIcon:setAlpha( 0 )
-			f11_arg0.clipFinished( f11_arg0.lockedIcon )
-			f11_arg0.TrialWidget:completeAnimation()
-			f11_arg0.TrialWidget:setAlpha( 1 )
-			f11_arg0.clipFinished( f11_arg0.TrialWidget )
-			f11_arg0.ProgressBar:completeAnimation()
-			f11_arg0.ProgressBar:setAlpha( 0 )
-			f11_arg0.clipFinished( f11_arg0.ProgressBar )
-		end,
-		GainFocus = function ( f12_arg0, f12_arg1 )
-			f12_arg0:__resetProperties()
-			f12_arg0:setupElementClipCounter( 10 )
-			local f12_local0 = function ( f13_arg0 )
-				f12_arg0.FocusGlow:beginAnimation( 200 )
-				f12_arg0.FocusGlow:setAlpha( 0.6 )
-				f12_arg0.FocusGlow:registerEventHandler( "interrupted_keyframe", f12_arg0.clipInterrupted )
-				f12_arg0.FocusGlow:registerEventHandler( "transition_complete_keyframe", f12_arg0.clipFinished )
-			end
-			
-			f12_arg0.FocusGlow:completeAnimation()
-			f12_arg0.FocusGlow:setAlpha( 0 )
-			f12_local0( f12_arg0.FocusGlow )
-			local f12_local1 = function ( f14_arg0 )
-				f12_arg0.FocusBorder:beginAnimation( 200 )
-				f12_arg0.FocusBorder:setAlpha( 1 )
-				f12_arg0.FocusBorder:registerEventHandler( "interrupted_keyframe", f12_arg0.clipInterrupted )
-				f12_arg0.FocusBorder:registerEventHandler( "transition_complete_keyframe", f12_arg0.clipFinished )
-			end
-			
-			f12_arg0.FocusBorder:completeAnimation()
-			f12_arg0.FocusBorder:setAlpha( 0 )
-			f12_local1( f12_arg0.FocusBorder )
-			local f12_local2 = function ( f15_arg0 )
-				f12_arg0.SelectorOverlay:beginAnimation( 200 )
-				f12_arg0.SelectorOverlay:setAlpha( 0.04 )
-				f12_arg0.SelectorOverlay:registerEventHandler( "interrupted_keyframe", f12_arg0.clipInterrupted )
-				f12_arg0.SelectorOverlay:registerEventHandler( "transition_complete_keyframe", f12_arg0.clipFinished )
-			end
-			
-			f12_arg0.SelectorOverlay:completeAnimation()
-			f12_arg0.SelectorOverlay:setAlpha( 0.01 )
-			f12_local2( f12_arg0.SelectorOverlay )
-			local f12_local3 = function ( f16_arg0 )
-				local f16_local0 = function ( f17_arg0 )
-					f17_arg0:beginAnimation( 50 )
-					f17_arg0:setLeftRight( 0, 1, -10, 10 )
-					f17_arg0:setTopBottom( 0, 1, -10, 10 )
-					f17_arg0:setAlpha( 1 )
-					f17_arg0:registerEventHandler( "transition_complete_keyframe", f12_arg0.clipFinished )
-				end
-				
-				f12_arg0.FocusBrackets:beginAnimation( 100 )
-				f12_arg0.FocusBrackets:setLeftRight( 0, 1, -8, 8 )
-				f12_arg0.FocusBrackets:setTopBottom( 0, 1, -8, 8 )
-				f12_arg0.FocusBrackets:setAlpha( 0.67 )
-				f12_arg0.FocusBrackets:registerEventHandler( "interrupted_keyframe", f12_arg0.clipInterrupted )
-				f12_arg0.FocusBrackets:registerEventHandler( "transition_complete_keyframe", f16_local0 )
-			end
-			
-			f12_arg0.FocusBrackets:completeAnimation()
-			f12_arg0.FocusBrackets:setLeftRight( 0, 1, -40, 40 )
-			f12_arg0.FocusBrackets:setTopBottom( 0, 1, -40, 40 )
-			f12_arg0.FocusBrackets:setAlpha( 0 )
-			f12_local3( f12_arg0.FocusBrackets )
-			local f12_local4 = function ( f18_arg0 )
-				f12_arg0.Lines:beginAnimation( 200 )
-				f12_arg0.Lines:setAlpha( 0 )
-				f12_arg0.Lines:registerEventHandler( "interrupted_keyframe", f12_arg0.clipInterrupted )
-				f12_arg0.Lines:registerEventHandler( "transition_complete_keyframe", f12_arg0.clipFinished )
-			end
-			
-			f12_arg0.Lines:completeAnimation()
-			f12_arg0.Lines:setAlpha( 1 )
-			f12_local4( f12_arg0.Lines )
-			f12_arg0.Label:completeAnimation()
-			f12_arg0.Label:setRGB( 0.96, 0.94, 0.78 )
-			f12_arg0.clipFinished( f12_arg0.Label )
-			f12_arg0.lockedIcon:completeAnimation()
-			f12_arg0.lockedIcon:setAlpha( 0 )
-			f12_arg0.clipFinished( f12_arg0.lockedIcon )
-			f12_arg0.TrialWidget:completeAnimation()
-			f12_arg0.TrialWidget:setAlpha( 1 )
-			f12_arg0.clipFinished( f12_arg0.TrialWidget )
-			f12_arg0.ProgressBorder:completeAnimation()
-			f12_arg0.ProgressBorder:setAlpha( 0 )
-			f12_arg0.clipFinished( f12_arg0.ProgressBorder )
-			f12_arg0.ProgressBar:completeAnimation()
-			f12_arg0.ProgressBar:setAlpha( 0 )
-			f12_arg0.clipFinished( f12_arg0.ProgressBar )
-		end,
-		LoseFocus = function ( f19_arg0, f19_arg1 )
-			f19_arg0:__resetProperties()
-			f19_arg0:setupElementClipCounter( 9 )
-			local f19_local0 = function ( f20_arg0 )
-				f19_arg0.FocusGlow:beginAnimation( 200 )
-				f19_arg0.FocusGlow:setAlpha( 0 )
-				f19_arg0.FocusGlow:registerEventHandler( "interrupted_keyframe", f19_arg0.clipInterrupted )
-				f19_arg0.FocusGlow:registerEventHandler( "transition_complete_keyframe", f19_arg0.clipFinished )
-			end
-			
-			f19_arg0.FocusGlow:completeAnimation()
-			f19_arg0.FocusGlow:setAlpha( 0.6 )
-			f19_local0( f19_arg0.FocusGlow )
-			local f19_local1 = function ( f21_arg0 )
-				f19_arg0.FocusBorder:beginAnimation( 200 )
-				f19_arg0.FocusBorder:setAlpha( 0 )
-				f19_arg0.FocusBorder:registerEventHandler( "interrupted_keyframe", f19_arg0.clipInterrupted )
-				f19_arg0.FocusBorder:registerEventHandler( "transition_complete_keyframe", f19_arg0.clipFinished )
-			end
-			
-			f19_arg0.FocusBorder:completeAnimation()
-			f19_arg0.FocusBorder:setAlpha( 1 )
-			f19_local1( f19_arg0.FocusBorder )
-			local f19_local2 = function ( f22_arg0 )
-				f19_arg0.SelectorOverlay:beginAnimation( 200 )
-				f19_arg0.SelectorOverlay:setAlpha( 0.01 )
-				f19_arg0.SelectorOverlay:registerEventHandler( "interrupted_keyframe", f19_arg0.clipInterrupted )
-				f19_arg0.SelectorOverlay:registerEventHandler( "transition_complete_keyframe", f19_arg0.clipFinished )
-			end
-			
-			f19_arg0.SelectorOverlay:completeAnimation()
-			f19_arg0.SelectorOverlay:setAlpha( 0.04 )
-			f19_local2( f19_arg0.SelectorOverlay )
-			local f19_local3 = function ( f23_arg0 )
-				f19_arg0.FocusBrackets:beginAnimation( 60 )
-				f19_arg0.FocusBrackets:setAlpha( 0 )
-				f19_arg0.FocusBrackets:registerEventHandler( "interrupted_keyframe", f19_arg0.clipInterrupted )
-				f19_arg0.FocusBrackets:registerEventHandler( "transition_complete_keyframe", f19_arg0.clipFinished )
-			end
-			
-			f19_arg0.FocusBrackets:completeAnimation()
-			f19_arg0.FocusBrackets:setAlpha( 1 )
-			f19_local3( f19_arg0.FocusBrackets )
-			local f19_local4 = function ( f24_arg0 )
-				f19_arg0.Lines:beginAnimation( 200 )
-				f19_arg0.Lines:setAlpha( 1 )
-				f19_arg0.Lines:registerEventHandler( "interrupted_keyframe", f19_arg0.clipInterrupted )
-				f19_arg0.Lines:registerEventHandler( "transition_complete_keyframe", f19_arg0.clipFinished )
-			end
-			
-			f19_arg0.Lines:completeAnimation()
-			f19_arg0.Lines:setAlpha( 0 )
-			f19_local4( f19_arg0.Lines )
-			f19_arg0.lockedIcon:completeAnimation()
-			f19_arg0.lockedIcon:setAlpha( 0 )
-			f19_arg0.clipFinished( f19_arg0.lockedIcon )
-			f19_arg0.TrialWidget:completeAnimation()
-			f19_arg0.TrialWidget:setAlpha( 1 )
-			f19_arg0.clipFinished( f19_arg0.TrialWidget )
-			f19_arg0.ProgressBorder:completeAnimation()
-			f19_arg0.ProgressBorder:setAlpha( 0 )
-			f19_arg0.clipFinished( f19_arg0.ProgressBorder )
-			f19_arg0.ProgressBar:completeAnimation()
-			f19_arg0.ProgressBar:setAlpha( 0 )
-			f19_arg0.clipFinished( f19_arg0.ProgressBar )
-		end
-	},
-	Locked = {
-		DefaultClip = function ( f25_arg0, f25_arg1 )
-			f25_arg0:__resetProperties()
-			f25_arg0:setupElementClipCounter( 7 )
-			f25_arg0.FocusBrackets:completeAnimation()
-			f25_arg0.FocusBrackets:setAlpha( 0 )
-			f25_arg0.clipFinished( f25_arg0.FocusBrackets )
-			f25_arg0.CardIcon:completeAnimation()
-			f25_arg0.CardIcon:setAlpha( 1 )
-			f25_arg0.clipFinished( f25_arg0.CardIcon )
-			f25_arg0.CardIconLockOverlay:completeAnimation()
-			f25_arg0.CardIconLockOverlay:setAlpha( 0.98 )
-			f25_arg0.clipFinished( f25_arg0.CardIconLockOverlay )
-			f25_arg0.Lines:completeAnimation()
-			f25_arg0.Lines:setAlpha( 0.5 )
-			f25_arg0.clipFinished( f25_arg0.Lines )
-			f25_arg0.ProgressBarBacking:completeAnimation()
-			f25_arg0.ProgressBarBacking:setAlpha( 0.02 )
-			f25_arg0.clipFinished( f25_arg0.ProgressBarBacking )
-			f25_arg0.ProgressBorder:completeAnimation()
-			f25_arg0.ProgressBorder:setAlpha( 0.02 )
-			f25_arg0.clipFinished( f25_arg0.ProgressBorder )
-			f25_arg0.ProgressBar:completeAnimation()
-			f25_arg0.ProgressBar:setAlpha( 1 )
-			f25_arg0.clipFinished( f25_arg0.ProgressBar )
-		end,
-		Focus = function ( f26_arg0, f26_arg1 )
-			f26_arg0:__resetProperties()
-			f26_arg0:setupElementClipCounter( 11 )
-			f26_arg0.FocusGlow:completeAnimation()
-			f26_arg0.FocusGlow:setAlpha( 0 )
-			f26_arg0.clipFinished( f26_arg0.FocusGlow )
-			f26_arg0.FocusBorder:completeAnimation()
-			f26_arg0.FocusBorder:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-			f26_arg0.FocusBorder:setAlpha( 0.25 )
-			f26_arg0.clipFinished( f26_arg0.FocusBorder )
-			f26_arg0.SelectorOverlay:completeAnimation()
-			f26_arg0.SelectorOverlay:setAlpha( 0.04 )
-			f26_arg0.clipFinished( f26_arg0.SelectorOverlay )
-			f26_arg0.FocusBrackets:completeAnimation()
-			f26_arg0.FocusBrackets:setAlpha( 1 )
-			f26_arg0.FocusBrackets:setScale( 1, 1 )
-			f26_arg0.clipFinished( f26_arg0.FocusBrackets )
-			f26_arg0.CardIconLockOverlay:completeAnimation()
-			f26_arg0.CardIconLockOverlay:setAlpha( 0.98 )
-			f26_arg0.clipFinished( f26_arg0.CardIconLockOverlay )
-			f26_arg0.Lines:completeAnimation()
-			f26_arg0.Lines:setAlpha( 0 )
-			f26_arg0.clipFinished( f26_arg0.Lines )
-			f26_arg0.Label:completeAnimation()
-			f26_arg0.Label:setRGB( 0.96, 0.94, 0.78 )
-			f26_arg0.clipFinished( f26_arg0.Label )
-			f26_arg0.lockedIcon:completeAnimation()
-			f26_arg0.lockedIcon:setAlpha( 0.8 )
-			f26_arg0.clipFinished( f26_arg0.lockedIcon )
-			f26_arg0.ProgressBarBacking:completeAnimation()
-			f26_arg0.ProgressBarBacking:setAlpha( 0.02 )
-			f26_arg0.clipFinished( f26_arg0.ProgressBarBacking )
-			f26_arg0.ProgressBorder:completeAnimation()
-			f26_arg0.ProgressBorder:setAlpha( 0.05 )
-			f26_arg0.clipFinished( f26_arg0.ProgressBorder )
-			f26_arg0.ProgressBar:completeAnimation()
-			f26_arg0.ProgressBar:setAlpha( 1 )
-			f26_arg0.clipFinished( f26_arg0.ProgressBar )
-		end,
-		GainFocus = function ( f27_arg0, f27_arg1 )
-			f27_arg0:__resetProperties()
-			f27_arg0:setupElementClipCounter( 10 )
-			local f27_local0 = function ( f28_arg0 )
-				f27_arg0.FocusBorder:beginAnimation( 200 )
-				f27_arg0.FocusBorder:setAlpha( 0.25 )
-				f27_arg0.FocusBorder:registerEventHandler( "interrupted_keyframe", f27_arg0.clipInterrupted )
-				f27_arg0.FocusBorder:registerEventHandler( "transition_complete_keyframe", f27_arg0.clipFinished )
-			end
-			
-			f27_arg0.FocusBorder:completeAnimation()
-			f27_arg0.FocusBorder:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-			f27_arg0.FocusBorder:setAlpha( 0 )
-			f27_local0( f27_arg0.FocusBorder )
-			local f27_local1 = function ( f29_arg0 )
-				f27_arg0.SelectorOverlay:beginAnimation( 200 )
-				f27_arg0.SelectorOverlay:setAlpha( 0.04 )
-				f27_arg0.SelectorOverlay:registerEventHandler( "interrupted_keyframe", f27_arg0.clipInterrupted )
-				f27_arg0.SelectorOverlay:registerEventHandler( "transition_complete_keyframe", f27_arg0.clipFinished )
-			end
-			
-			f27_arg0.SelectorOverlay:completeAnimation()
-			f27_arg0.SelectorOverlay:setAlpha( 0.01 )
-			f27_local1( f27_arg0.SelectorOverlay )
-			local f27_local2 = function ( f30_arg0 )
-				local f30_local0 = function ( f31_arg0 )
-					f31_arg0:beginAnimation( 50 )
-					f31_arg0:setLeftRight( 0, 1, -10, 10 )
-					f31_arg0:setTopBottom( 0, 1, -10, 10 )
-					f31_arg0:setAlpha( 1 )
-					f31_arg0:registerEventHandler( "transition_complete_keyframe", f27_arg0.clipFinished )
-				end
-				
-				f27_arg0.FocusBrackets:beginAnimation( 100 )
-				f27_arg0.FocusBrackets:setLeftRight( 0, 1, -8, 8 )
-				f27_arg0.FocusBrackets:setTopBottom( 0, 1, -8, 8 )
-				f27_arg0.FocusBrackets:setAlpha( 0.67 )
-				f27_arg0.FocusBrackets:registerEventHandler( "interrupted_keyframe", f27_arg0.clipInterrupted )
-				f27_arg0.FocusBrackets:registerEventHandler( "transition_complete_keyframe", f30_local0 )
-			end
-			
-			f27_arg0.FocusBrackets:completeAnimation()
-			f27_arg0.FocusBrackets:setLeftRight( 0, 1, -40, 40 )
-			f27_arg0.FocusBrackets:setTopBottom( 0, 1, -40, 40 )
-			f27_arg0.FocusBrackets:setAlpha( 0 )
-			f27_local2( f27_arg0.FocusBrackets )
-			f27_arg0.CardIconLockOverlay:completeAnimation()
-			f27_arg0.CardIconLockOverlay:setAlpha( 0.98 )
-			f27_arg0.clipFinished( f27_arg0.CardIconLockOverlay )
-			f27_arg0.Lines:completeAnimation()
-			f27_arg0.Lines:setAlpha( 0.5 )
-			f27_arg0.clipFinished( f27_arg0.Lines )
-			f27_arg0.Label:completeAnimation()
-			f27_arg0.Label:setRGB( 0.96, 0.94, 0.78 )
-			f27_arg0.clipFinished( f27_arg0.Label )
-			local f27_local3 = function ( f32_arg0 )
-				f27_arg0.lockedIcon:beginAnimation( 200 )
-				f27_arg0.lockedIcon:setAlpha( 0.8 )
-				f27_arg0.lockedIcon:registerEventHandler( "interrupted_keyframe", f27_arg0.clipInterrupted )
-				f27_arg0.lockedIcon:registerEventHandler( "transition_complete_keyframe", f27_arg0.clipFinished )
-			end
-			
-			f27_arg0.lockedIcon:completeAnimation()
-			f27_arg0.lockedIcon:setAlpha( 1 )
-			f27_local3( f27_arg0.lockedIcon )
-			f27_arg0.ProgressBarBacking:completeAnimation()
-			f27_arg0.ProgressBarBacking:setAlpha( 0.02 )
-			f27_arg0.clipFinished( f27_arg0.ProgressBarBacking )
-			f27_arg0.ProgressBorder:completeAnimation()
-			f27_arg0.ProgressBorder:setAlpha( 0.05 )
-			f27_arg0.clipFinished( f27_arg0.ProgressBorder )
-			f27_arg0.ProgressBar:completeAnimation()
-			f27_arg0.ProgressBar:setAlpha( 1 )
-			f27_arg0.clipFinished( f27_arg0.ProgressBar )
-		end,
-		LoseFocus = function ( f33_arg0, f33_arg1 )
-			f33_arg0:__resetProperties()
-			f33_arg0:setupElementClipCounter( 9 )
-			local f33_local0 = function ( f34_arg0 )
-				f33_arg0.FocusBorder:beginAnimation( 150 )
-				f33_arg0.FocusBorder:setAlpha( 0 )
-				f33_arg0.FocusBorder:registerEventHandler( "interrupted_keyframe", f33_arg0.clipInterrupted )
-				f33_arg0.FocusBorder:registerEventHandler( "transition_complete_keyframe", f33_arg0.clipFinished )
-			end
-			
-			f33_arg0.FocusBorder:completeAnimation()
-			f33_arg0.FocusBorder:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-			f33_arg0.FocusBorder:setAlpha( 0.5 )
-			f33_local0( f33_arg0.FocusBorder )
-			local f33_local1 = function ( f35_arg0 )
-				f33_arg0.SelectorOverlay:beginAnimation( 150 )
-				f33_arg0.SelectorOverlay:setAlpha( 0.01 )
-				f33_arg0.SelectorOverlay:registerEventHandler( "interrupted_keyframe", f33_arg0.clipInterrupted )
-				f33_arg0.SelectorOverlay:registerEventHandler( "transition_complete_keyframe", f33_arg0.clipFinished )
-			end
-			
-			f33_arg0.SelectorOverlay:completeAnimation()
-			f33_arg0.SelectorOverlay:setAlpha( 0.04 )
-			f33_local1( f33_arg0.SelectorOverlay )
-			local f33_local2 = function ( f36_arg0 )
-				f33_arg0.FocusBrackets:beginAnimation( 60 )
-				f33_arg0.FocusBrackets:setAlpha( 0 )
-				f33_arg0.FocusBrackets:registerEventHandler( "interrupted_keyframe", f33_arg0.clipInterrupted )
-				f33_arg0.FocusBrackets:registerEventHandler( "transition_complete_keyframe", f33_arg0.clipFinished )
-			end
-			
-			f33_arg0.FocusBrackets:completeAnimation()
-			f33_arg0.FocusBrackets:setAlpha( 1 )
-			f33_local2( f33_arg0.FocusBrackets )
-			f33_arg0.CardIconLockOverlay:completeAnimation()
-			f33_arg0.CardIconLockOverlay:setAlpha( 0.98 )
-			f33_arg0.clipFinished( f33_arg0.CardIconLockOverlay )
-			local f33_local3 = function ( f37_arg0 )
-				f33_arg0.Lines:beginAnimation( 150 )
-				f33_arg0.Lines:setAlpha( 1 )
-				f33_arg0.Lines:registerEventHandler( "interrupted_keyframe", f33_arg0.clipInterrupted )
-				f33_arg0.Lines:registerEventHandler( "transition_complete_keyframe", f33_arg0.clipFinished )
-			end
-			
-			f33_arg0.Lines:completeAnimation()
-			f33_arg0.Lines:setAlpha( 0 )
-			f33_local3( f33_arg0.Lines )
-			local f33_local4 = function ( f38_arg0 )
-				f33_arg0.lockedIcon:beginAnimation( 150 )
-				f33_arg0.lockedIcon:setAlpha( 1 )
-				f33_arg0.lockedIcon:registerEventHandler( "interrupted_keyframe", f33_arg0.clipInterrupted )
-				f33_arg0.lockedIcon:registerEventHandler( "transition_complete_keyframe", f33_arg0.clipFinished )
-			end
-			
-			f33_arg0.lockedIcon:completeAnimation()
-			f33_arg0.lockedIcon:setAlpha( 0.8 )
-			f33_local4( f33_arg0.lockedIcon )
-			f33_arg0.ProgressBarBacking:completeAnimation()
-			f33_arg0.ProgressBarBacking:setAlpha( 0.02 )
-			f33_arg0.clipFinished( f33_arg0.ProgressBarBacking )
-			f33_arg0.ProgressBorder:completeAnimation()
-			f33_arg0.ProgressBorder:setAlpha( 0.05 )
-			f33_arg0.clipFinished( f33_arg0.ProgressBorder )
-			f33_arg0.ProgressBar:completeAnimation()
-			f33_arg0.ProgressBar:setAlpha( 1 )
-			f33_arg0.clipFinished( f33_arg0.ProgressBar )
-		end
-	},
-	Classified = {
-		DefaultClip = function ( f39_arg0, f39_arg1 )
-			f39_arg0:__resetProperties()
-			f39_arg0:setupElementClipCounter( 7 )
-			f39_arg0.FocusBrackets:completeAnimation()
-			f39_arg0.FocusBrackets:setAlpha( 0 )
-			f39_arg0.clipFinished( f39_arg0.FocusBrackets )
-			f39_arg0.CardIcon:completeAnimation()
-			f39_arg0.CardIcon:setAlpha( 0 )
-			f39_arg0.clipFinished( f39_arg0.CardIcon )
-			f39_arg0.DarkOpsClassifiedIcon:completeAnimation()
-			f39_arg0.DarkOpsClassifiedIcon:setAlpha( 1 )
-			f39_arg0.clipFinished( f39_arg0.DarkOpsClassifiedIcon )
-			f39_arg0.lockedIcon:completeAnimation()
-			f39_arg0.lockedIcon:setAlpha( 0 )
-			f39_arg0.clipFinished( f39_arg0.lockedIcon )
-			f39_arg0.ProgressBarBacking:completeAnimation()
-			f39_arg0.ProgressBarBacking:setAlpha( 0.1 )
-			f39_arg0.clipFinished( f39_arg0.ProgressBarBacking )
-			f39_arg0.ProgressBorder:completeAnimation()
-			f39_arg0.ProgressBorder:setAlpha( 0.02 )
-			f39_arg0.clipFinished( f39_arg0.ProgressBorder )
-			f39_arg0.ProgressBar:completeAnimation()
-			f39_arg0.ProgressBar:setAlpha( 0 )
-			f39_arg0.clipFinished( f39_arg0.ProgressBar )
-		end,
-		Focus = function ( f40_arg0, f40_arg1 )
-			f40_arg0:__resetProperties()
-			f40_arg0:setupElementClipCounter( 7 )
-			f40_arg0.FocusGlow:completeAnimation()
-			f40_arg0.FocusGlow:setAlpha( 0.6 )
-			f40_arg0.clipFinished( f40_arg0.FocusGlow )
-			f40_arg0.FocusBorder:completeAnimation()
-			f40_arg0.FocusBorder:setRGB( 0.96, 0.94, 0.78 )
-			f40_arg0.FocusBorder:setAlpha( 1 )
-			f40_arg0.clipFinished( f40_arg0.FocusBorder )
-			f40_arg0.SelectorOverlay:completeAnimation()
-			f40_arg0.SelectorOverlay:setAlpha( 0.04 )
-			f40_arg0.clipFinished( f40_arg0.SelectorOverlay )
-			f40_arg0.CardIcon:completeAnimation()
-			f40_arg0.CardIcon:setAlpha( 0 )
-			f40_arg0.clipFinished( f40_arg0.CardIcon )
-			f40_arg0.DarkOpsClassifiedIcon:completeAnimation()
-			f40_arg0.DarkOpsClassifiedIcon:setAlpha( 1 )
-			f40_arg0.clipFinished( f40_arg0.DarkOpsClassifiedIcon )
-			f40_arg0.Label:completeAnimation()
-			f40_arg0.Label:setRGB( 0.96, 0.94, 0.78 )
-			f40_arg0.clipFinished( f40_arg0.Label )
-			f40_arg0.lockedIcon:completeAnimation()
-			f40_arg0.lockedIcon:setAlpha( 0 )
-			f40_arg0.clipFinished( f40_arg0.lockedIcon )
-		end,
-		GainFocus = function ( f41_arg0, f41_arg1 )
-			f41_arg0:__resetProperties()
-			f41_arg0:setupElementClipCounter( 8 )
-			local f41_local0 = function ( f42_arg0 )
-				f41_arg0.FocusGlow:beginAnimation( 200 )
-				f41_arg0.FocusGlow:setAlpha( 0.6 )
-				f41_arg0.FocusGlow:registerEventHandler( "interrupted_keyframe", f41_arg0.clipInterrupted )
-				f41_arg0.FocusGlow:registerEventHandler( "transition_complete_keyframe", f41_arg0.clipFinished )
-			end
-			
-			f41_arg0.FocusGlow:completeAnimation()
-			f41_arg0.FocusGlow:setAlpha( 0 )
-			f41_local0( f41_arg0.FocusGlow )
-			local f41_local1 = function ( f43_arg0 )
-				f41_arg0.FocusBorder:beginAnimation( 200 )
-				f41_arg0.FocusBorder:setAlpha( 1 )
-				f41_arg0.FocusBorder:registerEventHandler( "interrupted_keyframe", f41_arg0.clipInterrupted )
-				f41_arg0.FocusBorder:registerEventHandler( "transition_complete_keyframe", f41_arg0.clipFinished )
-			end
-			
-			f41_arg0.FocusBorder:completeAnimation()
-			f41_arg0.FocusBorder:setAlpha( 0 )
-			f41_local1( f41_arg0.FocusBorder )
-			local f41_local2 = function ( f44_arg0 )
-				f41_arg0.SelectorOverlay:beginAnimation( 200 )
-				f41_arg0.SelectorOverlay:setAlpha( 0.04 )
-				f41_arg0.SelectorOverlay:registerEventHandler( "interrupted_keyframe", f41_arg0.clipInterrupted )
-				f41_arg0.SelectorOverlay:registerEventHandler( "transition_complete_keyframe", f41_arg0.clipFinished )
-			end
-			
-			f41_arg0.SelectorOverlay:completeAnimation()
-			f41_arg0.SelectorOverlay:setAlpha( 0.01 )
-			f41_local2( f41_arg0.SelectorOverlay )
-			local f41_local3 = function ( f45_arg0 )
-				local f45_local0 = function ( f46_arg0 )
-					f46_arg0:beginAnimation( 50 )
-					f46_arg0:setLeftRight( 0, 1, -10, 10 )
-					f46_arg0:setTopBottom( 0, 1, -10, 10 )
-					f46_arg0:setAlpha( 1 )
-					f46_arg0:registerEventHandler( "transition_complete_keyframe", f41_arg0.clipFinished )
-				end
-				
-				f41_arg0.FocusBrackets:beginAnimation( 100 )
-				f41_arg0.FocusBrackets:setLeftRight( 0, 1, -8, 8 )
-				f41_arg0.FocusBrackets:setTopBottom( 0, 1, -8, 8 )
-				f41_arg0.FocusBrackets:setAlpha( 0.67 )
-				f41_arg0.FocusBrackets:registerEventHandler( "interrupted_keyframe", f41_arg0.clipInterrupted )
-				f41_arg0.FocusBrackets:registerEventHandler( "transition_complete_keyframe", f45_local0 )
-			end
-			
-			f41_arg0.FocusBrackets:completeAnimation()
-			f41_arg0.FocusBrackets:setLeftRight( 0, 1, -40, 40 )
-			f41_arg0.FocusBrackets:setTopBottom( 0, 1, -40, 40 )
-			f41_arg0.FocusBrackets:setAlpha( 0 )
-			f41_local3( f41_arg0.FocusBrackets )
-			f41_arg0.CardIcon:completeAnimation()
-			f41_arg0.CardIcon:setAlpha( 0 )
-			f41_arg0.clipFinished( f41_arg0.CardIcon )
-			f41_arg0.DarkOpsClassifiedIcon:completeAnimation()
-			f41_arg0.DarkOpsClassifiedIcon:setAlpha( 1 )
-			f41_arg0.clipFinished( f41_arg0.DarkOpsClassifiedIcon )
-			f41_arg0.Label:completeAnimation()
-			f41_arg0.Label:setRGB( 0.96, 0.94, 0.78 )
-			f41_arg0.clipFinished( f41_arg0.Label )
-			f41_arg0.lockedIcon:completeAnimation()
-			f41_arg0.lockedIcon:setAlpha( 0 )
-			f41_arg0.clipFinished( f41_arg0.lockedIcon )
-		end,
-		LoseFocus = function ( f47_arg0, f47_arg1 )
-			f47_arg0:__resetProperties()
-			f47_arg0:setupElementClipCounter( 7 )
-			local f47_local0 = function ( f48_arg0 )
-				f47_arg0.FocusGlow:beginAnimation( 200 )
-				f47_arg0.FocusGlow:setAlpha( 0 )
-				f47_arg0.FocusGlow:registerEventHandler( "interrupted_keyframe", f47_arg0.clipInterrupted )
-				f47_arg0.FocusGlow:registerEventHandler( "transition_complete_keyframe", f47_arg0.clipFinished )
-			end
-			
-			f47_arg0.FocusGlow:completeAnimation()
-			f47_arg0.FocusGlow:setAlpha( 0.6 )
-			f47_local0( f47_arg0.FocusGlow )
-			local f47_local1 = function ( f49_arg0 )
-				f47_arg0.FocusBorder:beginAnimation( 200 )
-				f47_arg0.FocusBorder:setAlpha( 0 )
-				f47_arg0.FocusBorder:registerEventHandler( "interrupted_keyframe", f47_arg0.clipInterrupted )
-				f47_arg0.FocusBorder:registerEventHandler( "transition_complete_keyframe", f47_arg0.clipFinished )
-			end
-			
-			f47_arg0.FocusBorder:completeAnimation()
-			f47_arg0.FocusBorder:setAlpha( 1 )
-			f47_local1( f47_arg0.FocusBorder )
-			local f47_local2 = function ( f50_arg0 )
-				f47_arg0.SelectorOverlay:beginAnimation( 200 )
-				f47_arg0.SelectorOverlay:setAlpha( 0.01 )
-				f47_arg0.SelectorOverlay:registerEventHandler( "interrupted_keyframe", f47_arg0.clipInterrupted )
-				f47_arg0.SelectorOverlay:registerEventHandler( "transition_complete_keyframe", f47_arg0.clipFinished )
-			end
-			
-			f47_arg0.SelectorOverlay:completeAnimation()
-			f47_arg0.SelectorOverlay:setAlpha( 0.04 )
-			f47_local2( f47_arg0.SelectorOverlay )
-			local f47_local3 = function ( f51_arg0 )
-				f47_arg0.FocusBrackets:beginAnimation( 60 )
-				f47_arg0.FocusBrackets:setAlpha( 0 )
-				f47_arg0.FocusBrackets:registerEventHandler( "interrupted_keyframe", f47_arg0.clipInterrupted )
-				f47_arg0.FocusBrackets:registerEventHandler( "transition_complete_keyframe", f47_arg0.clipFinished )
-			end
-			
-			f47_arg0.FocusBrackets:completeAnimation()
-			f47_arg0.FocusBrackets:setAlpha( 1 )
-			f47_local3( f47_arg0.FocusBrackets )
-			f47_arg0.CardIcon:completeAnimation()
-			f47_arg0.CardIcon:setAlpha( 0 )
-			f47_arg0.clipFinished( f47_arg0.CardIcon )
-			f47_arg0.DarkOpsClassifiedIcon:completeAnimation()
-			f47_arg0.DarkOpsClassifiedIcon:setAlpha( 1 )
-			f47_arg0.clipFinished( f47_arg0.DarkOpsClassifiedIcon )
-			f47_arg0.lockedIcon:completeAnimation()
-			f47_arg0.lockedIcon:setAlpha( 0 )
-			f47_arg0.clipFinished( f47_arg0.lockedIcon )
-		end
-	},
-	ClassifiedShowProgress = {
-		DefaultClip = function ( f52_arg0, f52_arg1 )
-			f52_arg0:__resetProperties()
-			f52_arg0:setupElementClipCounter( 7 )
-			f52_arg0.FocusBrackets:completeAnimation()
-			f52_arg0.FocusBrackets:setAlpha( 0 )
-			f52_arg0.clipFinished( f52_arg0.FocusBrackets )
-			f52_arg0.CardIcon:completeAnimation()
-			f52_arg0.CardIcon:setAlpha( 0 )
-			f52_arg0.clipFinished( f52_arg0.CardIcon )
-			f52_arg0.DarkOpsClassifiedIcon:completeAnimation()
-			f52_arg0.DarkOpsClassifiedIcon:setAlpha( 1 )
-			f52_arg0.clipFinished( f52_arg0.DarkOpsClassifiedIcon )
-			f52_arg0.lockedIcon:completeAnimation()
-			f52_arg0.lockedIcon:setAlpha( 0 )
-			f52_arg0.clipFinished( f52_arg0.lockedIcon )
-			f52_arg0.ProgressBarBacking:completeAnimation()
-			f52_arg0.ProgressBarBacking:setAlpha( 0.1 )
-			f52_arg0.clipFinished( f52_arg0.ProgressBarBacking )
-			f52_arg0.ProgressBorder:completeAnimation()
-			f52_arg0.ProgressBorder:setAlpha( 0.02 )
-			f52_arg0.clipFinished( f52_arg0.ProgressBorder )
-			f52_arg0.ProgressBar:completeAnimation()
-			f52_arg0.ProgressBar:setAlpha( 1 )
-			f52_arg0.clipFinished( f52_arg0.ProgressBar )
-		end,
-		Focus = function ( f53_arg0, f53_arg1 )
-			f53_arg0:__resetProperties()
-			f53_arg0:setupElementClipCounter( 8 )
-			f53_arg0.FocusGlow:completeAnimation()
-			f53_arg0.FocusGlow:setAlpha( 0.6 )
-			f53_arg0.clipFinished( f53_arg0.FocusGlow )
-			f53_arg0.FocusBorder:completeAnimation()
-			f53_arg0.FocusBorder:setAlpha( 1 )
-			f53_arg0.clipFinished( f53_arg0.FocusBorder )
-			f53_arg0.SelectorOverlay:completeAnimation()
-			f53_arg0.SelectorOverlay:setAlpha( 0.04 )
-			f53_arg0.clipFinished( f53_arg0.SelectorOverlay )
-			f53_arg0.CardIcon:completeAnimation()
-			f53_arg0.CardIcon:setAlpha( 0 )
-			f53_arg0.clipFinished( f53_arg0.CardIcon )
-			f53_arg0.DarkOpsClassifiedIcon:completeAnimation()
-			f53_arg0.DarkOpsClassifiedIcon:setAlpha( 1 )
-			f53_arg0.clipFinished( f53_arg0.DarkOpsClassifiedIcon )
-			f53_arg0.Label:completeAnimation()
-			f53_arg0.Label:setRGB( 0.96, 0.94, 0.78 )
-			f53_arg0.clipFinished( f53_arg0.Label )
-			f53_arg0.lockedIcon:completeAnimation()
-			f53_arg0.lockedIcon:setAlpha( 0 )
-			f53_arg0.clipFinished( f53_arg0.lockedIcon )
-			f53_arg0.ProgressBar:completeAnimation()
-			f53_arg0.ProgressBar:setAlpha( 1 )
-			f53_arg0.clipFinished( f53_arg0.ProgressBar )
-		end,
-		GainFocus = function ( f54_arg0, f54_arg1 )
-			f54_arg0:__resetProperties()
-			f54_arg0:setupElementClipCounter( 9 )
-			local f54_local0 = function ( f55_arg0 )
-				f54_arg0.FocusGlow:beginAnimation( 200 )
-				f54_arg0.FocusGlow:setAlpha( 0.6 )
-				f54_arg0.FocusGlow:registerEventHandler( "interrupted_keyframe", f54_arg0.clipInterrupted )
-				f54_arg0.FocusGlow:registerEventHandler( "transition_complete_keyframe", f54_arg0.clipFinished )
-			end
-			
-			f54_arg0.FocusGlow:completeAnimation()
-			f54_arg0.FocusGlow:setAlpha( 0 )
-			f54_local0( f54_arg0.FocusGlow )
-			local f54_local1 = function ( f56_arg0 )
-				f54_arg0.FocusBorder:beginAnimation( 200 )
-				f54_arg0.FocusBorder:setAlpha( 1 )
-				f54_arg0.FocusBorder:registerEventHandler( "interrupted_keyframe", f54_arg0.clipInterrupted )
-				f54_arg0.FocusBorder:registerEventHandler( "transition_complete_keyframe", f54_arg0.clipFinished )
-			end
-			
-			f54_arg0.FocusBorder:completeAnimation()
-			f54_arg0.FocusBorder:setAlpha( 0 )
-			f54_local1( f54_arg0.FocusBorder )
-			local f54_local2 = function ( f57_arg0 )
-				f54_arg0.SelectorOverlay:beginAnimation( 200 )
-				f54_arg0.SelectorOverlay:setAlpha( 0.04 )
-				f54_arg0.SelectorOverlay:registerEventHandler( "interrupted_keyframe", f54_arg0.clipInterrupted )
-				f54_arg0.SelectorOverlay:registerEventHandler( "transition_complete_keyframe", f54_arg0.clipFinished )
-			end
-			
-			f54_arg0.SelectorOverlay:completeAnimation()
-			f54_arg0.SelectorOverlay:setAlpha( 0.01 )
-			f54_local2( f54_arg0.SelectorOverlay )
-			local f54_local3 = function ( f58_arg0 )
-				local f58_local0 = function ( f59_arg0 )
-					f59_arg0:beginAnimation( 50 )
-					f59_arg0:setLeftRight( 0, 1, -10, 10 )
-					f59_arg0:setTopBottom( 0, 1, -10, 10 )
-					f59_arg0:setAlpha( 1 )
-					f59_arg0:registerEventHandler( "transition_complete_keyframe", f54_arg0.clipFinished )
-				end
-				
-				f54_arg0.FocusBrackets:beginAnimation( 100 )
-				f54_arg0.FocusBrackets:setLeftRight( 0, 1, -8, 8 )
-				f54_arg0.FocusBrackets:setTopBottom( 0, 1, -8, 8 )
-				f54_arg0.FocusBrackets:setAlpha( 0.67 )
-				f54_arg0.FocusBrackets:registerEventHandler( "interrupted_keyframe", f54_arg0.clipInterrupted )
-				f54_arg0.FocusBrackets:registerEventHandler( "transition_complete_keyframe", f58_local0 )
-			end
-			
-			f54_arg0.FocusBrackets:completeAnimation()
-			f54_arg0.FocusBrackets:setLeftRight( 0, 1, -40, 40 )
-			f54_arg0.FocusBrackets:setTopBottom( 0, 1, -40, 40 )
-			f54_arg0.FocusBrackets:setAlpha( 0 )
-			f54_local3( f54_arg0.FocusBrackets )
-			f54_arg0.CardIcon:completeAnimation()
-			f54_arg0.CardIcon:setAlpha( 0 )
-			f54_arg0.clipFinished( f54_arg0.CardIcon )
-			f54_arg0.DarkOpsClassifiedIcon:completeAnimation()
-			f54_arg0.DarkOpsClassifiedIcon:setAlpha( 1 )
-			f54_arg0.clipFinished( f54_arg0.DarkOpsClassifiedIcon )
-			f54_arg0.Label:completeAnimation()
-			f54_arg0.Label:setRGB( 0.96, 0.94, 0.78 )
-			f54_arg0.clipFinished( f54_arg0.Label )
-			f54_arg0.lockedIcon:completeAnimation()
-			f54_arg0.lockedIcon:setAlpha( 0 )
-			f54_arg0.clipFinished( f54_arg0.lockedIcon )
-			f54_arg0.ProgressBar:completeAnimation()
-			f54_arg0.ProgressBar:setAlpha( 1 )
-			f54_arg0.clipFinished( f54_arg0.ProgressBar )
-		end,
-		LoseFocus = function ( f60_arg0, f60_arg1 )
-			f60_arg0:__resetProperties()
-			f60_arg0:setupElementClipCounter( 8 )
-			local f60_local0 = function ( f61_arg0 )
-				f60_arg0.FocusGlow:beginAnimation( 200 )
-				f60_arg0.FocusGlow:setAlpha( 0 )
-				f60_arg0.FocusGlow:registerEventHandler( "interrupted_keyframe", f60_arg0.clipInterrupted )
-				f60_arg0.FocusGlow:registerEventHandler( "transition_complete_keyframe", f60_arg0.clipFinished )
-			end
-			
-			f60_arg0.FocusGlow:completeAnimation()
-			f60_arg0.FocusGlow:setAlpha( 0.6 )
-			f60_local0( f60_arg0.FocusGlow )
-			local f60_local1 = function ( f62_arg0 )
-				f60_arg0.FocusBorder:beginAnimation( 200 )
-				f60_arg0.FocusBorder:setAlpha( 0 )
-				f60_arg0.FocusBorder:registerEventHandler( "interrupted_keyframe", f60_arg0.clipInterrupted )
-				f60_arg0.FocusBorder:registerEventHandler( "transition_complete_keyframe", f60_arg0.clipFinished )
-			end
-			
-			f60_arg0.FocusBorder:completeAnimation()
-			f60_arg0.FocusBorder:setAlpha( 1 )
-			f60_local1( f60_arg0.FocusBorder )
-			local f60_local2 = function ( f63_arg0 )
-				f60_arg0.SelectorOverlay:beginAnimation( 200 )
-				f60_arg0.SelectorOverlay:setAlpha( 0.01 )
-				f60_arg0.SelectorOverlay:registerEventHandler( "interrupted_keyframe", f60_arg0.clipInterrupted )
-				f60_arg0.SelectorOverlay:registerEventHandler( "transition_complete_keyframe", f60_arg0.clipFinished )
-			end
-			
-			f60_arg0.SelectorOverlay:completeAnimation()
-			f60_arg0.SelectorOverlay:setAlpha( 0.04 )
-			f60_local2( f60_arg0.SelectorOverlay )
-			local f60_local3 = function ( f64_arg0 )
-				f60_arg0.FocusBrackets:beginAnimation( 60 )
-				f60_arg0.FocusBrackets:setAlpha( 0 )
-				f60_arg0.FocusBrackets:registerEventHandler( "interrupted_keyframe", f60_arg0.clipInterrupted )
-				f60_arg0.FocusBrackets:registerEventHandler( "transition_complete_keyframe", f60_arg0.clipFinished )
-			end
-			
-			f60_arg0.FocusBrackets:completeAnimation()
-			f60_arg0.FocusBrackets:setAlpha( 1 )
-			f60_local3( f60_arg0.FocusBrackets )
-			f60_arg0.CardIcon:completeAnimation()
-			f60_arg0.CardIcon:setAlpha( 0 )
-			f60_arg0.clipFinished( f60_arg0.CardIcon )
-			f60_arg0.DarkOpsClassifiedIcon:completeAnimation()
-			f60_arg0.DarkOpsClassifiedIcon:setAlpha( 1 )
-			f60_arg0.clipFinished( f60_arg0.DarkOpsClassifiedIcon )
-			f60_arg0.lockedIcon:completeAnimation()
-			f60_arg0.lockedIcon:setAlpha( 0 )
-			f60_arg0.clipFinished( f60_arg0.lockedIcon )
-			f60_arg0.ProgressBar:completeAnimation()
-			f60_arg0.ProgressBar:setAlpha( 1 )
-			f60_arg0.clipFinished( f60_arg0.ProgressBar )
-		end
-	}
-}
-
-CoD.Shield_ModsStyle.__onClose = function ( f65_arg0 )
-	f65_arg0.FocusBrackets:close()
-	f65_arg0.CardIcon:close()
-	f65_arg0.Lines:close()
-	f65_arg0.Label:close()
-	f65_arg0.lockedIcon:close()
-	f65_arg0.TrialWidget:close()
-	f65_arg0.ProgressBorder:close()
-	f65_arg0.ProgressBar:close()
-end
-
--- Mod Active List
-CoD.ActiveModListData = InheritFrom( LUI.UIElement )
-CoD.ActiveModListData.__defaultWidth = 1600
-CoD.ActiveModListData.__defaultHeight = 620
-CoD.ActiveModListData.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
-	local self = LUI.UIElement.new( f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
-	self:setClass( CoD.ActiveModListData )
-	self.id = "ActiveModListData"
+	self:setClass( CoD.ShieldModManagerBody )
+	self.id = "ShieldModManagerBody"
 	self.soundSet = "default"
 	self.onlyChildrenFocusable = true
 	self.anyChildUsesUpdateState = true
 
-	local ActiveModsList = LUI.UIList.new( f1_arg0, f1_arg1, 10, 0, nil, false, false, false, false )
-	ActiveModsList:setLeftRight( 0.5, 0.5, 100, -700 + 1400 )
-	ActiveModsList:setTopBottom( 0, 0, 240, 840 )
-	ActiveModsList:setAutoScaleContent( true )
-	ActiveModsList:setVerticalCount(10)
-	ActiveModsList:setHorizontalCount(1)
-	ActiveModsList:setSpacing( 10 )
-	ActiveModsList:setWidgetType( CoD.ShieldActiveModRow )
-	ActiveModsList:setVerticalCounter( CoD.verticalCounter )
-	ActiveModsList:setDataSource( "ShieldActiveModsList" )
-	ActiveModsList:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	self:addElement( ActiveModsList )
-	self.ActiveModsList = ActiveModsList
+	-- everything of the body that is only closed with it
+	self.Parts = {}
+	self.Buttons = {}
 
-	-- for updates
-	CoD.Menu.ActiveModsList = ActiveModsList
-
-	-- update active mods
-	Engine[@"exec"](Engine[@"getprimarycontroller"](), "MM_push_mods")
-
-	ActiveModsList:AddContextualMenuAction( f1_arg0, f1_arg1, @"menu/remove", function ( f13_arg0, f13_arg1, f13_arg2, f13_arg3 )
-		if AlwaysTrue() then
-			return function ( f14_arg0, f14_arg1, f14_arg2, f14_arg3 )
-				local ModName = f14_arg0:getModel(f14_arg2, "ModName")
-
-				-- remove ^1 prefix if it's there
-				local rawName = ModName:get()
-				if string.sub(rawName, 1, 2) == "^1" then
-					rawName = string.sub(rawName, 3)
-				end
-				
-				CoD.EnhPrintInfo("Removing Mod -> " .. rawName)
-
-				Engine[@"exec"](Engine[@"getprimarycontroller"](), "MM_remove_mod " .. rawName)
-			end
-			
-		else
-			CoD.EnhPrintInfo("WTF")
-		end
-	end ) 
-
-	ActiveModsList:AddContextualMenuAction( f1_arg0, f1_arg1, @"shield/toggle_mod", function ( f13_arg0, f13_arg1, f13_arg2, f13_arg3 )
-		if AlwaysTrue() then
-			return function ( f14_arg0, f14_arg1, f14_arg2, f14_arg3 )
-				local ModName = f14_arg0:getModel(f14_arg2, "ModName")
-				CoD.EnhPrintInfo("Toggling Mod -> " .. ModName:get())
-
-				-- remove ^1 prefix if it's there
-				local rawName = ModName:get()
-				if string.sub(rawName, 1, 2) == "^1" then
-					rawName = string.sub(rawName, 3)
-				end
-
-				CoD.EnhPrintInfo("Toggling Mod -> " .. rawName)
-				Engine[@"exec"](Engine["getprimarycontroller"](), "MM_toggle_mod " .. rawName)
-			end
-		else
-			CoD.EnhPrintInfo("WTF")
-		end
-	end ) 
-
-	f1_arg0:AddButtonCallbackFunction( ActiveModsList, f1_arg1, Enum[@"luibutton"][@"lui_key_xbx_pssquare"], "ui_remove", function ( element, menu, controller, model )
-		if AlwaysTrue() then
-			local ModName = element:getModel(model, "ModName")
-
-			-- remove ^1 prefix if it's there
-			local rawName = ModName:get()
-			if string.sub(rawName, 1, 2) == "^1" then
-				rawName = string.sub(rawName, 3)
-			end
-
-			CoD.EnhPrintInfo("Removing Mod -> " .. rawName)
-
-			Engine[@"exec"](Engine[@"getprimarycontroller"](), "MM_remove_mod " .. rawName)
-			
-			return true
-		else
-			
-		end
-	end, function ( element, menu, controller )
-		if not CoD.ModelUtility.IsSelfModelValueEqualTo( element, controller, "itemIndex", CoDShared.EmptyItemIndex ) and IsGamepad( controller ) and not IsElementPropertyValue( element, "__hasFocusOnVariantWidget", true ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xbx_pssquare"], @"menu/remove", nil, "ui_remove" )
-			return true
-		elseif IsMouseOrKeyboard( controller ) and not CoD.ModelUtility.IsSelfModelValueEqualTo( element, controller, "itemIndex", CoDShared.EmptyItemIndex ) and not IsElementPropertyValue( element, "__hasFocusOnVariantWidget", true ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xbx_pssquare"], @"menu/remove", Enum[@"luibuttonpromptflags"][@"bpf_contextual"], "ui_remove" )
-			return true
-		else
-			return false
-		end
-	end, false )
-
-	f1_arg0:AddButtonCallbackFunction( ActiveModsList, f1_arg1, Enum[@"luibutton"][@"lui_key_xby_pstriangle"], "Y", function ( element, menu, controller, model )
-		if AlwaysTrue() then
-			local ModName = element:getModel(model, "ModName")
-			CoD.EnhPrintInfo("Toggling Mod -> " .. ModName:get())
-
-			-- remove ^1 prefix if it's there
-			local rawName = ModName:get()
-			if string.sub(rawName, 1, 2) == "^1" then
-				rawName = string.sub(rawName, 3)
-			end
-
-			CoD.EnhPrintInfo("Toggling Mod -> " .. rawName)
-			Engine[@"exec"](Engine["getprimarycontroller"](), "MM_toggle_mod " .. rawName)
-
-
-			return true
-		else
-			
-		end
-	end, function ( element, menu, controller )
-		if not CoD.ModelUtility.IsSelfModelValueEqualTo( element, controller, "itemIndex", CoDShared.EmptyItemIndex ) and IsGamepad( controller ) and not IsElementPropertyValue( element, "__hasFocusOnVariantWidget", true ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xby_pstriangle"], @"shield/toggle_mod", nil, "Y" )
-			return true
-		elseif IsMouseOrKeyboard( controller ) and not CoD.ModelUtility.IsSelfModelValueEqualTo( element, controller, "itemIndex", CoDShared.EmptyItemIndex ) and not IsElementPropertyValue( element, "__hasFocusOnVariantWidget", true ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xby_pstriangle"], @"shield/toggle_mod", Enum[@"luibuttonpromptflags"][@"bpf_contextual"], "Y" )
-			return true
-		else
-			return false
-		end
-	end, false )
-
-	-- name
-	CoD.PCWidgetUtility.SetupContextualMenu( ActiveModsList, f1_arg1, "ModName", "", "" )
-
-	ActiveModsList.id = "ActiveModsList"
-
-	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
-	
-	if PostLoadFunc then
-		PostLoadFunc( self, f1_arg1, f1_arg0 )
+	local function Add( element )
+		self:addElement( element )
+		table.insert( self.Parts, element )
+		return element
 	end
 
-	return self
-end
+	-- a button of the body: the menu finds what can take the focus as parent[id], so it is kept under its id
+	local function AddButton( id, label, left, right, top, bottom, action )
+		local button = UI.NewBrowserButton( self, f1_arg0, f1_arg1, label, left, right, top, bottom )
+		self:addElement( button )
+		button.id = id
+		self[id] = button
+		table.insert( self.Buttons, button )
+		UI.OnBrowserButton( f1_arg0, f1_arg1, button, action )
+		return button
+	end
 
-CoD.ActiveModListData.__onClose = function ( f9_arg0 )
-	--f9_arg0.LANServerBrowserDetails:close()
-	f9_arg0.ActiveModsList:close()
-end
+	---------------------------
+	-- the list of the rows
 
--- Mods Background Style
-CoD.ModsCommonCenteredPopup = InheritFrom( LUI.UIElement )
-CoD.ModsCommonCenteredPopup.__defaultWidth = 1920
-CoD.ModsCommonCenteredPopup.__defaultHeight = 1080
-CoD.ModsCommonCenteredPopup.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
-	local self = LUI.UIElement.new( f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
-	self:setClass( CoD.ModsCommonCenteredPopup )
-	self.id = "ModsCommonCenteredPopup"
-	self.soundSet = "default"
-	self.onlyChildrenFocusable = true
-	self.anyChildUsesUpdateState = true
-	
-	--[[
-	local BlackfadeBlurB = LUI.UIImage.new( 0, 1, -5, 5, 0, 1, -5, 5 )
-	BlackfadeBlurB:setRGB( 0, 0, 0 )
-	BlackfadeBlurB:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_E2354BE557C4C7A" ) )
-	BlackfadeBlurB:setShaderVector( 0, 0, 0, 0, 0 )
-	self:addElement( BlackfadeBlurB )
-	self.BlackfadeBlurB = BlackfadeBlurB
-	
-	local BlackfadeBlurF = LUI.UIImage.new( 0, 1, -5, 5, 0, 1, -5, 5 )
-	BlackfadeBlurF:setRGB( 0, 0, 0 )
-	BlackfadeBlurF:setAlpha( 0.6 )
-	self:addElement( BlackfadeBlurF )
-	self.BlackfadeBlurF = BlackfadeBlurF
-	]]
-	
-	local CenterBackground = LUI.UIImage.new( 0.5, 0.5, -348 - 500, 348 + 500, 0.5, 0.5, -500, 500 )
-	CenterBackground:setRGB( 0.09, 0.09, 0.09 )
-	CenterBackground:setAlpha( 0.9 )
-	self:addElement( CenterBackground )
-	self.CenterBackground = CenterBackground
-	
-	local CenterTiledBacking = LUI.UIImage.new( 0.5, 0.5, -348 - 500, 348 + 500, 0.5, 0.5, -500, 500 )
-	CenterTiledBacking:setAlpha( 0.25 )
-	CenterTiledBacking:setImage( RegisterImage( @"hash_634839E8065B1E53" ) )
-	CenterTiledBacking:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_16CBE95C250C6D15" ) )
-	CenterTiledBacking:setShaderVector( 0, 0, 0, 0, 0 )
-	CenterTiledBacking:setupNineSliceShader( 196, 88 )
-	self:addElement( CenterTiledBacking )
-	self.CenterTiledBacking = CenterTiledBacking
-	
-	local buttons = CoD.fe_LeftContainer_NOTLobby.new( f1_arg0, f1_arg1, 0.5, 0.5, -312, 336, 0.5, 0.5, 439, 487 )
-	self:addElement( buttons )
-	self.buttons = buttons
-	
-	local featureOverlayButtonMouseOnly = nil
-	
-	featureOverlayButtonMouseOnly = CoD.featureOverlay_Button.new( f1_arg0, f1_arg1, 0.5, 0.5, -333 + 950, -147 + 950, 0.5, 0.5, 424, 484 )
-	featureOverlayButtonMouseOnly.ButtonContainer.Title:setText( Engine[@"hash_4F9F1239CFD921FE"]( @"hash_778D439E1B360368" ) )
-	featureOverlayButtonMouseOnly:registerEventHandler( "gain_focus", function ( element, event )
-		local f2_local0 = nil
-		if element.gainFocus then
-			f2_local0 = element:gainFocus( event )
-		elseif element.super.gainFocus then
-			f2_local0 = element.super:gainFocus( event )
-		end
-		CoD.Menu.UpdateButtonShownState( element, f1_arg0, f1_arg1, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"] )
-		return f2_local0
+	local Rows = LUI.UIList.new( f1_arg0, f1_arg1, 7, 0, nil, false, false, false, false )
+	Rows:setLeftRight( 0, 0, 0, 1060 )
+	Rows:setTopBottom( 0, 0, MM_LIST_TOP, MM_LIST_TOP + 654 )
+
+	-- filled a moment after the menu is up, and when the client tells its mods
+	Rows:setDataSource( "ShieldModManagerRowsEmpty" )
+
+	Rows:setWidgetType( CoD.ShieldModManagerRow )
+	Rows:setVerticalCount( 10 )
+	Rows:setSpacing( 6 )
+
+	Rows:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
+	Rows:setVerticalCounter( CoD.verticalCounter )
+	Rows:appendEventHandler( "input_source_changed", function ( f2_arg0, f2_arg1 )
+		f2_arg1.menu = f2_arg1.menu or f1_arg0
+		CoD.Menu.UpdateButtonShownState( f2_arg0, f1_arg0, f1_arg1, Enum[@"luibutton"][@"lui_key_xba_pscross"] )
 	end )
-	f1_arg0:AddButtonCallbackFunction( featureOverlayButtonMouseOnly, f1_arg1, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"], "ui_confirm", function ( element, menu, controller, model )
-		GoBack( self, controller )
-		return true
-	end, function ( element, menu, controller )
-		CoD.Menu.SetButtonLabel( menu, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"], @"hash_0", nil, "ui_confirm" )
-		return false
-	end, false )
-	self:addElement( featureOverlayButtonMouseOnly )
-	self.featureOverlayButtonMouseOnly = featureOverlayButtonMouseOnly
 
-	-- reload one
-	local ReloadModsOverlayButtonMouseOnly = nil
-	
-	ReloadModsOverlayButtonMouseOnly = CoD.featureOverlay_Button.new( f1_arg0, f1_arg1, 0.5, 0.5, -333 + 750, -147 + 750, 0.5, 0.5, 424, 484 )
-	ReloadModsOverlayButtonMouseOnly.ButtonContainer.Title:setText( "Reload Mods" )
-	ReloadModsOverlayButtonMouseOnly:registerEventHandler( "gain_focus", function ( element, event )
-		local f2_local0 = nil
-		if element.gainFocus then
-			f2_local0 = element:gainFocus( event )
-		elseif element.super.gainFocus then
-			f2_local0 = element.super:gainFocus( event )
-		end
-		CoD.Menu.UpdateButtonShownState( element, f1_arg0, f1_arg1, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"] )
-		return f2_local0
-	end )
-	f1_arg0:AddButtonCallbackFunction( ReloadModsOverlayButtonMouseOnly, f1_arg1, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"], "ui_confirm", function ( element, menu, controller, model )
-		PlaySoundAlias( "uin_paint_image_flip_toggle" )
-		CoD.EnhPrintInfo("ReloadModsButton")
-		
-		-- reload with killserver
-		CoD.VM_ReloadMods()
-		return true
-	end, function ( element, menu, controller )
-		CoD.Menu.SetButtonLabel( menu, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"], @"hash_0", nil, "ui_confirm" )
-		return false
-	end, false )
-	self:addElement( ReloadModsOverlayButtonMouseOnly )
-	self.ReloadModsOverlayButtonMouseOnly = ReloadModsOverlayButtonMouseOnly
-	
-	local LayoutBottomBar = LUI.UIImage.new( 0.5, 0.5, -349.5 - 500, 349.5 + 500, 0.5, 0.5, 473, 501 )
-	LayoutBottomBar:setZRot( 180 )
-	LayoutBottomBar:setImage( RegisterImage( @"hash_87C348C36FF085C" ) )
-	self:addElement( LayoutBottomBar )
-	self.LayoutBottomBar = LayoutBottomBar
-	
-	local LayoutTopBar = LUI.UIImage.new( 0.5, 0.5, -349.5 - 500, 349.5 + 500, 0.5, 0.5, -500.5, -472.5 )
-	LayoutTopBar:setImage( RegisterImage( @"hash_87C348C36FF085C" ) )
-	self:addElement( LayoutTopBar )
-	self.LayoutTopBar = LayoutTopBar
-	
-	local LayoutTopBarStripes = LUI.UIImage.new( 0.5, 0.5, -348 - 500, 348 + 500, 0.5, 0.5, -500.5, -484.5 )
-	LayoutTopBarStripes:setImage( RegisterImage( @"hash_6A0F654633E4C64E" ) )
-	self:addElement( LayoutTopBarStripes )
-	self.LayoutTopBarStripes = LayoutTopBarStripes
-	
-	local TitleBackgroundBar = LUI.UIImage.new( 0.5, 0.5, -336.5, 336.5, 0.5, 0.5, -472, -444 )
-	TitleBackgroundBar:setRGB( 0.25, 0.24, 0.22 )
-	TitleBackgroundBar:setAlpha( 0.88 )
-	self:addElement( TitleBackgroundBar )
-	self.TitleBackgroundBar = TitleBackgroundBar
-	
-	local TitleTiledBacking = LUI.UIImage.new( 0.5, 0.5, -336.5, 336.5, 0.5, 0.5, -472, -444 )
-	TitleTiledBacking:setAlpha( 0.5 )
-	TitleTiledBacking:setImage( RegisterImage( @"hash_634839E8065B1E53" ) )
-	TitleTiledBacking:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_16CBE95C250C6D15" ) )
-	TitleTiledBacking:setShaderVector( 0, 0, 0, 0, 0 )
-	TitleTiledBacking:setupNineSliceShader( 196, 88 )
-	self:addElement( TitleTiledBacking )
-	self.TitleTiledBacking = TitleTiledBacking
-	
-	local TitleText = LUI.UIText.new( 0.5, 0.5, -279.5, 279.5, 0.5, 0.5, -469, -445 )
-	TitleText:setRGB( ColorSet.T8__BIEGE.r, ColorSet.T8__BIEGE.g, ColorSet.T8__BIEGE.b )
-	TitleText:setAlpha( 0.6 )
-	TitleText:setText( "" )
-	TitleText:setTTF( "ttmussels_regular" )
-	TitleText:setLetterSpacing( 4 )
-	TitleText:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_1FEEB12BCB0D7041"] )
-	TitleText:setAlignment( Enum[@"hash_67A5123B654282D2"][@"hash_3F41D595A2B0EDF3"] )
-	self:addElement( TitleText )
-	self.TitleText = TitleText
-	
-	local TitleLayoutElementL = LUI.UIImage.new( 0.5, 0.5, -331, -315, 0.5, 0.5, -465, -449 )
-	TitleLayoutElementL:setRGB( ColorSet.T8__BIEGE.r, ColorSet.T8__BIEGE.g, ColorSet.T8__BIEGE.b )
-	TitleLayoutElementL:setZRot( 90 )
-	TitleLayoutElementL:setImage( RegisterImage( @"hash_634B575F15CDD376" ) )
-	TitleLayoutElementL:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_F755127C95CF5B6" ) )
-	TitleLayoutElementL:setShaderVector( 0, 3, 0, 0, 0 )
-	self:addElement( TitleLayoutElementL )
-	self.TitleLayoutElementL = TitleLayoutElementL
-	
-	local TitleLayoutElementR = LUI.UIImage.new( 0.5, 0.5, 313, 329, 0.5, 0.5, -464, -448 )
-	TitleLayoutElementR:setRGB( ColorSet.T8__BIEGE.r, ColorSet.T8__BIEGE.g, ColorSet.T8__BIEGE.b )
-	TitleLayoutElementR:setImage( RegisterImage( @"hash_634B575F15CDD376" ) )
-	TitleLayoutElementR:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_F755127C95CF5B6" ) )
-	TitleLayoutElementR:setShaderVector( 0, 3, 0, 0, 0 )
-	self:addElement( TitleLayoutElementR )
-	self.TitleLayoutElementR = TitleLayoutElementR
-	
-	local HeaderBackground = LUI.UIImage.new( 0.5, 0.5, -336.5 - 500, 336.5 + 500, 0.5, 0.5, -423, -231 )
-	HeaderBackground:setRGB( 0.23, 0.23, 0.23 )
-	HeaderBackground:setAlpha( 0.25 )
-	self:addElement( HeaderBackground )
-	self.HeaderBackground = HeaderBackground
-	
-	local HeaderTopBar = LUI.UIImage.new( 0.5, 0.5, -5, -1, 0.5, 0.5, -767, -90 )
-	HeaderTopBar:setAlpha( 0.09 )
-	HeaderTopBar:setZRot( 90 )
-	HeaderTopBar:setImage( RegisterImage( @"hash_C49B0C8991A541F" ) )
-	HeaderTopBar:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_67C9C02F608D0A75" ) )
-	HeaderTopBar:setShaderVector( 0, 0, 0, 0, 0 )
-	HeaderTopBar:setupNineSliceShader( 4, 8 )
-	self:addElement( HeaderTopBar )
-	self.HeaderTopBar = HeaderTopBar
-	
-	local HeaderBottomBar = LUI.UIImage.new( 0.5, 0.5, -5, -1, 0.5, 0.5, -566, 111 )
-	HeaderBottomBar:setAlpha( 0.09 )
-	HeaderBottomBar:setZRot( 90 )
-	HeaderBottomBar:setImage( RegisterImage( @"hash_C49B0C8991A541F" ) )
-	HeaderBottomBar:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_67C9C02F608D0A75" ) )
-	HeaderBottomBar:setShaderVector( 0, 0, 0, 0, 0 )
-	HeaderBottomBar:setupNineSliceShader( 4, 8 )
-	self:addElement( HeaderBottomBar )
-	self.HeaderBottomBar = HeaderBottomBar
-	
-	local BTNQuit = nil
-	
-	BTNQuit = CoD.PC_SmallCloseButton.new( f1_arg0, f1_arg1, 0.5, 0.5, 302, 336, 0.5, 0.5, -475, -441 )
-	BTNQuit:setScale( 0.8, 0.8 )
-	BTNQuit:registerEventHandler( "gain_focus", function ( element, event )
+	Rows:registerEventHandler( "gain_focus", function ( element, event )
 		local f5_local0 = nil
 		if element.gainFocus then
 			f5_local0 = element:gainFocus( event )
 		elseif element.super.gainFocus then
 			f5_local0 = element.super:gainFocus( event )
 		end
-		CoD.Menu.UpdateButtonShownState( element, f1_arg0, f1_arg1, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"] )
+		CoD.Menu.UpdateButtonShownState( element, f1_arg0, f1_arg1, Enum[@"luibutton"][@"lui_key_xba_pscross"] )
 		return f5_local0
 	end )
-	f1_arg0:AddButtonCallbackFunction( BTNQuit, f1_arg1, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"], "ui_confirm", function ( element, menu, controller, model )
-		GoBack( self, controller )
-		return true
-	end, function ( element, menu, controller )
-		CoD.Menu.SetButtonLabel( menu, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"], @"hash_0", nil, "ui_confirm" )
-		return false
-	end, false )
-	self:addElement( BTNQuit )
-	self.BTNQuit = BTNQuit
-	
-	--if CoD.isPC then
-		buttons.id = "buttons"
-	--end
-	--if CoD.isPC then
-		featureOverlayButtonMouseOnly.id = "featureOverlayButtonMouseOnly"
-		ReloadModsOverlayButtonMouseOnly.id = "ReloadModsOverlayButtonMouseOnly"
-	--end
-	--if CoD.isPC then
-		BTNQuit.id = "BTNQuit"
-	--end
-	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
-	if PostLoadFunc then
-		PostLoadFunc( self, f1_arg1, f1_arg0 )
+
+	-- A list keeps the row it was scrolled to when its rows change: emptied, it is put back to its top before the new rows come.
+	local function ReloadRows()
+		Rows:setDataSource( "ShieldModManagerRowsEmpty" )
+		Rows:updateDataSource()
+		Rows:clearLayout()
+		Rows:clearSavedActiveIndex()
+		Rows:setDataSource( "ShieldModManagerRows" )
+		Rows:updateDataSource()
 	end
-	
-	return self
-end
 
-CoD.ModsCommonCenteredPopup.__onClose = function ( f8_arg0 )
-	f8_arg0.buttons:close()
-	f8_arg0.featureOverlayButtonMouseOnly:close()
-	f8_arg0.ReloadModsOverlayButtonMouseOnly:close()
-	f8_arg0.BTNQuit:close()
-end
+	---------------------------
+	-- over the rows: the tabs, and how many there are
 
--- Mods
-CoD.ShieldModManager = InheritFrom( CoD.Menu )
-LUI.createMenu.ShieldModManager = function ( f1_arg0, f1_arg1 )
-	local self = CoD.Menu.NewForUIEditor( "ShieldModManager", f1_arg0 )
-	local f1_local1 = self
-	self:setClass( CoD.ShieldModManager )
-	self.soundSet = "none"
-	self:setOwner( f1_arg0 )
-	self:setLeftRight( 0, 1, 0, 0 )
-	self:setTopBottom( 0, 1, 0, 0 )
-	self:playSound( "menu_open", f1_arg0 )
-	self.anyChildUsesUpdateState = true
-	f1_local1:addElementToPendingUpdateStateList( self )
-	
-	local CommomCenteredPopup = CoD.ModsCommonCenteredPopup.new( f1_local1, f1_arg0, 0, 1, 0, 0, 0, 1, 0, 0 )
-	CommomCenteredPopup.TitleText:setText("Mod Manager")
-	CommomCenteredPopup.HeaderBackground:setAlpha( 0 )
-	CommomCenteredPopup.HeaderTopBar:setAlpha( 0 )
-	CommomCenteredPopup.HeaderBottomBar:setAlpha( 0 )
-	self:addElement( CommomCenteredPopup )
-	self.CommomCenteredPopup = CommomCenteredPopup
+	self.TabButtons = {}
 
-	local InstalledModsText = LUI.UIText.new( 0.5, 0.5, 105, 900, 0.5, 0.5, 0 - 350, 35 - 350 )
-	InstalledModsText:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	InstalledModsText:setTTF( "notosans_regular" )
-	InstalledModsText:setText("Installed Mods: (right click for more actions..)")
-	InstalledModsText:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	InstalledModsText:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( InstalledModsText )
-	self.InstalledModsText = InstalledModsText
+	local CountText = Add( UI.NewText( 520, 1060, 6, 16, "ttmussels_regular", Enum[@"luialignment"][@"lui_alignment_right"] ) )
+	CountText:setRGB( 0.6, 0.6, 0.6 )
 
-	local FeatModsText = LUI.UIText.new( 0.5, 0.5, -695, 695, 0.5, 0.5, 0 - 350, 35 - 350 )
-	FeatModsText:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	FeatModsText:setTTF( "notosans_regular" )
-	FeatModsText:setText("Featured Mods:")
-	FeatModsText:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	FeatModsText:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( FeatModsText )
-	self.FeatModsText = FeatModsText
+	local TabHint = Add( UI.NewText( 520, 1060, 28, 14, "ttmussels_regular", Enum[@"luialignment"][@"lui_alignment_right"] ) )
+	TabHint:setRGB( 0.42, 0.42, 0.42 )
+	TabHint:setLetterSpacing( 1 )
 
-	-- sep
-	local HeaderPixSep = LUI.UIImage.new( 0.5, 0.5, 60, 90, 0.5, 0.5, -450, 450 )
-	HeaderPixSep:setAlpha( 0.25 )
-	HeaderPixSep:setImage( RegisterImage( @"hash_CB07CCC28498CB2" ) )
-	--HeaderPixSep:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_16CBE95C250C6D15" ) )
-	HeaderPixSep:setShaderVector( 0, 0, 0, 0, 0 )
-	HeaderPixSep:setupNineSliceShader( 128, 128 )
-	self:addElement( HeaderPixSep )
-	self.HeaderPixSep = HeaderPixSep
+	-- the names of the columns, where the rows have them
+	Add( UI.NewCaption( MM_ROW_TEXT_LEFT, MM_ROW_STATUS_LEFT - 20, 56, "NAME" ) )
+	Add( UI.NewCaption( MM_ROW_STATUS_LEFT, 900, 56, "STATUS" ) )
+	Add( UI.NewCaption( 900, 1040, 56, "VERSION", Enum[@"luialignment"][@"lui_alignment_right"] ) )
+	Add( UI.NewBox( 0, 1060, 78, 79, 1, 1, 1, 0.12 ) )
 
-	-- active, fucked up datasource widget, so inside a cod better
-	local ActiveModList = CoD.ActiveModListData.new( self, f1_arg0, 0.5, 0.5, -800, 800, 0.5, 0.5, -535, 400 )
-	self:addElement( ActiveModList )
-	self.ActiveModList = ActiveModList
+	-- in the place of the rows while there is none
+	local EmptyTitle = Add( UI.NewText( 0, 1060, MM_LIST_TOP + 250, 30, "notosans_bold", Enum[@"luialignment"][@"lui_alignment_center"] ) )
+	EmptyTitle:setRGB( 0.75, 0.75, 0.75 )
+	EmptyTitle:setText( "Nothing here yet" )
+	EmptyTitle:setAlpha( 0 )
 
-	ActiveModList.id = "ActiveModList"
-	
-	local ModsList = LUI.UIList.new( f1_local1, f1_arg0, 3, 3, nil, false, false, false, false )
-	ModsList:setLeftRight( 0.5, 0.5, -1100, 450 )
-	ModsList:setTopBottom( 0.55, 0.55, -380 + 290, -320 + 290 )
-	ModsList:setAutoScaleContent( true )
-	ModsList:setVerticalCount(4)
-	ModsList:setHorizontalCount(2)
-	ModsList:setSpacing( 30 )
-	ModsList:setWidgetType( CoD.Shield_ModsStyleMain )
-	ModsList:setVerticalCounter( CoD.verticalCounter )
-	ModsList:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	ModsList:setDataSource( "ShieldFeaturedModsList" )
+	---------------------------
+	-- the card of the row picked: its picture, 660 by 330, which cuts what of the picture is over
 
-	self:AddButtonCallbackFunction( ModsList, f1_arg0, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"], "ui_confirm", function ( element, menu, controller, model )
-		if not CoD.ModelUtility.IsSelfModelValueTrue( element, controller, "locked" ) and CoD.DirectorUtility.ShowForAllClients( element, controller ) then
-			PlaySoundAlias( "uin_toggle_generic" )
-			
-			-- open site
-			CoD.EnhPrintInfo("MM_download_mod", element.site)
+	local ImageClip = LUI.UIElement.new( 0, 0, MM_CARD_LEFT, MM_CARD_RIGHT, 0, 0, 0, MM_CARD_IMAGE_HEIGHT )
+	ImageClip:setUseStencil( true )
+	Add( ImageClip )
 
-			-- removed delay, we have in c++ side anyways.
-			Engine[@"exec"](Engine[@"getprimarycontroller"](), "MM_download_mod " .. element.site)
+	local CardImage = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	CardImage:setImage( RegisterImage( @"uie_ui_menu_emblem_grid" ) )
+	ImageClip:addElement( CardImage )
+	self.CardImage = CardImage
 
-			return true
+	UI.AddBottomFade( ImageClip, MM_CARD_IMAGE_HEIGHT, 170 )
+
+	-- the parts of the card that change with the pick
+	local Card = {}
+
+	-- the line over the card, in the colour of the mode
+	Card.Accent = Add( UI.NewBox( MM_CARD_LEFT, MM_CARD_RIGHT, 0, 4, 1, 1, 1, 0.25 ) )
+
+	Card.Pills = {}
+
+	for index = 1, MM_MAX_TAGS, 1 do
+		local left = MM_TEXT_LEFT + ( index - 1 ) * 60
+
+		local box = Add( UI.NewBox( left, left + 52, 222, 248, 1, 1, 1, 0 ) )
+
+		local text = Add( UI.NewText( left, left + 52, 226, 18, "notosans_bold", Enum[@"luialignment"][@"lui_alignment_center"] ) )
+		text:setRGB( 0.04, 0.04, 0.04 )
+
+		Card.Pills[index] = { box = box, text = text }
+	end
+
+	Card.Kind = Add( UI.NewText( MM_TEXT_LEFT, MM_TEXT_RIGHT, 224, 22, "ttmussels_regular" ) )
+	Card.Kind:setRGB( 0.86, 0.86, 0.86 )
+	Card.Kind:setLetterSpacing( 2 )
+
+	Card.Title = Add( UI.NewText( MM_TEXT_LEFT, MM_TEXT_RIGHT, 258, 48, "notosans_bold" ) )
+	Card.Title:setRGB( 1, 1, 1 )
+
+	-- under the picture: who made it, its version, what it is, its files and how the download goes
+	Add( UI.NewBox( MM_CARD_LEFT, MM_CARD_RIGHT, MM_CARD_IMAGE_HEIGHT, MM_CARD_BOTTOM, 0, 0, 0, 0.5 ) )
+
+	Add( UI.NewCaption( MM_TEXT_LEFT, MM_CARD_HALF - 20, 346, "MADE BY" ) )
+
+	Card.Author = Add( UI.NewText( MM_TEXT_LEFT, MM_CARD_HALF - 20, 366, 26, "notosans_bold" ) )
+	Card.Author:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+
+	Add( UI.NewCaption( MM_CARD_HALF, MM_TEXT_RIGHT, 346, "STATUS" ) )
+
+	Card.Status = Add( UI.NewText( MM_CARD_HALF, MM_TEXT_RIGHT, 368, 22, "ttmussels_regular" ) )
+
+	Add( UI.NewBox( MM_TEXT_LEFT, MM_TEXT_RIGHT, 404, 405, 1, 1, 1, 0.1 ) )
+
+	Add( UI.NewCaption( MM_TEXT_LEFT, MM_TEXT_RIGHT, 416, "ABOUT" ) )
+
+	Card.Desc = Add( UI.NewText( MM_TEXT_LEFT, MM_TEXT_RIGHT, 438, 18, "ttmussels_regular" ) )
+	Card.Desc:setRGB( 0.78, 0.78, 0.78 )
+
+	Add( UI.NewCaption( MM_TEXT_LEFT, MM_TEXT_RIGHT, 556, "FILES" ) )
+
+	Card.Files = Add( UI.NewText( MM_TEXT_LEFT, MM_TEXT_RIGHT, 576, 16, "ttmussels_regular" ) )
+	Card.Files:setRGB( 0.55, 0.55, 0.55 )
+
+	Add( UI.NewBox( MM_TEXT_LEFT, MM_TEXT_RIGHT, 614, 615, 1, 1, 1, 0.1 ) )
+
+	Card.Progress = Add( UI.NewText( MM_TEXT_LEFT, MM_TEXT_RIGHT, 630, 20, "notosans_bold" ) )
+	Card.Progress:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+
+	-- the thin frame of the game around the card
+	local CardFrame = LUI.UIImage.new( 0, 0, MM_CARD_LEFT - 1, MM_CARD_RIGHT + 1, 0, 0, -1, MM_CARD_BOTTOM + 1 )
+	CardFrame:setAlpha( 0.12 )
+	CardFrame:setImage( RegisterImage( @"uie_ui_menu_store_common_frame" ) )
+	CardFrame:setMaterial( LUI.UIImage.GetCachedMaterial( @"uie_nineslice_add" ) )
+	CardFrame:setShaderVector( 0, 0, 0, 0, 0 )
+	CardFrame:setupNineSliceShader( 12, 12 )
+	Add( CardFrame )
+
+	---------------------------
+	-- what the menu shows of the tab, the pick and the download
+
+	local function PickedRow()
+		return FindManagerRow( ModState.selected[ModState.tab] )
+	end
+
+	-- the download's words, or what waits for a restart
+	local function ShowProgress()
+		if ModState.status ~= "Idle" then
+			Card.Progress:setRGB( 1, 0.8, 0.25 )
+			Card.Progress:setText( ModState.status )
+		elseif ModState.pending > 0 then
+			Card.Progress:setRGB( 1, 0.8, 0.25 )
+			Card.Progress:setText( "Restart the game to finish: some files were in use." )
 		else
-			
+			Card.Progress:setRGB( 0.55, 0.55, 0.55 )
+			Card.Progress:setText( "Ready" )
+		end
+	end
+
+	local function ShowManager()
+		local maps = ModState.tab == "maps"
+		local row = PickedRow()
+		local installed = 0
+
+		for _, other in ipairs( ManagerRows ) do
+			if other.status ~= "get" then
+				installed = installed + 1
+			end
+		end
+
+		CountText:setText( #ManagerRows .. ( maps and " MAPS" or " MODS" ) .. "  /  " .. installed .. " INSTALLED" )
+
+		if maps then
+			TabHint:setText( "A MAP LOADS WHEN THE GAME STARTS: RESTART AFTER INSTALLING" )
+		else
+			TabHint:setText( "MODS LOAD WITH RELOAD MODS" )
+		end
+
+		EmptyTitle:setAlpha( #ManagerRows == 0 and 1 or 0 )
+
+		for _, button in ipairs( self.TabButtons ) do
+			button.ActiveMark:setAlpha( button.Tab == ModState.tab and 1 or 0 )
+		end
+
+		ShowProgress()
+
+		if row == nil then
+			Card.Title:setText( maps and "No map" or "No mod" )
+			Card.Kind:setText( "" )
+			Card.Author:setText( "-" )
+			Card.Status:setText( "-" )
+			Card.Desc:setText( "" )
+			Card.Files:setText( "" )
+			Card.Accent:setAlpha( 0.25 )
+			for _, pill in ipairs( Card.Pills ) do
+				pill.box:setAlpha( 0 )
+				pill.text:setText( "" )
+			end
+			return
+		end
+
+		local tags = RowTags( row )
+		local color = tags[1].color
+		local look = StatusLooks[row.status] or StatusLooks.get
+
+		UI.SetPreviewImage( CardImage, RowImage( row ), MM_CARD_RIGHT - MM_CARD_LEFT, MM_CARD_IMAGE_HEIGHT )
+
+		-- the new picture comes up out of the dark
+		CardImage:completeAnimation()
+		CardImage:setAlpha( 0.35 )
+		CardImage:beginAnimation( 180 )
+		CardImage:setAlpha( 1 )
+
+		Card.Accent:setRGB( color.r, color.g, color.b )
+		Card.Accent:setAlpha( 1 )
+
+		for index, pill in ipairs( Card.Pills ) do
+			local tag = tags[index]
+			if tag ~= nil then
+				pill.box:setRGB( tag.color.r, tag.color.g, tag.color.b )
+				pill.box:setAlpha( 1 )
+				pill.text:setText( tag.tag )
+			else
+				pill.box:setAlpha( 0 )
+				pill.text:setText( "" )
+			end
+		end
+
+		-- the kind of it, after the pills
+		Card.Kind:setLeftRight( 0, 0, MM_TEXT_LEFT + #tags * 60 + 4, MM_TEXT_RIGHT )
+		Card.Kind:setText( maps and "CUSTOM MAP" or "SHIELD MOD" )
+
+		Card.Title:setText( UI.ShortenText( row.title, 26 ) )
+		Card.Author:setText( row.author ~= "" and row.author or "Unknown" )
+
+		local status = look.text
+		if row.status == "update" then
+			if row.installedVersion == "" then
+				status = "UPDATE TO " .. row.version
+			else
+				status = "UPDATE: " .. row.installedVersion .. " -> " .. row.version
+			end
+		elseif row.installedVersion ~= "" and row.installedVersion ~= "-" then
+			status = status .. "  " .. row.installedVersion
+		end
+
+		Card.Status:setRGB( look.r, look.g, look.b )
+		Card.Status:setText( status )
+		Card.Desc:setText( row.desc )
+		Card.Files:setText( FilesText( row ) )
+
+		-- what the buttons do with it
+		if self.PrimaryButton ~= nil then
+			if row.status == "update" then
+				SetButtonWords( self.PrimaryButton, "UPDATE" )
+			elseif row.status == "get" then
+				SetButtonWords( self.PrimaryButton, "INSTALL" )
+			else
+				SetButtonWords( self.PrimaryButton, "REINSTALL" )
+			end
+			self.PrimaryButton:setAlpha( row.link ~= nil and 1 or 0.45 )
+		end
+
+		if self.RemoveButton ~= nil then
+			local removable = row.status ~= "get" and row.status ~= "manual"
+			self.RemoveButton:setAlpha( removable and 1 or 0.45 )
+		end
+
+		if self.ToggleButton ~= nil then
+			SetButtonWords( self.ToggleButton, row.status == "disabled" and "ENABLE" or "DISABLE" )
+			self.ToggleButton:setAlpha( ( row.kind == "mod" and row.status ~= "get" ) and 1 or 0.45 )
+		end
+	end
+
+	-- the row picked: the one of before when it is still there, else the first
+	local function PickRow( key )
+		if FindManagerRow( key ) == nil then
+			key = ManagerRows[1] and ManagerRows[1].key or nil
+		end
+
+		ModState.selected[ModState.tab] = key
+		ModManagerModel( "selected" ):set( key or "" )
+	end
+
+	local function RefillManager()
+		BuildManagerRows()
+		PickRow( ModState.selected[ModState.tab] )
+		ShowManager()
+
+		Rows:addElement( LUI.UITimer.newElementTimer( 5, true, function ()
+			ReloadRows()
+		end ) )
+	end
+
+	---------------------------
+	-- the tabs
+
+	local Tabs = {
+		{ tab = "maps", label = "CUSTOM MAPS", left = 0, right = 240 },
+		{ tab = "mods", label = "SHIELD MODS", left = 248, right = 488 }
+	}
+
+	for index, info in ipairs( Tabs ) do
+		local button = AddButton( "TabButton" .. index, info.label, info.left, info.right, 0, 44, function ()
+			if ModState.tab == info.tab then
+				return
+			end
+
+			PlaySoundAlias( "uin_paint_image_flip_toggle" )
+			ModState.tab = info.tab
+			RefillManager()
+		end )
+
+		button.Tab = info.tab
+		AddActiveMark( button, TabColors[info.tab] )
+		table.insert( self.TabButtons, button )
+	end
+
+	---------------------------
+	-- the buttons under the card
+
+	local function Refuse( message )
+		PlaySoundAlias( "uin_unavailable_click" )
+		CoD.Shield.ModManagerToastUpdate( message )
+	end
+
+	local PrimaryButton = AddButton( "PrimaryButton", "INSTALL", MM_CARD_LEFT, MM_CARD_HALF - 6, 692, 740, function ()
+		local row = PickedRow()
+
+		if row == nil then
+			return Refuse( "Pick something in the list first." )
+		elseif row.link == nil then
+			return Refuse( "It isn't in the downloads: it was put there by hand." )
+		end
+
+		PlaySoundAlias( "uin_toggle_generic" )
+		CoD.EnhPrintInfo( "MM_download_mod", row.link )
+
+		ModState.status = "Starting the download.."
+		ShowProgress()
+
+		-- without the scheme: the client adds it back
+		local link = string.gsub( row.link, "^https?://", "" )
+		Engine[@"exec"]( Engine[@"getprimarycontroller"](), "MM_download_mod " .. link )
+	end )
+	self.PrimaryButton = PrimaryButton
+
+	local RemoveButton = AddButton( "RemoveButton", "REMOVE", MM_CARD_HALF + 6, MM_CARD_RIGHT, 692, 740, function ()
+		local row = PickedRow()
+
+		if row == nil or row.status == "get" then
+			return Refuse( "It isn't installed." )
+		elseif row.status == "manual" then
+			return Refuse( "Installed by hand: remove its files yourself." )
+		end
+
+		PlaySoundAlias( "uin_toggle_generic" )
+		CoD.EnhPrintInfo( "Removing -> " .. row.key )
+
+		if row.kind == "map" then
+			Engine[@"exec"]( Engine[@"getprimarycontroller"](), "MM_remove_map " .. row.key )
+		else
+			Engine[@"exec"]( Engine[@"getprimarycontroller"](), "MM_remove_mod " .. row.target )
+		end
+	end )
+	self.RemoveButton = RemoveButton
+
+	local ToggleButton = AddButton( "ToggleButton", "DISABLE", MM_CARD_LEFT, MM_CARD_HALF - 6, 752, 800, function ()
+		local row = PickedRow()
+
+		if row == nil or row.kind ~= "mod" then
+			return Refuse( "A map can't be turned off: remove it instead." )
+		elseif row.status == "get" then
+			return Refuse( "It isn't installed." )
+		end
+
+		PlaySoundAlias( "uin_paint_image_flip_toggle" )
+		CoD.EnhPrintInfo( "Toggling Mod -> " .. row.target )
+		Engine[@"exec"]( Engine[@"getprimarycontroller"](), "MM_toggle_mod " .. row.target )
+	end )
+	self.ToggleButton = ToggleButton
+
+	AddButton( "ReloadButton", "RELOAD MODS", MM_CARD_HALF + 6, MM_CARD_RIGHT, 752, 800, function ()
+		PlaySoundAlias( "uin_paint_image_flip_toggle" )
+		CoD.EnhPrintInfo( "ReloadModsButton" )
+
+		-- reload with killserver
+		CoD.VM_ReloadMods()
+	end )
+
+	---------------------------
+	-- the rows
+
+	f1_arg0:AddButtonCallbackFunction( Rows, f1_arg1, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
+		if ( IsGamepad( controller ) or IsMouseOrKeyboard( controller ) ) and element.RowKey ~= nil then
+			PlaySoundAlias( "uin_toggle_generic" )
+			PickRow( element.RowKey )
+			ShowManager()
+			return true
 		end
 	end, function ( element, menu, controller )
-		if not CoD.ModelUtility.IsSelfModelValueTrue( element, controller, "locked" ) and CoD.DirectorUtility.ShowForAllClients( element, controller ) then
-			CoD.Menu.SetButtonLabel( menu, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"], @"hash_6D0BB36CD318F55F", nil, "ui_confirm" )
+		if IsGamepad( controller ) then
+			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/select", nil, "ui_confirm" )
 			return true
+		elseif IsMouseOrKeyboard( controller ) then
+			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
+			return false
 		else
 			return false
 		end
 	end, false )
 
-	self:addElement( ModsList )
-	self.ModsList = ModsList
+	self:addElement( Rows )
+	self.Rows = Rows
+	Rows.id = "Rows"
 
-	local C_Status = LUI.UIText.new( 0.5, 0.5, 150, 850, 0.60, 0.60, -284 + 475, -263 + 475 )
-	C_Status:setText("Status: Idle")
-	C_Status:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	C_Status:setTTF( "notosans_bold" )
-	C_Status:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	C_Status:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( C_Status )
-
-	-- for updates
-	CoD.Menu.C_Status = C_Status
-	
-	local ModDescription = LUI.UIText.new( 0.5, 0.5, -700, 50, 0.50, 0.50, -284 + 640, -263 + 640 )
-	ModDescription:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
-	ModDescription:setTTF( "notosans_regular" )
-	ModDescription:setAlignment( Enum[@"luialignment"][@"lui_alignment_left"] )
-	ModDescription:setAlignment( Enum[@"luialignment"][@"lui_alignment_top"] )
-	self:addElement( ModDescription )
-	self.ModDescription = ModDescription
-	
-	local PCSmallCloseButton = nil
-	
-	--[[
-	PCSmallCloseButton = CoD.PC_SmallCloseButton.new( f1_local1, f1_arg0, 0.5, 0.5, 308, 342, 0.5, 0.5, -438.5, -404.5 )
-	PCSmallCloseButton:registerEventHandler( "gain_focus", function ( element, event )
-		local f2_local0 = nil
-		if element.gainFocus then
-			f2_local0 = element:gainFocus( event )
-		elseif element.super.gainFocus then
-			f2_local0 = element.super:gainFocus( event )
-		end
-		CoD.Menu.UpdateButtonShownState( element, f1_local1, f1_arg0, Enum[@"luibutton"][@"lui_key_none"] )
-		return f2_local0
-	end )
-	f1_local1:AddButtonCallbackFunction( PCSmallCloseButton, f1_arg0, Enum[@"luibutton"][@"lui_key_none"], "MOUSE1", function ( element, menu, controller, model )
-		GoBack( self, controller )
-		return true
-	end, function ( element, menu, controller )
-		CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_none"], @"hash_0", nil, "MOUSE1" )
-		return false
-	end, false )
-	f1_local1:AddButtonCallbackFunction( PCSmallCloseButton, f1_arg0, Enum[@"luibutton"][@"lui_key_none"], "ui_confirm", function ( element, menu, controller, model )
-		GoBack( self, controller )
-		return true
-	end, function ( element, menu, controller )
-		CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_none"], @"hash_0", nil, "ui_confirm" )
-		return false
-	end, false )
-
-	-- no point?
-	--self:addElement( PCSmallCloseButton )
-	--self.PCSmallCloseButton = PCSmallCloseButton
-	]]
-	
-	ModDescription:linkToElementModel( ModsList, "desc", true, function ( model )
-		local f7_local0 = model:get()
-		if f7_local0 ~= nil then
-			ModDescription:setText( f7_local0 )
-		end
-	end )
-	self:mergeStateConditions( {
-		{
-			stateName = "KBM",
-			condition = function ( menu, element, event )
-				return IsMouseOrKeyboard( f1_arg0 )
-			end
-		}
-	} )
-	self:appendEventHandler( "input_source_changed", function ( f9_arg0, f9_arg1 )
-		f9_arg1.menu = f9_arg1.menu or f1_local1
-		f1_local1:updateElementState( self, f9_arg1 )
-	end )
-	local f1_local6 = self
-	local f1_local7 = self.subscribeToModel
-	local f1_local8 = Engine[@"getmodelforcontroller"]( f1_arg0 )
-	f1_local7( f1_local6, f1_local8.LastInput, function ( f10_arg0 )
-		f1_local1:updateElementState( self, {
-			name = "model_validation",
-			menu = f1_local1,
-			controller = f1_arg0,
-			modelValue = f10_arg0:get(),
-			modelName = "LastInput"
-		} )
-	end, false )
-	f1_local1:AddButtonCallbackFunction( self, f1_arg0, Enum[@"luibutton"][@"lui_key_xbb_pscircle"], nil, function ( element, menu, controller, model )
-		GoBack( self, controller )
-		ClearMenuSavedState( menu )
-		ForceNotifyGlobalModel( controller, "GametypeSettings.Update" )
-		return true
-	end, function ( element, menu, controller )
-		CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xbb_pscircle"], @"menu/back", nil, nil )
-		return true
-	end, false )
-	CommomCenteredPopup.buttons:setModel( self.buttonModel, f1_arg0 )
-	if CoD.isPC then
-		CommomCenteredPopup.id = "CommomCenteredPopup"
+	-- the client told its mods and maps: the rows a moment later, as the browser fills its own
+	CoD.Shield.OnModListChanged = function ()
+		RefillManager()
 	end
-	ModsList.id = "ModsList"
-	--if CoD.isPC then
-	--	PCSmallCloseButton.id = "PCSmallCloseButton"
-	--end
-	self:processEvent( {
-		name = "menu_loaded",
-		controller = f1_arg0
-	} )
-	self.__defaultFocus = ModsList
-	if CoD.isPC and (IsKeyboard( f1_arg0 ) or self.ignoreCursor) then
-		self:restoreState( f1_arg0 )
+
+	CoD.Shield.OnModManagerStatus = function ()
+		ShowProgress()
 	end
+
+	RefillManager()
+
+	-- and it is asked for them again: one can be new since the game started
+	Engine[@"exec"]( Engine[@"getprimarycontroller"](), "MM_push_mods" )
+
+	-- and the release's versions (an older client has no such command: the entries' own links are used)
+	Engine[@"exec"]( Engine[@"getprimarycontroller"](), "MM_check_releases" )
+
 	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
-	if PostLoadFunc then
-		PostLoadFunc( self, f1_arg0 )
-	end
-	
-	f1_local7 = self
-	--MenuHidesFreeCursor( f1_local1, f1_arg0 )
 
-	CoD.EnhPrintInfo("Called", "Shield's Mods")
+	if PostLoadFunc then
+		PostLoadFunc( self, f1_arg1, f1_arg0 )
+	end
 
 	return self
 end
 
-CoD.ShieldModManager.__resetProperties = function ( f13_arg0 )
-	f13_arg0.ModsList:completeAnimation()
-	f13_arg0.ModDescription:completeAnimation()
-	f13_arg0.ModsList:setLeftRight( 0.5, 0.5, -1100, 450 )
+CoD.ShieldModManagerBody.__onClose = function ( f9_arg0 )
+	CoD.Shield.OnModListChanged = nil
+	CoD.Shield.OnModManagerStatus = nil
+
+	for _, element in ipairs( f9_arg0.Parts ) do
+		element:close()
+	end
+	for _, button in ipairs( f9_arg0.Buttons ) do
+		button:close()
+	end
+	f9_arg0.CardImage:close()
+	f9_arg0.Rows:close()
 end
 
-CoD.ShieldModManager.__clipsPerState = {
+---------------------------
+
+-- a row, 1060 by 60: picture, name over mode pills and author, status, version
+
+-- what of a row changes with the focus
+local ManagerRowFocusParts = {
+	{ "BlackBar", function ( element, focus ) element:setAlpha( focus and 0.1 or 0.05 ) end },
+	{ "Tint", function ( element, focus ) element:setAlpha( focus and 0.16 or 0 ) end },
+	{ "FocusFrame", function ( element, focus ) element:setAlpha( focus and 1 or 0 ) end },
+	{ "ThumbDim", function ( element, focus ) element:setAlpha( focus and 0 or 0.35 ) end },
+	{ "Accent", function ( element, focus ) element:setLeftRight( 0, 0, 0, focus and 7 or 4 ) end }
+}
+
+-- the clip of the rows of the browser, looked up when it plays: that file may be loaded after this one
+local function ManagerRowClip( focus, duration )
+	return function ( self, event )
+		return CoD.Shield.BrowserUI.FocusClip( ManagerRowFocusParts, focus, duration )( self, event )
+	end
+end
+
+CoD.ShieldModManagerRow = InheritFrom( LUI.UIElement )
+CoD.ShieldModManagerRow.__defaultWidth = 1060
+CoD.ShieldModManagerRow.__defaultHeight = MM_ROW_HEIGHT
+CoD.ShieldModManagerRow.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
+	local UI = CoD.Shield.BrowserUI
+
+	local self = LUI.UIElement.new( f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
+	self:setClass( CoD.ShieldModManagerRow )
+	self.id = "ShieldModManagerRow"
+	self.soundSet = "default"
+	f1_arg0:addElementToPendingUpdateStateList( self )
+
+	self.Parts = {}
+
+	local function Add( element )
+		self:addElement( element )
+		table.insert( self.Parts, element )
+		return element
+	end
+
+	local BlackBar = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	BlackBar:setRGB( 1, 1, 1 )
+	BlackBar:setAlpha( 0.05 )
+	Add( BlackBar )
+	self.BlackBar = BlackBar
+
+	-- the colour of the mode over the row in focus
+	local Tint = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	Tint:setAlpha( 0 )
+	Add( Tint )
+	self.Tint = Tint
+
+	-- and over the row picked, which no clip touches
+	local Chosen = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	Chosen:setAlpha( 0 )
+	Add( Chosen )
+
+	-- the picture, cut to its box
+	local ThumbClip = LUI.UIElement.new( 0, 0, 0, MM_ROW_THUMB_WIDTH, 0, 0, 0, MM_ROW_HEIGHT )
+	ThumbClip:setUseStencil( true )
+	Add( ThumbClip )
+
+	local Thumb = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	Thumb:setAlpha( 0 )
+	ThumbClip:addElement( Thumb )
+	self.Thumb = Thumb
+
+	-- a little dark until the row is in focus, a part of the row: only the row counts the clip's parts
+	local ThumbDim = Add( UI.NewBox( 0, MM_ROW_THUMB_WIDTH, 0, MM_ROW_HEIGHT, 0, 0, 0, 0.35 ) )
+	self.ThumbDim = ThumbDim
+
+	-- the bar at the start of the row
+	local Accent = LUI.UIImage.new( 0, 0, 0, 4, 0, 1, 0, 0 )
+	Add( Accent )
+	self.Accent = Accent
+
+	local Name = Add( UI.NewText( MM_ROW_TEXT_LEFT, MM_ROW_STATUS_LEFT - 20, 7, 24, "notosans_bold" ) )
+	Name:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+
+	-- MP, ZM or WZ, dark on the colour of the mode, as the lobby rows have them
+	local Pills = {}
+
+	for index = 1, MM_MAX_TAGS, 1 do
+		local left = MM_ROW_TEXT_LEFT + ( index - 1 ) * 42
+
+		local box = Add( UI.NewBox( left, left + 36, 36, 54, 1, 1, 1, 0 ) )
+
+		local text = Add( UI.NewText( left, left + 36, 38, 14, "notosans_bold", Enum[@"luialignment"][@"lui_alignment_center"] ) )
+		text:setRGB( 0.04, 0.04, 0.04 )
+
+		Pills[index] = { box = box, text = text }
+	end
+
+	local Author = Add( UI.NewText( MM_ROW_TEXT_LEFT + 46, MM_ROW_STATUS_LEFT - 20, 36, 18, "ttmussels_regular" ) )
+	Author:setRGB( 0.68, 0.68, 0.68 )
+	Author:setLetterSpacing( 1 )
+
+	local Status = Add( UI.NewText( MM_ROW_STATUS_LEFT, 900, 18, 22, "ttmussels_regular" ) )
+
+	local Version = Add( UI.NewText( 900, 1040, 17, 26, "0arame_mono_stencil", Enum[@"luialignment"][@"lui_alignment_right"] ) )
+	Version:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
+
+	-- the bar at the end of the row picked
+	local ChosenMark = LUI.UIImage.new( 1, 1, -8, 0, 0, 1, 0, 0 )
+	ChosenMark:setAlpha( 0 )
+	Add( ChosenMark )
+
+	-- the frame of the game around the row in focus, in the colour of the mode
+	local FocusFrame = LUI.UIImage.new( 0, 1, -4, 4, 0, 1, -4, 4 )
+	FocusFrame:setAlpha( 0 )
+	FocusFrame:setImage( RegisterImage( @"uie_ui_menu_store_focus_frame" ) )
+	FocusFrame:setMaterial( LUI.UIImage.GetCachedMaterial( @"uie_nineslice_add" ) )
+	FocusFrame:setShaderVector( 0, 0, 0, 0, 0 )
+	FocusFrame:setupNineSliceShader( 10, 10 )
+	Add( FocusFrame )
+	self.FocusFrame = FocusFrame
+
+	local SelectedModel = ModManagerModel( "selected" )
+
+	local function ShowChosen()
+		local chosen = self.RowKey ~= nil and SelectedModel:get() == self.RowKey
+
+		Chosen:setAlpha( chosen and 0.14 or 0 )
+		ChosenMark:setAlpha( chosen and 1 or 0 )
+	end
+
+	-- everything of the row is read when its name is set: the list makes a row whole before it gives it
+	Name:linkToElementModel( self, "Title", true, function ( model )
+		if model:get() == nil then
+			return
+		end
+
+		local row = ManagerRows[CoD.ModelUtility.GetSelfModelPathValue( self, "Index" ) or 0]
+		if row == nil then
+			return
+		end
+
+		local tags = RowTags( row )
+		local color = tags[1].color
+		local look = StatusLooks[row.status] or StatusLooks.get
+
+		-- what the click reads of the row
+		self.RowKey = row.key
+
+		Accent:setRGB( color.r, color.g, color.b )
+		Tint:setRGB( color.r, color.g, color.b )
+		Chosen:setRGB( color.r, color.g, color.b )
+		ChosenMark:setRGB( color.r, color.g, color.b )
+		FocusFrame:setRGB( color.r, color.g, color.b )
+
+		for index, pill in ipairs( Pills ) do
+			local tag = tags[index]
+			if tag ~= nil then
+				pill.box:setRGB( tag.color.r, tag.color.g, tag.color.b )
+				pill.box:setAlpha( 1 )
+				pill.text:setText( tag.tag )
+			else
+				pill.box:setAlpha( 0 )
+				pill.text:setText( "" )
+			end
+		end
+
+		UI.SetPreviewImage( Thumb, RowImage( row ), MM_ROW_THUMB_WIDTH, MM_ROW_HEIGHT )
+		Thumb:setAlpha( 1 )
+
+		Name:setText( UI.ShortenText( row.title, 36 ) )
+
+		Author:setLeftRight( 0, 0, MM_ROW_TEXT_LEFT + #tags * 42 + 4, MM_ROW_STATUS_LEFT - 20 )
+		Author:setText( row.author ~= "" and ToUpper( UI.ShortenText( row.author, 30 ) ) or ( row.kind == "map" and "CUSTOM MAP" or "LOCAL MOD" ) )
+
+		Status:setRGB( look.r, look.g, look.b )
+		Status:setText( look.text )
+
+		if row.status == "update" then
+			Version:setText( row.version )
+		elseif row.installedVersion ~= "" then
+			Version:setText( row.installedVersion )
+		elseif row.version ~= "" then
+			Version:setText( row.version )
+		else
+			Version:setText( "-" )
+		end
+
+		ShowChosen()
+	end )
+
+	self:subscribeToModel( SelectedModel, function ( model )
+		ShowChosen()
+	end )
+
+	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
+
+	if PostLoadFunc then
+		PostLoadFunc( self, f1_arg1, f1_arg0 )
+	end
+
+	return self
+end
+
+CoD.ShieldModManagerRow.__resetProperties = function ( f7_arg0 )
+	for _, part in ipairs( ManagerRowFocusParts ) do
+		local element = f7_arg0[part[1]]
+		element:completeAnimation()
+		part[2]( element, false )
+	end
+end
+
+CoD.ShieldModManagerRow.__clipsPerState = {
 	DefaultState = {
-		DefaultClip = function ( f14_arg0, f14_arg1 )
-			f14_arg0:__resetProperties()
-			f14_arg0:setupElementClipCounter( 0 )
-		end
-	},
-	KBM = {
-		DefaultClip = function ( f15_arg0, f15_arg1 )
-			f15_arg0:__resetProperties()
-			f15_arg0:setupElementClipCounter( 2 )
-			f15_arg0.ModsList:completeAnimation()
-			f15_arg0.ModsList:setLeftRight( 0.5, 0.5, -1100, 450 )
-			f15_arg0.clipFinished( f15_arg0.ModsList )
-		end
+		DefaultClip = ManagerRowClip( false ),
+		Focus = ManagerRowClip( true ),
+		GainFocus = ManagerRowClip( true, 120 ),
+		LoseFocus = ManagerRowClip( false, 120 )
 	}
 }
 
-CoD.ShieldModManager.__onClose = function ( f16_arg0 )
-	f16_arg0.ModDescription:close()
-	f16_arg0.CommomCenteredPopup:close()
-	f16_arg0.ModsList:close()
-	f16_arg0.C_Status:close()
-	f16_arg0.InstalledModsText:close()
-	f16_arg0.FeatModsText:close()
-	f16_arg0.HeaderPixSep:close()
-	f16_arg0.ActiveModList:close()
-	--f16_arg0.PCSmallCloseButton:close()
+CoD.ShieldModManagerRow.__onClose = function ( f10_arg0 )
+	f10_arg0.Thumb:close()
+	for _, element in ipairs( f10_arg0.Parts ) do
+		element:close()
+	end
+end
+
+---------------------------
+
+-- Safe area of the menu: the header of the game over the body
+CoD.Shield_SafeAreaContainer_ModManager = InheritFrom( LUI.UIElement )
+CoD.Shield_SafeAreaContainer_ModManager.__defaultWidth = 1920
+CoD.Shield_SafeAreaContainer_ModManager.__defaultHeight = 1080
+CoD.Shield_SafeAreaContainer_ModManager.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
+	local self = LUI.UIElement.new( f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
+	self:setClass( CoD.Shield_SafeAreaContainer_ModManager )
+	self.id = "Shield_SafeAreaContainer_ModManager"
+	self.soundSet = "none"
+	self.onlyChildrenFocusable = true
+	self.anyChildUsesUpdateState = true
+
+	local TabBacking = CoD.CommonTabBarBacking.new( f1_arg0, f1_arg1, -0.1, 1.1, 0, 0, 0, 0, 52, 89 )
+	TabBacking.TabBackingBlur:setAlpha( 0 )
+	self:addElement( TabBacking )
+	self.TabBacking = TabBacking
+
+	local CommonHeader = CoD.CommonHeader.new( f1_arg0, f1_arg1, 0, 1, 0, 0, 0, 0, 0, 67 )
+	CommonHeader.subtitle.StageTitle:setText("^2Mod Manager")
+	CommonHeader.subtitle.subtitle:setText("^3Custom Maps and Shield Mods")
+	self:addElement( CommonHeader )
+	self.CommonHeader = CommonHeader
+
+	local HeaderStripe = CoD.header_container_frontend.new( f1_arg0, f1_arg1, 0, 1, 0, 0, 0, 0, 0, 42 )
+	self:addElement( HeaderStripe )
+	self.HeaderStripe = HeaderStripe
+
+	-- the body: from 88 to 1832 of the 1920 across, from 140 to 940 down
+	local ShieldModManagerBody = CoD.ShieldModManagerBody.new( f1_arg0, f1_arg1, 0.5, 0.5, -872, 872, 0, 0, 140, 940 )
+	self:addElement( ShieldModManagerBody )
+	self.ShieldModManagerBody = ShieldModManagerBody
+
+	ShieldModManagerBody.id = "ShieldModManagerBody"
+
+	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
+
+	if PostLoadFunc then
+		PostLoadFunc( self, f1_arg1, f1_arg0 )
+	end
+
+	return self
+end
+
+CoD.Shield_SafeAreaContainer_ModManager.__onClose = function ( f5_arg0 )
+	f5_arg0.TabBacking:close()
+	f5_arg0.CommonHeader:close()
+	f5_arg0.HeaderStripe:close()
+	f5_arg0.ShieldModManagerBody:close()
+end
+
+---------------------------
+
+-- the menu, opened from the main menu
+CoD.ShieldModManager = InheritFrom( CoD.Menu )
+LUI.createMenu.ShieldModManager = function ( f1_arg0, f1_arg1 )
+	local self = CoD.Menu.NewForUIEditor( "ShieldModManager", f1_arg0 )
+	local f1_local1 = self
+
+	self:setClass( CoD.ShieldModManager )
+	self.soundSet = "default"
+	self:setOwner( f1_arg0 )
+	self:setLeftRight( 0, 1, 0, 0 )
+	self:setTopBottom( 0, 1, 0, 0 )
+	self:playSound( "menu_open", f1_arg0 )
+	self.anyChildUsesUpdateState = true
+
+	local Background = CoD.StartMenuOptionsBackground.new( f1_local1, f1_arg0, 0, 1, 0, 0, 0, 1, 0, 0 )
+	self:addElement( Background )
+	self.Background = Background
+
+	local FooterContainerFrontendRight = CoD.FooterContainer_Frontend_Right.new( f1_local1, f1_arg0, 0.5, 0.5, -960, 960, 1, 1, -48, 0 )
+	self:addElement( FooterContainerFrontendRight )
+	self.FooterContainerFrontendRight = FooterContainerFrontendRight
+
+	local SafeAreaContainerModManager = CoD.Shield_SafeAreaContainer_ModManager.new( f1_local1, f1_arg0, 0, 0, 0, 1920, 0, 0, 0, 1080 )
+	SafeAreaContainerModManager:registerEventHandler( "menu_loaded", function ( element, event )
+		local f3_local0 = nil
+		if element.menuLoaded then
+			f3_local0 = element:menuLoaded( event )
+		elseif element.super.menuLoaded then
+			f3_local0 = element.super:menuLoaded( event )
+		end
+		if not IsPC() then
+			SizeToSafeArea( element, f1_arg0 )
+		end
+		if not f3_local0 then
+			f3_local0 = element:dispatchEventToChildren( event )
+		end
+		return f3_local0
+	end )
+	self:addElement( SafeAreaContainerModManager )
+	self.SafeAreaContainerModManager = SafeAreaContainerModManager
+
+	f1_local1:AddButtonCallbackFunction( self, f1_arg0, Enum[@"hash_3DD78803F918E9D"][@"hash_1805EFA15E9E7E5A"], nil, function ( element, menu, controller, model )
+		GoBack( self, controller )
+		return true
+	end, function ( element, menu, controller )
+		CoD.Menu.SetButtonLabel( menu, Enum[@"hash_3DD78803F918E9D"][@"hash_1805EFA15E9E7E5A"], @"hash_6A4032FB2AAB69F2", nil, nil )
+		return true
+	end, false )
+
+	FooterContainerFrontendRight:setModel( self.buttonModel, f1_arg0 )
+	if CoD.isPC then
+		FooterContainerFrontendRight.id = "FooterContainerFrontendRight"
+	end
+
+	SafeAreaContainerModManager.id = "SafeAreaContainerModManager"
+
+	self:processEvent( {
+		name = "menu_loaded",
+		controller = f1_arg0
+	} )
+
+	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
+
+	if PostLoadFunc then
+		PostLoadFunc( self, f1_arg0 )
+	end
+
+	CoD.EnhPrintInfo("Called", "Shield's Mods")
+
+	SizeToSafeArea(SafeAreaContainerModManager, f1_arg0)
+
+	return self
+end
+
+CoD.ShieldModManager.__onClose = function ( f8_arg0 )
+	f8_arg0.Background:close()
+	f8_arg0.FooterContainerFrontendRight:close()
+	f8_arg0.SafeAreaContainerModManager:close()
 end
