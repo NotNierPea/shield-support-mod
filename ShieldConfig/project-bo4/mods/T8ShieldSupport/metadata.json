@@ -346,6 +346,14 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/ShieldLoot",
+            "path": "Lua\\Frontend\\ShieldLoot.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/HostTeamSwitch",
             "path": "Lua\\Frontend\\HostTeamSwitch.luac",
             "hooks_post": [

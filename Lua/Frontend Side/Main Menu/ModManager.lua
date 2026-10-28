@@ -139,6 +139,9 @@ local ModState = {
 	versions = {},
 	status = "Idle",
 	tab = "maps",
+	-- the filter of modes ("all", "mp", "zm", "wz") and the search, for both tabs
+	filter = "all",
+	search = "",
 	selected = {}
 }
 
@@ -404,6 +407,28 @@ local function ModRow( entry, installed )
 	return row
 end
 
+-- a row the filter of modes and the search let through: no modes is every mode, the search looks at its name, author and id
+local function RowShown( row )
+	if ModState.filter ~= "all" and #row.modes > 0 then
+		local found = false
+		for _, mode in ipairs( row.modes ) do
+			found = found or mode == ModState.filter
+		end
+		if not found then
+			return false
+		end
+	end
+
+	if ModState.search == "" then
+		return true
+	end
+
+	local search = ToUpper( ModState.search )
+	return string.find( ToUpper( row.title ), search, 1, true ) ~= nil or
+		string.find( ToUpper( row.author ), search, 1, true ) ~= nil or
+		string.find( ToUpper( row.key ), search, 1, true ) ~= nil
+end
+
 -- the rows of the tab: the downloads first, then what is installed and isn't one of them
 local function BuildManagerRows()
 	ManagerRows = {}
@@ -448,6 +473,15 @@ local function BuildManagerRows()
 			end
 		end
 	end
+
+	-- what the filter and the search leave
+	local shown = {}
+	for _, row in ipairs( ManagerRows ) do
+		if RowShown( row ) then
+			table.insert( shown, row )
+		end
+	end
+	ManagerRows = shown
 end
 
 local function FindManagerRow( key )
@@ -509,7 +543,7 @@ end, true )
 
 ---------------------------
 
--- the body, 1744 by 800 in BrowserUI parts: tabs and rows on the left 1060, the picked row's card and buttons from 1084
+-- the body, 1744 by 850 in BrowserUI parts: tabs and rows on the left 1060, the picked row's card and buttons from 1084
 local MM_CARD_LEFT = 1084
 local MM_CARD_RIGHT = 1744
 local MM_CARD_IMAGE_HEIGHT = 330
@@ -555,7 +589,7 @@ end
 
 CoD.ShieldModManagerBody = InheritFrom( LUI.UIElement )
 CoD.ShieldModManagerBody.__defaultWidth = 1744
-CoD.ShieldModManagerBody.__defaultHeight = 800
+CoD.ShieldModManagerBody.__defaultHeight = 850
 CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_arg4, f1_arg5, f1_arg6, f1_arg7, f1_arg8, f1_arg9 )
 	local UI = CoD.Shield.BrowserUI
 
@@ -630,14 +664,15 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 	end
 
 	---------------------------
-	-- over the rows: the tabs, and how many there are
+	-- over the rows the tabs and the search, under them the filter of modes and how many there are
 
 	self.TabButtons = {}
+	self.FilterChips = {}
 
-	local CountText = Add( UI.NewText( 520, 1060, 6, 16, "ttmussels_regular", Enum[@"luialignment"][@"lui_alignment_right"] ) )
+	local CountText = Add( UI.NewText( 836, 1060, 806, 16, "ttmussels_regular", Enum[@"luialignment"][@"lui_alignment_right"] ) )
 	CountText:setRGB( 0.6, 0.6, 0.6 )
 
-	local TabHint = Add( UI.NewText( 520, 1060, 28, 14, "ttmussels_regular", Enum[@"luialignment"][@"lui_alignment_right"] ) )
+	local TabHint = Add( UI.NewText( 836, 1060, 828, 14, "ttmussels_regular", Enum[@"luialignment"][@"lui_alignment_right"] ) )
 	TabHint:setRGB( 0.42, 0.42, 0.42 )
 	TabHint:setLetterSpacing( 1 )
 
@@ -766,15 +801,24 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 		CountText:setText( #ManagerRows .. ( maps and " MAPS" or " MODS" ) .. "  /  " .. installed .. " INSTALLED" )
 
 		if maps then
-			TabHint:setText( "A MAP LOADS WHEN THE GAME STARTS: RESTART AFTER INSTALLING" )
+			TabHint:setText( "RESTART AFTER INSTALLING" )
 		else
-			TabHint:setText( "MODS LOAD WITH RELOAD MODS" )
+			TabHint:setText( "LOAD WITH RELOAD MODS" )
 		end
 
+		if ModState.filter ~= "all" or ModState.search ~= "" then
+			EmptyTitle:setText( "Nothing matches the filter or the search" )
+		else
+			EmptyTitle:setText( "Nothing here yet" )
+		end
 		EmptyTitle:setAlpha( #ManagerRows == 0 and 1 or 0 )
 
 		for _, button in ipairs( self.TabButtons ) do
 			button.ActiveMark:setAlpha( button.Tab == ModState.tab and 1 or 0 )
+		end
+
+		for _, chip in ipairs( self.FilterChips ) do
+			chip.ActiveMark:setAlpha( chip.Filter == ModState.filter and 1 or 0 )
 		end
 
 		ShowProgress()
@@ -891,8 +935,8 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 	-- the tabs
 
 	local Tabs = {
-		{ tab = "maps", label = "CUSTOM MAPS", left = 0, right = 240 },
-		{ tab = "mods", label = "SHIELD MODS", left = 248, right = 488 }
+		{ tab = "maps", label = "CUSTOM MAPS", left = 0, right = 200 },
+		{ tab = "mods", label = "SHIELD MODS", left = 208, right = 408 }
 	}
 
 	for index, info in ipairs( Tabs ) do
@@ -910,6 +954,73 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 		AddActiveMark( button, TabColors[info.tab] )
 		table.insert( self.TabButtons, button )
 	end
+
+	---------------------------
+	-- the filter of modes under the rows and their page counter, as the lobby browser's
+
+	local ModeColors = UI.ModeColors
+	local Filters = {
+		{ filter = "all", label = "ALL", left = 0, right = 200, color = { r = 1, g = 1, b = 1 } },
+		{ filter = "mp", label = "MP", left = 208, right = 408, color = ModeColors.mp },
+		{ filter = "zm", label = "ZM", left = 416, right = 616, color = ModeColors.zm },
+		{ filter = "wz", label = "BLACKOUT", left = 624, right = 824, color = ModeColors.wz }
+	}
+
+	for index, info in ipairs( Filters ) do
+		local chip = AddButton( "FilterChip" .. index, info.label, info.left, info.right, 802, 850, function ()
+			if ModState.filter == info.filter then
+				return
+			end
+
+			PlaySoundAlias( "uin_paint_image_flip_toggle" )
+			ModState.filter = info.filter
+			RefillManager()
+		end )
+
+		chip.Filter = info.filter
+		AddActiveMark( chip, info.color )
+		table.insert( self.FilterChips, chip )
+	end
+
+	---------------------------
+	-- the search, over the rows on the right, as the lobby browser's
+
+	local SearchMods = CoD.Shield_NameEditBox.new( f1_arg0, f1_arg1, 0, 0, 660, 1060, 0, 0, 0, 48 )
+	SearchMods:linkToElementModel( self, nil, false, function ( model )
+		SearchMods:setModel( model, f1_arg1 )
+	end )
+	SearchMods.TextBox:setLeftRight( 0, 0, 100, 385 )
+	SearchMods.RankHighlight:setText( "Search:" )
+	self:addElement( SearchMods )
+	self.SearchMods = SearchMods
+
+	local SearchModel = Engine[@"getmodel"]( Engine[@"getmodelforcontroller"]( f1_arg1 ), "Shield_Search_Mods" )
+
+	if SearchModel == nil then
+		SearchModel = Engine[@"createmodel"]( Engine[@"getmodelforcontroller"]( f1_arg1 ), "Shield_Search_Mods" )
+	end
+
+	SearchModel:set( ModState.search )
+
+	SearchMods.__editControlMaxChar = 16
+	SearchMods.__editControlisInteger = 1
+	SearchMods.__editControlMin = 0
+	SearchMods.__editControlMax = 1000
+
+	CoD.PCUtility.SetupEditControlWithModel( SearchMods, f1_arg1, f1_arg0, SearchModel, function ( model, controller, event )
+		if not event.canceled and event.name == "textbox_editdone" then
+			ModState.search = model:get() or ""
+			PlaySoundAlias( "uin_paint_image_flip_toggle" )
+		else
+			-- cancelled: the search off
+			model:set( "" )
+			ModState.search = ""
+		end
+
+		RefillManager()
+	end )
+
+	SearchMods.id = "SearchMods"
 
 	---------------------------
 	-- the buttons under the card
@@ -1042,6 +1153,7 @@ CoD.ShieldModManagerBody.__onClose = function ( f9_arg0 )
 	for _, element in ipairs( f9_arg0.Parts ) do
 		element:close()
 	end
+	f9_arg0.SearchMods:close()
 	for _, button in ipairs( f9_arg0.Buttons ) do
 		button:close()
 	end
@@ -1301,8 +1413,8 @@ CoD.Shield_SafeAreaContainer_ModManager.new = function ( f1_arg0, f1_arg1, f1_ar
 	self:addElement( HeaderStripe )
 	self.HeaderStripe = HeaderStripe
 
-	-- the body: from 88 to 1832 of the 1920 across, from 140 to 940 down
-	local ShieldModManagerBody = CoD.ShieldModManagerBody.new( f1_arg0, f1_arg1, 0.5, 0.5, -872, 872, 0, 0, 140, 940 )
+	-- the body: from 88 to 1832 of the 1920 across, from 140 to 990 down
+	local ShieldModManagerBody = CoD.ShieldModManagerBody.new( f1_arg0, f1_arg1, 0.5, 0.5, -872, 872, 0, 0, 140, 990 )
 	self:addElement( ShieldModManagerBody )
 	self.ShieldModManagerBody = ShieldModManagerBody
 

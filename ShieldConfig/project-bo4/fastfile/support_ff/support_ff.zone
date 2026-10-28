@@ -24,13 +24,15 @@ image,mm_icon.png
 image,shield_public_banner.png
 image,loading_shield.png
 
-// custom camos (camo index 399 and up): shield-client's custom_camos.cpp lays the sets of shield_camos on each
-// weapon's own camo (the set's "template"), materials/ and templates/ are the camo materials, the csv is the menu's list
+// custom camos (camo index 399 and up)
 weaponcamo,tables/weaponcamo/shield_camos.json
 stringtable,gamedata/shield/custom_camos.csv
 image,shield_camo_circuit_prev.png
 image,shield_camo_digital_prev.png
 
-// startup video sound: shield-client's intro.cpp gives an overridden video (project-bo4/video/<name>.bk2) the alias
-// shield_bik_<name> in place of the game's bik_<name>; settings copied from core_bootstrap.all's bik_logo_cinematic
+// black market items of our own: shield-client's
+stringtable,gamedata/shield/loot_items.csv
+image,shield_loot_wanted_card.png
+
+// startup video sound: shield-client's
 sound,sounds/support_sounds.json
