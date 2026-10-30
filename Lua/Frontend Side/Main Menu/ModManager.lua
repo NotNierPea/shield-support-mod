@@ -8,6 +8,9 @@ CoD.ShieldInitLuaFile()
 
 ---------------------------
 
+-- "previews": the card's pictures of a map or a mod, images of support.ff (support_ff/images, a zone line each), the
+-- arrows on the picture go through them; without, the card shows its usual picture and no arrows
+
 -- custom maps: "link" its zip (one with shield_map.json); "asset" its name in the shield-MM-mods release, whose <asset>_<version>.zip is used when there
 local MapsCatalog = {
 	{
@@ -18,7 +21,8 @@ local MapsCatalog = {
 		author = "peawhatever",
 		base = "zm_towers",
 		image = "zm_park_preview",
-		desc = "Come on down to Giddy Park! We got rides, booths, and water features/bathrooms! Located between Dave Manor and that zombie HQ-we-shall-not-name, Giddy Park is a place to go nuts with your friends.",
+		previews = { "mm_prev_zm_park_1" },
+		desc ="Come on down to Giddy Park! We got rides, booths, and water features/bathrooms! Located between Dave Manor and that zombie HQ-we-shall-not-name, Giddy Park is a place to go nuts with your friends.",
 		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/zm_park.zip"
 	},
 	{
@@ -29,8 +33,9 @@ local MapsCatalog = {
 		author = "peawhatever",
 		base = "zm_towers",
 		image = "zm_room_preview",
-		desc = "One room, the zombies and the way out: hold the room, ride the ferris wheel and the carousel, mind the sawblade, and buy your ending.",
-		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/zm_room.zip"
+		previews = { "mm_prev_zm_room_1" },
+		desc = "First room challenge and first custom map for BO4 Zombies.\nAssets and stuff by:\nGenEnix - Freddy and the wiki for voicelines\nCrash Twinsanity - Cortex model and sounds\nHarryBo21 - SOe and DE Wonder Weapons\nWetEgg - Announcers/BO7 To BO3 SAT Sawblade Trap\nLogical and NSZ (NateSmithZombies) - More powerups",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/zm_room_1.0.0.zip"
 	}
 }
 
@@ -142,7 +147,11 @@ local ModState = {
 	-- the filter of modes ("all", "mp", "zm", "wz") and the search, for both tabs
 	filter = "all",
 	search = "",
-	selected = {}
+	selected = {},
+	-- the picture of its previews each row is at, by its key
+	preview = {},
+	-- the key of the row whose zip is downloading (its button is the cancel), nil while none is
+	downloading = nil
 }
 
 -- the rows of the tab, built again when the client tells something
@@ -193,7 +202,12 @@ CoD.Shield.DownloadedModCallback = function(event_name, event_table)
 	end
 
 	ModState.status = "Idle"
+	ModState.downloading = nil
 	ShowManagerStatus()
+
+	if CoD.Shield.OnModManagerDownload then
+		CoD.Shield.OnModManagerDownload()
+	end
 
 	-- Show the toast, with sound
 	CoD.Shield.ModManagerToastUpdate(message)
@@ -350,7 +364,8 @@ local function MapRow( entry, installed )
 		asset = entry and entry.asset,
 		shared = entry and entry.shared or {},
 		base = entry and entry.base or "zm_towers",
-		image = entry and entry.image or ( ( entry and entry.id or installed.id ) .. "_preview" )
+		image = entry and entry.image or ( ( entry and entry.id or installed.id ) .. "_preview" ),
+		previews = entry and entry.previews or {}
 	}
 
 	if installed == nil then
@@ -386,6 +401,7 @@ local function ModRow( entry, installed )
 		link = LinkOf( entry, release ),
 		asset = entry and entry.asset,
 		icon = entry and entry.icon,
+		previews = entry and entry.previews or {},
 		-- the folder as it is on disk, for remove and toggle
 		target = installed and installed.name or ( entry and entry.folder )
 	}
@@ -506,16 +522,20 @@ local function RowTags( row )
 	return tags
 end
 
--- the picture of a row: a map's own once its zones are loaded, its base map's before
+-- the picture of a row: a map's first preview (support.ff, there installed or not), else its own once its zones are
+-- loaded, its base map's before
 local function RowImage( row )
 	if row.kind == "map" then
-		if IsMapLoaded( row.key ) then
+		if #row.previews > 0 then
+			return row.previews[1]
+		elseif IsMapLoaded( row.key ) then
 			return row.image
 		end
 		return MapNameToMapImage( row.base )
 	end
 
-	return row.icon or "ui_menu_ftue_zm_custom_mutations"
+	-- a mod of the list has its icon; one put in mods by hand a question mark (support.ff)
+	return row.icon or "mm_unknown_mod"
 end
 
 DataSources.ShieldModManagerRowsEmpty = DataSourceHelpers.ListSetup( "ShieldModManagerRowsEmpty", function ( f3_arg0, f3_arg1 )
@@ -570,6 +590,15 @@ local function AddActiveMark( button, color )
 	mark:setAlpha( 0 )
 	button:addElement( mark )
 	button.ActiveMark = mark
+end
+
+-- the about text's size: 18, 16 when it runs past the 6 lines it has room for at 18 (about 68 letters a line)
+local function DescSize( text )
+	local lines = 0
+	for line in string.gmatch( text .. "\n", "(.-)\n" ) do
+		lines = lines + math.max( 1, math.ceil( string.len( line ) / 68 ) )
+	end
+	return lines > 6 and 16 or 18
 end
 
 -- what the card says of a map's or a mod's files
@@ -766,11 +795,77 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 	CardFrame:setupNineSliceShader( 12, 12 )
 	Add( CardFrame )
 
+	-- on the picture, top right: which of the row's previews it is, "1/4", only when it has some
+	Card.CounterBox = Add( UI.NewBox( MM_CARD_RIGHT - 96, MM_CARD_RIGHT - 16, 16, 46, 0, 0, 0, 0 ) )
+	Card.Counter = Add( UI.NewText( MM_CARD_RIGHT - 96, MM_CARD_RIGHT - 16, 21, 20, "notosans_bold", Enum[@"luialignment"][@"lui_alignment_center"] ) )
+	Card.Counter:setRGB( 1, 1, 1 )
+
 	---------------------------
 	-- what the menu shows of the tab, the pick and the download
 
 	local function PickedRow()
 		return FindManagerRow( ModState.selected[ModState.tab] )
+	end
+
+	-- the main button of the row: its cancel while its zip downloads, else install, update or reinstall (made after this:
+	-- looked up when it runs)
+	local function ShowPrimaryButton( row )
+		local button = self.PrimaryButton
+
+		if button == nil or row == nil then
+			return
+		end
+
+		if ModState.downloading == row.key then
+			SetButtonWords( button, "CANCEL" )
+			button:setAlpha( 1 )
+			return
+		end
+
+		if row.status == "update" then
+			SetButtonWords( button, "UPDATE" )
+		elseif row.status == "get" then
+			SetButtonWords( button, "INSTALL" )
+		else
+			SetButtonWords( button, "REINSTALL" )
+		end
+		button:setAlpha( row.link ~= nil and 1 or 0.45 )
+	end
+
+	-- the new picture comes up out of the dark
+	local function FadeInPicture()
+		CardImage:completeAnimation()
+		CardImage:setAlpha( 0.35 )
+		CardImage:beginAnimation( 180 )
+		CardImage:setAlpha( 1 )
+	end
+
+	-- The row's picture: the preview it is at, else its usual one. The counter shows with a preview, the arrows with
+	-- two or more (made after this: looked up when it runs).
+	local function ShowPreview( row )
+		local count = row ~= nil and #row.previews or 0
+		local index = 1
+
+		if count > 0 then
+			index = math.min( ModState.preview[row.key] or 1, count )
+			ModState.preview[row.key] = index
+			UI.SetPreviewImage( CardImage, row.previews[index], MM_CARD_RIGHT - MM_CARD_LEFT, MM_CARD_IMAGE_HEIGHT )
+		elseif row ~= nil then
+			UI.SetPreviewImage( CardImage, RowImage( row ), MM_CARD_RIGHT - MM_CARD_LEFT, MM_CARD_IMAGE_HEIGHT )
+		end
+
+		Card.Counter:setText( count > 0 and ( index .. "/" .. count ) or "" )
+		Card.CounterBox:setAlpha( count > 0 and 0.55 or 0 )
+
+		for _, arrow in ipairs( { self.PreviewLeft, self.PreviewRight } ) do
+			if count > 1 then
+				arrow:setAlpha( 1 )
+				arrow:makeFocusableWithoutResettingNavigation( f1_arg1 )
+			else
+				arrow:setAlpha( 0 )
+				arrow:makeNotFocusable( f1_arg1 )
+			end
+		end
 	end
 
 	-- the download's words, or what waits for a restart
@@ -823,6 +918,8 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 
 		ShowProgress()
 
+		ShowPreview( row )
+
 		if row == nil then
 			Card.Title:setText( maps and "No map" or "No mod" )
 			Card.Kind:setText( "" )
@@ -842,13 +939,7 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 		local color = tags[1].color
 		local look = StatusLooks[row.status] or StatusLooks.get
 
-		UI.SetPreviewImage( CardImage, RowImage( row ), MM_CARD_RIGHT - MM_CARD_LEFT, MM_CARD_IMAGE_HEIGHT )
-
-		-- the new picture comes up out of the dark
-		CardImage:completeAnimation()
-		CardImage:setAlpha( 0.35 )
-		CardImage:beginAnimation( 180 )
-		CardImage:setAlpha( 1 )
+		FadeInPicture()
 
 		Card.Accent:setRGB( color.r, color.g, color.b )
 		Card.Accent:setAlpha( 1 )
@@ -885,20 +976,12 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 
 		Card.Status:setRGB( look.r, look.g, look.b )
 		Card.Status:setText( status )
+		Card.Desc:setTopBottom( 0, 0, 438, 438 + DescSize( row.desc ) )
 		Card.Desc:setText( row.desc )
 		Card.Files:setText( FilesText( row ) )
 
 		-- what the buttons do with it
-		if self.PrimaryButton ~= nil then
-			if row.status == "update" then
-				SetButtonWords( self.PrimaryButton, "UPDATE" )
-			elseif row.status == "get" then
-				SetButtonWords( self.PrimaryButton, "INSTALL" )
-			else
-				SetButtonWords( self.PrimaryButton, "REINSTALL" )
-			end
-			self.PrimaryButton:setAlpha( row.link ~= nil and 1 or 0.45 )
-		end
+		ShowPrimaryButton( row )
 
 		if self.RemoveButton ~= nil then
 			local removable = row.status ~= "get" and row.status ~= "manual"
@@ -1035,6 +1118,15 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 
 		if row == nil then
 			return Refuse( "Pick something in the list first." )
+		elseif ModState.downloading == row.key then
+			-- its download: the client tells it back as a failed one, which puts the button back
+			PlaySoundAlias( "uin_toggle_generic" )
+			ModState.status = "Cancelling.."
+			ShowProgress()
+			Engine[@"exec"]( Engine[@"getprimarycontroller"](), "MM_cancel_download" )
+			return
+		elseif ModState.downloading ~= nil then
+			return Refuse( "Wait for the other download to finish first." )
 		elseif row.link == nil then
 			return Refuse( "It isn't in the downloads: it was put there by hand." )
 		end
@@ -1043,7 +1135,9 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 		CoD.EnhPrintInfo( "MM_download_mod", row.link )
 
 		ModState.status = "Starting the download.."
+		ModState.downloading = row.key
 		ShowProgress()
+		ShowPrimaryButton( row )
 
 		-- without the scheme: the client adds it back
 		local link = string.gsub( row.link, "^https?://", "" )
@@ -1085,6 +1179,28 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 		Engine[@"exec"]( Engine[@"getprimarycontroller"](), "MM_toggle_mod " .. row.target )
 	end )
 	self.ToggleButton = ToggleButton
+
+	-- the arrows on the picture, through the row's previews, round
+	local function TurnPreview( step )
+		local row = PickedRow()
+
+		if row == nil or #row.previews < 2 then
+			return
+		end
+
+		PlaySoundAlias( "uin_paint_image_flip_toggle" )
+		ModState.preview[row.key] = ( ( ModState.preview[row.key] or 1 ) - 1 + step ) % #row.previews + 1
+		ShowPreview( row )
+		FadeInPicture()
+	end
+
+	self.PreviewLeft = AddButton( "PreviewLeft", "<", MM_CARD_LEFT + 16, MM_CARD_LEFT + 76, 135, 195, function ()
+		TurnPreview( -1 )
+	end )
+
+	self.PreviewRight = AddButton( "PreviewRight", ">", MM_CARD_RIGHT - 76, MM_CARD_RIGHT - 16, 135, 195, function ()
+		TurnPreview( 1 )
+	end )
 
 	AddButton( "ReloadButton", "RELOAD MODS", MM_CARD_HALF + 6, MM_CARD_RIGHT, 752, 800, function ()
 		PlaySoundAlias( "uin_paint_image_flip_toggle" )
@@ -1129,6 +1245,11 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 		ShowProgress()
 	end
 
+	-- a download done, failed or cancelled: the picked row's button again
+	CoD.Shield.OnModManagerDownload = function ()
+		ShowPrimaryButton( PickedRow() )
+	end
+
 	RefillManager()
 
 	-- and it is asked for them again: one can be new since the game started
@@ -1149,6 +1270,7 @@ end
 CoD.ShieldModManagerBody.__onClose = function ( f9_arg0 )
 	CoD.Shield.OnModListChanged = nil
 	CoD.Shield.OnModManagerStatus = nil
+	CoD.Shield.OnModManagerDownload = nil
 
 	for _, element in ipairs( f9_arg0.Parts ) do
 		element:close()

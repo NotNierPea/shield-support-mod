@@ -21,6 +21,10 @@ image,mod_manager_abom.png
 image,mod_manager_synergy.png
 image,mod_manager_timers.png
 image,mm_icon.png
+image,mm_unknown_mod.png
+// the Mod Manager card's previews (ModManager.lua catalog "previews")
+image,mm_prev_zm_park_1.png
+image,mm_prev_zm_room_1.png
 image,shield_public_banner.png
 image,loading_shield.png
 

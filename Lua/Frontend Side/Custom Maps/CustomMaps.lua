@@ -389,6 +389,11 @@ if source ~= nil and not source.shieldCustomMaps then
 	source.shieldCustomMaps = true
 
 	source.prepare = function ( controller, list, filter )
+		-- no list yet (asked at the boot, before the client could tell it): asked again, it comes for the next fill
+		if next( CoD.ShieldCustomMaps.byHash ) == nil then
+			Engine[@"exec"]( Engine[@"getprimarycontroller"](), "shield_custom_maps" )
+		end
+
 		UnlockRows( controller )
 		prepare( controller, list, filter )
 		SplitCustomMaps( list )
