@@ -1778,6 +1778,11 @@
             "type": "localizeentry",
             "name": "hash_4e3c597d83bc0cfa",
             "value": "Send a friend request by entering a player's username. If several players share that name, add # and the last digits of their XUID, like Name#1234. They don't have to be online right now, but must have been online on Shield at least once."
+        },
+        {
+            "type": "localizeentry",
+            "name": "platform/missingmap",
+            "value": "You do not have this custom map. You can try downloading it from Mod Manager in Main Menu.."
         }
     ],
     "cache": [
