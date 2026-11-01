@@ -134,6 +134,41 @@ CoD.ShieldDeadSubscription = function ( id )
 		( element ~= nil and "still at " .. ElementPath( element ) or "gone" ), "Model subscription" )
 end
 
+--[[
+	The game end score widget (MP HUD) handles round and match transitions on PerController.scriptNotify, and subscribing
+	calls its function at once with the model's value. A player who joins mid-match, or comes back after being dropped
+	from one, can have a transition there before the HUD's models exist: the error stops the HUD from being built and it
+	never shows (UI Error 45470, gameendscoreutility.lua:277). Its handlers log their error instead. They're replaced in
+	the table the callback reads them from, the callback itself is left alone (the engine holds it weakly).
+	The callback also indexes the notify's data itself (team_eliminated, the match bonus), so SetupGameEndScoreWidget
+	is protected too: its subscription is the last thing it does and is made before that first call, so only the call
+	with the old value is lost.
+]]
+local GameEndScoreProtected = false
+
+local function ProtectGameEndScore()
+	local utility = CoD.GameEndScoreUtility
+	if GameEndScoreProtected or type( utility ) ~= "table" then
+		return
+	end
+
+	GameEndScoreProtected = true
+	for _, name in ipairs( { "SetupGameEndScoreWidget", "SetupTransition", "SetupRoundEndPreKillcamModels", "ClearTransition", "SetEliminatorData" } ) do
+		local handler = utility[name]
+		if type( handler ) == "function" then
+			-- the callback uses none of their results
+			utility[name] = function ( ... )
+				local ok, err = pcall( handler, ... )
+				if not ok then
+					CoD.EnhPrintInfo( name .. " failed: " .. tostring( err ), "Game end score" )
+				end
+			end
+		end
+	end
+
+	CoD.EnhPrintInfo( "handlers protected", "Game end score" )
+end
+
 -- the guards made, so a class that takes its function from a guarded one is not guarded twice
 local SubscriptionGuards = setmetatable( {}, { __mode = "k" } )
 
@@ -145,6 +180,9 @@ local function GuardSubscriptions( class, className )
 	end
 
 	local guard = function ( self, model, callback, ... )
+		-- before the game end score widget's first subscription calls its handlers
+		ProtectGameEndScore()
+
 		-- no model (one a custom map's scripts don't make): the engine would stop on it, UI error 28714
 		if model == nil then
 			CoD.EnhPrintInfo( "no model, by " .. ElementPath( self ), "Model subscription" )
