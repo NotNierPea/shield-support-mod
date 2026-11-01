@@ -65,7 +65,7 @@ CoD.ShieldEarnCodPointsBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3,
 	Frame:setupNineSliceShader( 12, 12 )
 	Add( Frame )
 
-	Add( UI.NewCaption( 40, POPUP_WIDTH - 40, 34, "NOT FOR SALE ON SHIELD", center ) )
+	Add( UI.NewCaption( 40, POPUP_WIDTH - 40, 34, "ABOUT COD POINTS", center ) )
 
 	local Title = Add( UI.NewText( 40, POPUP_WIDTH - 40, 56, 40, "notosans_bold", center ) )
 	Title:setRGB( PointsColor.r, PointsColor.g, PointsColor.b )
