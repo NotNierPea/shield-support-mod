@@ -293,6 +293,7 @@ local StatusLooks = {
 	installed = { text = "INSTALLED", r = 0.45, g = 0.9, b = 0.45 },
 	update = { text = "UPDATE", r = 1, g = 0.8, b = 0.25 },
 	restart = { text = "RESTART TO PLAY", r = 1, g = 0.8, b = 0.25 },
+	broken = { text = "CAN'T LOAD", r = 1, g = 0.4, b = 0.3 },
 	disabled = { text = "DISABLED", r = 1, g = 0.4, b = 0.3 },
 	manual = { text = "INSTALLED BY HAND", r = 0.75, g = 0.75, b = 0.75 }
 }
@@ -375,7 +376,13 @@ local function MapRow( entry, installed )
 	elseif NeedsUpdate( row.version, row.installedVersion ) then
 		row.status = "update"
 	elseif not IsMapLoaded( row.key ) then
-		row.status = "restart"
+		-- installed before this start and still not loaded: the client says why, a restart won't help
+		if type( installed.problem ) == "string" and installed.problem ~= "" then
+			row.status = "broken"
+			row.problem = installed.problem
+		else
+			row.status = "restart"
+		end
 	else
 		row.status = "installed"
 	end
@@ -870,9 +877,13 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 
 	-- the download's words, or what waits for a restart
 	local function ShowProgress()
+		local picked = PickedRow()
 		if ModState.status ~= "Idle" then
 			Card.Progress:setRGB( 1, 0.8, 0.25 )
 			Card.Progress:setText( ModState.status )
+		elseif picked ~= nil and picked.problem ~= nil then
+			Card.Progress:setRGB( 1, 0.4, 0.3 )
+			Card.Progress:setText( "Can't load: " .. picked.problem )
 		elseif ModState.pending > 0 then
 			Card.Progress:setRGB( 1, 0.8, 0.25 )
 			Card.Progress:setText( "Restart the game to finish: some files were in use." )
