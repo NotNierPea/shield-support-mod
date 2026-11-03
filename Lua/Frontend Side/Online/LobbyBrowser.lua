@@ -147,7 +147,9 @@ local function DescribeLobby( mode, map, gametype )
 
 	if map ~= nil and map ~= "" and map ~= "UNK_MAP0" then
 		if info.mode == "wz" then
-			info.mapName = BlackoutMapNames[map] or "Blackout"
+			-- a Blackout map of ours has its name in the table (CustomMaps.lua's list of them)
+			local custom = CoD.ShieldCustomMaps and CoD.ShieldCustomMaps.byHash[CoD.MapUtility.ConvertMapNameToXHash( map )]
+			info.mapName = BlackoutMapNames[map] or ( custom and CoD.MapUtility.GetLocalizedMapValue( map, "mapName", "" ) ) or "Blackout"
 		else
 			info.mapName = CoD.MapUtility.GetLocalizedMapValue( map, "mapName", "" )
 		end
