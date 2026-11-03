@@ -542,19 +542,9 @@ DataSources.ShieldHostLobbyMaps = DataSourceHelpers.ListSetup( "ShieldHostLobbyM
 	return RowsToItems( Host.mapRows )
 end, true )
 
--- the lobby menus of blackout take the map of Alcatraz from these, see ReloadOverrides.lua and BlackoutSettings.lua: they are made to tell the map picked here
+-- the lobby menus of blackout take the map of Alcatraz or of ours from these, see ReloadOverrides.lua and BlackoutSettings.lua: they are made to tell the map picked here
 local function SetBlackoutMapDvars( controller, map )
-	local setting = 0
-
-	if map == "wz_escape" then
-		setting = 1
-	elseif map == "wz_escape_alt" then
-		setting = 2
-	end
-
-	Engine[@"exec"]( controller, "set use_wz_escape " .. ( setting == 1 and 1 or 0 ) )
-	Engine[@"exec"]( controller, "set use_wz_escape_alt " .. ( setting == 2 and 1 or 0 ) )
-	Engine[@"setdvar"]( "shield_wz_map", setting )
+	CoD.ShieldSetWZMap( controller, CoD.ShieldWZMapSetting( map ) )
 end
 
 -- closes the menu and the browser under it, and has the client open the lobby picked

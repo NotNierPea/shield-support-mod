@@ -28,6 +28,105 @@ Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_bots_wz_diff
 
 ---------------------------
 
+-- the game's Blackout maps: the map setting's first three are Blackout (0), Alcatraz (1) and Alcatraz at night (2)
+local StockWZMaps = { wz_open_skyscrapers = true, wz_open_skyscrapers_alt = true, wz_escape = true, wz_escape_alt = true }
+
+-- the map setting's value of the first Blackout map of ours, the next ones after it
+local WZ_CUSTOM_VALUE = 10
+
+-- the Blackout maps of ours, by name: the map table's warzone entries the client names as ours (CustomMaps.lua's list:
+-- custom_zones.cpp adds the entries; the game has more than the four, its Quick Play's)
+CoD.ShieldWZCustomMaps = function ()
+	local maps = {}
+	local seen = {}
+	local ours = CoD.ShieldCustomMaps and CoD.ShieldCustomMaps.byHash or {}
+
+	for _, info in pairs( CoD.MapUtility.MapsTable or {} ) do
+		local id = info[@"hash_3E2D141CB22F2813"]
+
+		if type( id ) ~= "string" or id == "" then
+			id = info.mapToLoad
+		end
+
+		if info.session_mode == Enum[@"emodes"][@"mode_warzone"] and type( id ) == "string" and id ~= "" and not StockWZMaps[id] and not seen[id]
+			and ours[CoD.MapUtility.ConvertMapNameToXHash( id )] then
+			seen[id] = true
+			table.insert( maps, { id = id, name = info.mapName } )
+		end
+	end
+
+	table.sort( maps, function ( a, b )
+		return a.id < b.id
+	end )
+
+	return maps
+end
+
+-- the map setting of a Blackout map by its name (0 for Blackout and its alternate)
+CoD.ShieldWZMapSetting = function ( map )
+	if map == "wz_escape" then
+		return 1
+	elseif map == "wz_escape_alt" then
+		return 2
+	end
+
+	for i, custom in ipairs( CoD.ShieldWZCustomMaps() ) do
+		if custom.id == map then
+			return WZ_CUSTOM_VALUE + i - 1
+		end
+	end
+
+	return 0
+end
+
+-- the Blackout map of ours the lobby plays, nil for a game's: ReloadOverrides.lua sets the lobby's map to it
+CoD.ShieldWZCustomMap = function ()
+	if Engine[@"getdvarint"]( "shield_wz_map" ) < WZ_CUSTOM_VALUE then
+		return nil
+	end
+
+	local name = Engine[@"getdvarstring"]( "shield_wz_custom_map" ) or ""
+
+	for _, custom in ipairs( CoD.ShieldWZCustomMaps() ) do
+		if custom.id == name then
+			return name
+		end
+	end
+
+	return nil
+end
+
+-- picks the lobby's Blackout map by its setting: the dvars the lobby menus read (use_wz_escape(_alt), shield_wz_custom_map);
+-- previous is the setting before (the dvar's without)
+CoD.ShieldSetWZMap = function ( controller, setting, previous )
+	local custom = setting >= WZ_CUSTOM_VALUE and CoD.ShieldWZCustomMaps()[setting - WZ_CUSTOM_VALUE + 1]
+	local wasCustom = ( previous or Engine[@"getdvarint"]( "shield_wz_map" ) ) >= WZ_CUSTOM_VALUE
+
+	if setting >= WZ_CUSTOM_VALUE and not custom then
+		setting = 0
+	end
+
+	Engine[@"exec"]( controller, "set use_wz_escape " .. ( setting == 1 and 1 or 0 ) )
+	Engine[@"exec"]( controller, "set use_wz_escape_alt " .. ( setting == 2 and 1 or 0 ) )
+
+	if custom then
+		Engine[@"exec"]( controller, "set shield_wz_custom_map " .. custom.id )
+	end
+
+	Engine[@"setdvar"]( "shield_wz_map", setting )
+
+	-- (in Blackout the lobby's map at once: a map of ours, or Blackout back from one; ReloadOverrides.lua takes Alcatraz from the dvars)
+	if Engine[@"currentsessionmode"]() == Enum[@"emodes"][@"mode_warzone"] then
+		if custom then
+			SetMap( controller, Engine[@"converttoxhash"]( custom.id ), false )
+		elseif wasCustom then
+			SetMap( controller, @"wz_open_skyscrapers", false )
+		end
+	end
+end
+
+---------------------------
+
 local function OnExtraDataChange ( f137_arg0, f137_arg1, f137_arg2, f137_arg3, f137_arg4 )
 	local dvar_name = f137_arg3
 	local dvar_val = Engine[@"getdvarint"]( dvar_name )
@@ -42,17 +141,9 @@ local function OnExtraDataChange ( f137_arg0, f137_arg1, f137_arg2, f137_arg3, f
 
 	local dvar_val_new = Engine[@"getdvarint"]( dvar_name )
 
-	if dvar_name == "shield_wz_map" then	
-		if current_val == 0 then -- none
-			Engine[@"exec"](Engine[@"getprimarycontroller"](), "set use_wz_escape 0")
-			Engine[@"exec"](Engine[@"getprimarycontroller"](), "set use_wz_escape_alt 0")
-		elseif current_val == 1 then -- alt
-			Engine[@"exec"](Engine[@"getprimarycontroller"](), "set use_wz_escape 1")
-			Engine[@"exec"](Engine[@"getprimarycontroller"](), "set use_wz_escape_alt 0")
-		else -- night
-			Engine[@"exec"](Engine[@"getprimarycontroller"](), "set use_wz_escape 0")
-			Engine[@"exec"](Engine[@"getprimarycontroller"](), "set use_wz_escape_alt 1")
-		end
+	-- Blackout, Alcatraz, Alcatraz at night or a map of ours
+	if dvar_name == "shield_wz_map" then
+		CoD.ShieldSetWZMap( Engine[@"getprimarycontroller"](), current_val, dvar_val )
 	end
 
 	if dvar_name == "shield_bots_wz_lives" then	
@@ -139,7 +230,7 @@ DataSources.OptionalSettingsDataBlackout = DataSourceHelpers.ListSetup( "Optiona
 
 	-- !! decs is not needed here!!!, nvm
 
-	table.insert( Settings, CoD.OptionsUtility.CreateDvarSettings( f138_arg0, @"shield/use_wz_alts", @"shield/use_wz_alts_desc", "shield_wz_map", "shield_wz_map", {
+	local mapOptions = {
 		{
 			option = Engine[@"hash_4F9F1239CFD921FE"]( @"shield/use_wz_def" ),
 			value = 0,
@@ -153,7 +244,28 @@ DataSources.OptionalSettingsDataBlackout = DataSourceHelpers.ListSetup( "Optiona
 			option = Engine[@"hash_4F9F1239CFD921FE"]( @"shield/use_wz_alts_other_night" ),
 			value = 2
 		}
-	}, nil, OnExtraDataChange ) )
+	}
+
+	-- the Blackout maps of ours after the game's, named as the map table names them
+	for i, custom in ipairs( CoD.ShieldWZCustomMaps() ) do
+		local text = custom.name and Engine[@"hash_4F9F1239CFD921FE"]( custom.name )
+
+		if type( text ) ~= "string" or string.find( text, "%S" ) == nil then
+			text = custom.id
+		end
+
+		table.insert( mapOptions, { option = text, value = WZ_CUSTOM_VALUE + i - 1 } )
+	end
+
+	-- (the map picked last by its name: its place in the list moves when maps are installed or removed)
+	local picked = CoD.ShieldWZCustomMap()
+	if picked then
+		Engine[@"setdvar"]( "shield_wz_map", CoD.ShieldWZMapSetting( picked ) )
+	elseif Engine[@"getdvarint"]( "shield_wz_map" ) >= WZ_CUSTOM_VALUE then
+		CoD.ShieldSetWZMap( f138_arg0, 0 )
+	end
+
+	table.insert( Settings, CoD.OptionsUtility.CreateDvarSettings( f138_arg0, @"shield/use_wz_alts", @"shield/use_wz_alts_desc", "shield_wz_map", "shield_wz_map", mapOptions, nil, OnExtraDataChange ) )
 
 	table.insert( Settings, CoD.OptionsUtility.CreateDvarSettings( f138_arg0, @"shield/bots_difficulty", @"shield/bots_difficulty_desc", "shield_bots_wz_difficulty", "shield_bots_wz_difficulty", {
 		{

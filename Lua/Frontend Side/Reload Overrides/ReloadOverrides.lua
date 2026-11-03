@@ -206,7 +206,14 @@ CoD.ReloadOverrides = function()
 					end
 				end
 				if f185_local1 and CoD.mapsTable[f185_local1] then
-					if (IsBooleanDvarSet( "use_wz_escape" ) or IsBooleanDvarSet( "use_wz_escape_alt" ) or IsBooleanDvarSet( "use_wz_alt" )) then
+					-- a Blackout map of ours picked in the Blackout settings or the Host Lobby (BlackoutSettings.lua), in a Blackout lobby
+					local customWZ = f185_local3[@"mainmode"] == Enum[@"lobbymainmode"][@"lobby_mainmode_wz"] and CoD.ShieldWZCustomMap and CoD.ShieldWZCustomMap()
+					if customWZ then
+						local customWZMap = Engine[@"converttoxhash"]( customWZ )
+						if f185_local1 ~= customWZMap and CoD.mapsTable[customWZMap] then
+							SetMap( f181_arg0, customWZMap, false )
+						end
+					elseif (IsBooleanDvarSet( "use_wz_escape" ) or IsBooleanDvarSet( "use_wz_escape_alt" ) or IsBooleanDvarSet( "use_wz_alt" )) then
 						if IsBooleanDvarSet( "use_wz_escape" ) or IsBooleanDvarSet( "use_wz_escape_alt" ) then
 							if IsBooleanDvarSet( "use_wz_escape_alt" ) then
 								SetMap( f181_arg0, @"wz_escape_alt", false )
@@ -397,6 +404,11 @@ CoD.ReloadOverrides = function()
 	-- the popup that says how COD Points are earned, in the place of the store, see EarnCodPoints.lua
 	if CoD.EarnCodPointsReload then
 		CoD.EarnCodPointsReload()
+	end
+
+	-- the popup that says the store isn't there, in the place of the store menus, see StoreUnavailable.lua
+	if CoD.StoreUnavailableReload then
+		CoD.StoreUnavailableReload()
 	end
 
 	-- the gunsmith of the last season whatever season the pass is on, see BlackMarketSettings.lua

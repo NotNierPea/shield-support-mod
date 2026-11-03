@@ -155,21 +155,6 @@ DataSources.DirectorExtraHomeButtonsCustom = ListHelper_SetupDataSource( "Direct
 		end
 		table.insert( f85_local0, {
 			models = {
-				subtitle = @"menu/theater",
-				iconBackground = @"blacktransparent",
-				iconBackgroundFocus = @"blacktransparent",
-				showOnLeft = true,
-				small = true,
-				locked = CoD.DirectorUtility.DisableForCurrentMilestone( f85_arg0 ) and not CoD.BaseUtility.IsDvarEnabled( "ui_showTheater" ),
-				trialLocked = Engine[@"hash_5CB675CA7856DA25"]()
-			},
-			properties = {
-				action = CoD.DirectorUtility.DirectorSelectTheater,
-				actionParam = LuaEnum.UI.DIRECTOR_ONLINE_THEATER
-			}
-		} ) 
-		table.insert( f85_local0, {
-			models = {
 				subtitle = @"shield/serverbrowser",
 				iconBackground = @"ui_icon_blackmarket_store_tile_focus_05",
 				iconBackgroundFocus = @"ui_icon_blackmarket_store_tile_focus_05",
@@ -225,25 +210,24 @@ DataSources.DirectorExtraHomeButtonsCustom = ListHelper_SetupDataSource( "Direct
 			end
 			f85_local9 = @"ui_icon_blackmarket_store_tile_default"
 		end
-		if IsCommerceEnabledOnPC() then
-			table.insert( f85_local0, {
-				models = {
-					showOnLeft = not IsBooleanDvarSet( @"loot_enableblackmarket" ),
-					iconBackground = f85_local6,
-					iconBackgroundFocus = f85_local7,
-					locked = false,
-					subtitle = @"hash_4191CDDA584B4408",
-					small = false,
-					showForAllClients = true
-				},
-				properties = {
-					action = OpenStore,
-					actionParam = "DirectorPlayButton"
-				}
-			} )
-		end
+		-- no Battle.net store: the theater takes its place on the right
+		table.insert( f85_local0, {
+			models = {
+				subtitle = @"menu/theater",
+				iconBackground = @"blacktransparent",
+				iconBackgroundFocus = @"blacktransparent",
+				showOnLeft = false,
+				small = true,
+				locked = CoD.DirectorUtility.DisableForCurrentMilestone( f85_arg0 ) and not CoD.BaseUtility.IsDvarEnabled( "ui_showTheater" ),
+				trialLocked = Engine[@"hash_5CB675CA7856DA25"]()
+			},
+			properties = {
+				action = CoD.DirectorUtility.DirectorSelectTheater,
+				actionParam = LuaEnum.UI.DIRECTOR_ONLINE_THEATER
+			}
+		} )
 
-		if not CoD.isPC then 
+		if not CoD.isPC then
 			table.insert( f85_local0, {
 				models = {
 					subtitle = @"hash_2968A794E7F44FAD",
