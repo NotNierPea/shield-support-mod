@@ -333,18 +333,23 @@ end
 --[[
 	Who made each subscription, by its number, for the client to ask when one has lost its function (lua.cpp,
 	find_dead_subscriptions): the functions of subscriptions are held weakly, and are collected with an element
-	that was dropped without being closed. What the element was called is kept as words, and the element weakly,
-	to say where it is if it is still there.
+	that was dropped without being closed. The element's id and class are kept, and the element weakly, to say
+	where it is if it is still there. Nothing is built when subscribing: a menu's list makes thousands at once, and
+	building a name for each ran the UI VM out of memory (lua_panic "UI VM: )"). The words are made when asked.
 	The engine gives some classes of LUI their own subscribeToModel (a list has its own, not the one of
 	LUI.UIElement): each class of LUI with one of its own gets the guard, with its own as the one it calls.
 ]]
-local SubscriptionOwners = {}
+local SubscriptionIds = {}
+local SubscriptionClasses = {}
 local SubscriptionElements = setmetatable( {}, { __mode = "v" } )
+
+-- shared and held here, so the engine's weak reference never loses it
+local NoCallback = function () end
 
 CoD.ShieldDeadSubscription = function ( id )
 	local element = SubscriptionElements[id]
-	CoD.EnhPrintInfo( "subscription " .. tostring( id ) .. " made by " .. tostring( SubscriptionOwners[id] ) .. ", the element is " ..
-		( element ~= nil and "still at " .. ElementPath( element ) or "gone" ), "Model subscription" )
+	CoD.EnhPrintInfo( "subscription " .. tostring( id ) .. " made by " .. tostring( SubscriptionIds[id] ) .. " (" .. tostring( SubscriptionClasses[id] ) ..
+		"), the element is " .. ( element ~= nil and "still at " .. ElementPath( element ) or "gone" ), "Model subscription" )
 end
 
 -- the guards made, so a class that takes its function from a guarded one is not guarded twice
@@ -360,13 +365,14 @@ local function GuardSubscriptions( class, className )
 	local guard = function ( self, model, callback, ... )
 		if callback == nil then
 			CoD.EnhPrintInfo( "no function, by " .. ElementPath( self ), "Model subscription" )
-			callback = function () end
+			callback = NoCallback
 		end
 
 		local id = subscribe( self, model, callback, ... )
 
 		if id ~= nil then
-			SubscriptionOwners[id] = ElementPath( self ) .. " (" .. className .. ")"
+			SubscriptionIds[id] = self.id
+			SubscriptionClasses[id] = className
 			SubscriptionElements[id] = self
 		end
 
