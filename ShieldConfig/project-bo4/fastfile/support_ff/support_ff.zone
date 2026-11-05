@@ -38,5 +38,25 @@ image,shield_camo_digital_prev.png
 stringtable,gamedata/shield/loot_items.csv
 image,shield_loot_wanted_card.png
 
+// calling cards of our own, real backgrounds (shield-client's custom_calling_cards.cpp): id, image (and its Lua widget),
+// name, description, mode, map, stat that unlocks it. Pictures: Giddy Park (BO4)/tools/build_calling_card.py
+stringtable,gamedata/shield/calling_cards.csv
+image,shield_cc_zm_park_quest.png
+image,shield_cc_zm_park_quest_bg.png
+image,shield_cc_zm_park_quest_wheel_00.png
+image,shield_cc_zm_park_quest_wheel_01.png
+image,shield_cc_zm_park_quest_wheel_02.png
+image,shield_cc_zm_park_quest_wheel_03.png
+image,shield_cc_zm_park_quest_wheel_04.png
+image,shield_cc_zm_park_quest_wheel_05.png
+image,shield_cc_zm_park_quest_wheel_06.png
+image,shield_cc_zm_park_quest_wheel_07.png
+image,shield_cc_zm_park_quest_wheel_08.png
+image,shield_cc_zm_park_quest_wheel_09.png
+image,shield_cc_zm_park_quest_wheel_10.png
+image,shield_cc_zm_park_quest_wheel_11.png
+// the zombies challenges' Custom tab (CustomChallenges.lua)
+image,shield_challenges_custom.png
+
 // startup video sound: shield-client's
 sound,sounds/support_sounds.json
