@@ -12,4 +12,4 @@
 - ### Download the latest Shield Client update [here](https://github.com/NotNierPea/shield-launcher), and Extract it in bo4 directory. or Use the ``ShieldConfig/project-bo4/fastfile/T8ShieldSupport_FF`` and copy it to bo4 directory: ``project-bo4/zone_mods``.
 - ### Download the latest [Acts Cod Tools](https://github.com/ate47/atian-cod-tools)
 - ### Run the command in ``ShieldConfig/project-bo4/fastfile/support_ff/support_ff.zone`` (first line)
-- ### Should be done. (the fast file is only used for images for now)
+- ### Should be done.
