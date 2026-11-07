@@ -108,12 +108,52 @@ local function HookContrabandPrice()
 	Log( "contraband price hooked" )
 end
 
+-- for testing: "set shield_loot_force <loot id>" puts that contraband item in the slot until it is bought ("0" stops it)
+-- the item, or nil and why not (nothing to say when the dvar is off)
+local function ForcedItem( controller )
+	local value = Engine[@"getdvarstring"]( "shield_loot_force" )
+	if value == nil or value == "" or value == "0" then
+		return nil
+	end
+
+	-- the id as the table gives it: tonumber( value ) is a float, too short for a loot id, and finds no row
+	local found = nil
+	for _, refresh in ipairs( { false, true } ) do
+		for _, item in ipairs( CoD.BlackMarketTableUtility.GetAllContrabandItem( controller, refresh ) or {} ) do
+			if tostring( item.itemId ) == value or ( type( item.itemId ) == "number" and tonumber( value ) == item.itemId ) then
+				found = item
+				break
+			end
+		end
+
+		if found then
+			break
+		end
+	end
+
+	if not found then
+		return nil, "forced item " .. value .. " has no contraband row"
+	end
+
+	if CoD.BlackMarketUtility.IsItemPurchased( controller, found.itemId ) then
+		return nil, "forced item " .. value .. " is owned"
+	end
+
+	-- what GetRNGItems gives
+	return { itemId = found.itemId, itemNameHash = found.name, weight = 1 }
+end
+
 local function HookContrabandSlot()
 	if not CoD.BlackMarketUtility or CoD.BlackMarketUtility.shieldLoot or not CoD.BlackMarketUtility.SetupItemShopSunsetSlotDatasource then
 		return
 	end
 
 	CoD.BlackMarketUtility.shieldLoot = true
+
+	local GameWeightedItem = CoD.BlackMarketUtility.GetRNGWeightedItem
+	CoD.BlackMarketUtility.GetRNGWeightedItem = function ( controller, slot )
+		return ForcedItem( controller ) or GameWeightedItem( controller, slot )
+	end
 
 	local GameSetupSlot = CoD.BlackMarketUtility.SetupItemShopSunsetSlotDatasource
 	CoD.BlackMarketUtility.SetupItemShopSunsetSlotDatasource = function ( controller, slot )
@@ -124,6 +164,23 @@ local function HookContrabandSlot()
 			if shown and not CoD.BlackMarketTableUtility.GetContrabandItemInfo( controller, shown.itemId, 0 ) then
 				CoD.BlackMarketUtility.RevealItemShopSunsetSlotItem( controller, slot )
 				Log( "unknown item " .. tostring( shown.itemId ) .. " taken out of the contraband slot" )
+			end
+
+			-- the forced item replaces whatever the slot shows
+			local forced, why = ForcedItem( controller )
+			shown = Engine[@"hash_6F2CB6360236F359"]( controller, slot )
+			if forced or why then
+				Log( "contraband slot shows " .. tostring( shown and shown.itemId ) .. ", shield_loot_force '" .. tostring( Engine[@"getdvarstring"]( "shield_loot_force" ) ) .. "'" )
+			end
+
+			if why then
+				Log( why )
+			elseif forced and shown and tostring( shown.itemId ) == tostring( forced.itemId ) then
+				Log( "forced item " .. tostring( forced.itemId ) .. " is in the contraband slot" )
+			elseif forced then
+				CoD.BlackMarketUtility.RevealItemShopSunsetSlotItem( controller, slot )
+				local now = Engine[@"hash_6F2CB6360236F359"]( controller, slot )
+				Log( "forced item " .. tostring( forced.itemId ) .. " put in the contraband slot, it shows " .. tostring( now and now.itemId ) )
 			end
 		end
 
