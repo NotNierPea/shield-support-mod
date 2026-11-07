@@ -672,6 +672,24 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/GameCalloutWheel",
+            "path": "Lua\\Game\\CalloutWheel.luac",
+            "hooks_post": [
+                "x64:46f417a74d9ab424",
+                "x64:57d27ab8e2f7a9d0"
+            ]
+        },
+        {
+            "type": "luafile",
+            "name": "ui/shield/GameSprayGestureWheel",
+            "path": "Lua\\Game\\SprayGestureWheel.luac",
+            "hooks_post": [
+                "x64:46f417a74d9ab424",
+                "x64:57d27ab8e2f7a9d0"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/GameReloadOverrides",
             "path": "Lua\\Game\\ReloadOverrides.luac",
             "hooks_post": [
@@ -2794,6 +2812,51 @@
             "type": "localizeentry",
             "name": "platform/missingmap",
             "value": "You do not have this custom map. You can try downloading it from Mod Manager in Main Menu.."
+        },
+        {
+            "type": "localizeentry",
+            "name": "hash_750100d161c4d583",
+            "value": "Hello"
+        },
+        {
+            "type": "localizeentry",
+            "name": "hash_7382718d1bea375c",
+            "value": "Nice Work"
+        },
+        {
+            "type": "localizeentry",
+            "name": "hash_ec2bd11204d4811",
+            "value": "Need Help"
+        },
+        {
+            "type": "localizeentry",
+            "name": "hash_5dd4de4914a2964b",
+            "value": "Need Revive"
+        },
+        {
+            "type": "localizeentry",
+            "name": "hash_1e993a7261c62997",
+            "value": "Cover Me"
+        },
+        {
+            "type": "localizeentry",
+            "name": "hash_176dcb27e4a0b1f4",
+            "value": "Group Up"
+        },
+        {
+            "type": "localizeentry",
+            "name": "hash_6101245aedfeb933",
+            "value": "Flanking"
+        },
+        {
+            "type": "localizeentry",
+            "name": "hash_1cf45eadd754592b",
+            "value": "Acknowledged"
+        },
+        {
+            "type": "localizeentry",
+            "name": "hash_2323687d4a52a88",
+            "value": "Thanks"
         }
     ],
     "cache": [
@@ -2814,6 +2877,27 @@
                 "mp",
                 "zm"
             ]
+        },
+        {
+            "type": "eventstring",
+            "name": "spray_gesture",
+            "mode": [
+                "zm"
+            ]
+        },
+        {
+            "type": "eventstring",
+            "name": "callout",
+            "mode": [
+                "zm"
+            ]
+        },
+        {
+            "type": "eventstring",
+            "name": "shield_callout",
+            "mode": [
+                "zm"
+            ]
         }
     ],
     "redirect": [
@@ -2823,5 +2907,17 @@
             "target": "loading_shield"
         }
     ],
+    "extrazone": {
+        "mp_common_script": {
+            "assets": "gesturetable:0x17d583bf031bf05d",
+            "scripts": "",
+            "modes": "zm"
+        },
+        "mp_common": {
+            "assets": "gesturetable:gestable_command_hello gesturetable:gestable_command_thanks gesturetable:gestable_command_need_help gesturetable:gestable_command_defending gesturetable:gestable_order_follow gesturetable:gestable_command_flanking gesturetable:gestable_command_acknowledge",
+            "scripts": "",
+            "modes": "zm"
+        }
+    },
     "enabled": true
 }

@@ -6,6 +6,7 @@
 #include scripts\core_common\array_shared.gsc;
 #include scripts\core_common\callbacks_shared.gsc;
 #include scripts\core_common\player\player_role;
+#include scripts\core_common\gestures;
 
 #namespace SupportGSC;
 

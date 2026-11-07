@@ -72,6 +72,20 @@ CoD.BlackMarketSeasonReload = function()
 		CoD.BlackMarketUtility.IsCurrentLootSeasonAtLeast = function ( season )
 			return true
 		end
+
+		-- switching to an order already bought writes only the stats slot; the client counts tiers for its own record of the running one
+		if not CoD.BlackMarketUtility.__shieldContractWrapped then
+			CoD.BlackMarketUtility.__shieldContractWrapped = true
+			local ActivateContract = CoD.BlackMarketUtility.ActivateContract
+			CoD.BlackMarketUtility.ActivateContract = function ( controller, hashName, slot )
+				local activated = ActivateContract( controller, hashName, slot )
+				if activated and slot == CoDShared.Loot.ContractSlots.SLOT_1 then
+					local id = CoD.BlackMarketTableUtility.GetContractId( hashName )
+					Engine[@"exec"]( controller, "contract_activate " .. id )
+				end
+				return activated
+			end
+		end
 	end
 end
 
