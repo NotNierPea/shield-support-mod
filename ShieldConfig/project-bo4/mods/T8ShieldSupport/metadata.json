@@ -2907,17 +2907,5 @@
             "target": "loading_shield"
         }
     ],
-    "extrazone": {
-        "mp_common_script": {
-            "assets": "gesturetable:0x17d583bf031bf05d",
-            "scripts": "",
-            "modes": "zm"
-        },
-        "mp_common": {
-            "assets": "gesturetable:gestable_command_hello gesturetable:gestable_command_thanks gesturetable:gestable_command_need_help gesturetable:gestable_command_defending gesturetable:gestable_order_follow gesturetable:gestable_command_flanking gesturetable:gestable_command_acknowledge",
-            "scripts": "",
-            "modes": "zm"
-        }
-    },
     "enabled": true
 }
