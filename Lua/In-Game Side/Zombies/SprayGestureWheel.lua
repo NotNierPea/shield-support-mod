@@ -17,10 +17,11 @@ CoD.ShieldInitLuaFile()
 	slot chosen on the wheel reaches it (Engine[@"hash_111C001DF63C3ABA"], as the multiplayer HUD does); what zombies lacks is
 	put in place here and in shield-client (sprays_gestures.cpp):
 	- the wheel on the HUD: zombies has none, nor the files of its widgets, so those of mp_common are copied at the end;
-	- what is on it: zombies loadouts have no slots for sprays and gestures, the wheel shows the 9 equipped in multiplayer;
+	- what is on it: zombies loadouts have no slots for sprays and gestures, shield-client keeps 9 for zombies (set in the
+	  lobby's Extras, ZombiesExtras.lua) and the game's reader of the slots answers with them;
 	- the server knowing them: it only has the zombies loadouts of its players, so each one sends it its 9 here (a menu response,
 	  the support GSC passes it to ShieldSetSprayGesture).
-	The spray can's gesture table is borrowed from mp_common_script (metadata.json).
+	The spray can's gesture table is support.ff's.
 ]]
 local MENU = "shield_support_menu"
 local RESPONSE = "spray_gesture"
@@ -30,12 +31,12 @@ local function Log( text )
 	Engine[@"printinfo"]( 0, "[shield] sprays and gestures: " .. text .. "\n" )
 end
 
--- the 9 slots equipped in multiplayer: an item index + 1 each, 0 for none. The first is the quick spray, the wheel has the others
+-- zombies' 9 slots: an item index + 1 each, 0 for none. The first is the quick spray, the wheel has the others
 local function EquippedItems( controller )
-	return Engine[@"hash_688987BA1B9D616B"]( controller, Enum[@"emodes"][@"mode_multiplayer"] ) or {}
+	return Engine[@"hash_688987BA1B9D616B"]( controller, Enum[@"emodes"][@"mode_zombies"] ) or {}
 end
 
--- the game's DataSources.SpraysAndGestures, with multiplayer's slots in place of those of the mode
+-- the game's DataSources.SpraysAndGestures, on zombies' slots
 local function SetupDataSource()
 	if DataSources.ShieldSpraysAndGestures then
 		return

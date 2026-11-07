@@ -58,12 +58,13 @@ image,shield_cc_zm_park_quest_wheel_11.png
 // the zombies challenges' Custom tab (CustomChallenges.lua)
 image,shield_challenges_custom.png
 
-// startup video sound: shield-client's
+// startup video sound (shield-client's) and the callouts' voice lines of the zombies characters (Blackout's, wz_common.en)
 sound,sounds/support_sounds.json
 
 // zombies sprays, gestures and callouts (shield-client sprays_gestures.cpp, CalloutWheel.lua): the spray can's gesture
-// table of mp_common_script and the 7 callout gesture tables of mp_common, with their gestures and xanims (acts ff
-// dumps). Zone order is the loaders': xanims, gestures, tables. The can models are core_common's.
+// table of mp_common_script and the 8 callout gesture tables of mp_common (taunt included), with their gestures and xanims (acts ff
+// dumps). Zone order is the loaders': xanims, gestures, tables. The can models are core_common's. The bgcache
+// also lists the voice lines' aliases (playsoundontag).
 xanim,gestures/xanim/file_9fae5d76c43cd.json
 xanim,gestures/xanim/file_3f30eaa816bcbc9.json
 xanim,gestures/xanim/file_606fa1e22108bbb.json
@@ -151,6 +152,15 @@ xanim,gestures/xanim/file_7d691df352679bba.json
 xanim,gestures/xanim/file_7eb4377a6bc569d0.json
 xanim,gestures/xanim/file_7f3f04529ee5d5d4.json
 xanim,gestures/xanim/file_7fd7383c5c77c54d.json
+xanim,gestures/xanim/file_5a2e636ebfb8b8a3.json
+xanim,gestures/xanim/file_53b278d4d1cc8803.json
+xanim,gestures/xanim/file_7b6230e1dc89e885.json
+xanim,gestures/xanim/file_7aa86ad5ce2495e7.json
+xanim,gestures/xanim/file_4b7eaf191e5e73ee.json
+xanim,gestures/xanim/file_2cdaa094471d70d0.json
+xanim,gestures/xanim/file_42998cc02c7fbaf0.json
+xanim,gestures/xanim/file_51815b019d3865b5.json
+xanim,gestures/xanim/file_50db2531c6a0f379.json
 gesture,gestures/gesture/file_2b4a0c94a34f6d3.json
 gesture,gestures/gesture/file_3e6da18e537a8f1.json
 gesture,gestures/gesture/file_bb3f1d9e5275045.json
@@ -178,6 +188,9 @@ gesture,gestures/gesture/file_66634d2041bce628.json
 gesture,gestures/gesture/file_7153d04831caf054.json
 gesture,gestures/gesture/file_778426018f2e1fa9.json
 gesture,gestures/gesture/file_7b72d79753f3db63.json
+gesture,gestures/gesture/file_3066678ce9dd690b.json
+gesture,gestures/gesture/file_2c5b0b759f3ade5d.json
+gesture,gestures/gesture/file_77814a2c0a0451a9.json
 gesturetable,gestures/gesturetable/file_17d583bf031bf05d.json
 gesturetable,gestures/gesturetable/file_590b7eb088b96eef.json
 gesturetable,gestures/gesturetable/file_46a54bc1788e2ecc.json
@@ -186,4 +199,5 @@ gesturetable,gestures/gesturetable/file_389f0fc75f638263.json
 gesturetable,gestures/gesturetable/file_448b4b6b1587754f.json
 gesturetable,gestures/gesturetable/file_44a4a0f1fb4bdff.json
 gesturetable,gestures/gesturetable/file_157d3b49990e7c47.json
+gesturetable,gestures/gesturetable/file_78cce64e1c6eced7.json
 bgcache,gestures/gestures_bgcache.csv

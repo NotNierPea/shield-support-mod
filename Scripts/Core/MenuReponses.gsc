@@ -78,6 +78,87 @@ TryCallout(params)
         if (player.team == self.team)
             player luinotifyevent(#"shield_callout", 2, params.intpayload, self getentitynumber());
     }
+
+    self thread CalloutVoice(params.intpayload % 100, params.intpayload >= 100);
+}
+
+/*
+    The character's line for the callout, Blackout's (support.ff: shield_vo_<callout>_<character>, the 2d variant for
+    the speaker, the 3d one for the others), after a moment as battlechatter.gsc's function_e3ebbf87.
+*/
+CalloutVoice(index, alt)
+{
+    self endon(#"death", #"disconnect");
+
+    callout = CalloutVoiceName(index, alt);
+    character = CalloutVoiceCharacter();
+    if (!isdefined(callout) || !isdefined(character))
+        return;
+
+    // Marlton, Russman and Stuhlinger have no "need revive" line
+    if (callout == "needrevive" && (character == "marlton" || character == "russman" || character == "stuhlinger"))
+        callout = "needhelp";
+
+    wait 0.25;
+
+    if (!isdefined(self) || !isalive(self) || self isplayerunderwater() || (isdefined(self.isspeaking) && self.isspeaking))
+        return;
+
+    self playsoundontag("shield_vo_" + callout + "_" + character, "J_Head");
+}
+
+// the callouts of CalloutWheel.lua with lines; cover me and flanking have none
+CalloutVoiceName(index, alt)
+{
+    switch (index)
+    {
+        case 0: return "hello";
+        case 1: return "nicework";
+        case 2: return alt ? "needrevive" : "needhelp";
+        case 4: return "groupup";
+        case 6: return "acknowledge";
+        case 7: return "thanks";
+        case 8: return "taunt";
+    }
+
+    return undefined;
+}
+
+// the player's character as the lines name it (Shaw is stanton; the _whi and _dlc0 ones are the same voices)
+CalloutVoiceCharacter()
+{
+    if (!player_role::is_valid(player_role::get()))
+        return undefined;
+
+    switch (function_b14806c6(player_role::get(), currentsessionmode()))
+    {
+        case #"prt_zm_dempsey":
+        case #"prt_zm_dempsey_whi": return "dempsey";
+        case #"prt_zm_dempsey_ofc": return "dempsey_ofc";
+        case #"prt_zm_nikolai":
+        case #"prt_zm_nikolai_whi": return "nikolai";
+        case #"prt_zm_nikolai_ofc": return "nikolai_ofc";
+        case #"prt_zm_richtofen":
+        case #"prt_zm_richtofen_whi": return "richtofen";
+        case #"prt_zm_richtofen_ofc": return "richtofen_ofc";
+        case #"prt_zm_takeo":
+        case #"prt_zm_takeo_whi": return "takeo";
+        case #"prt_zm_takeo_ofc": return "takeo_ofc";
+        case #"prt_zm_scarlett":
+        case #"prt_zm_scarlett_dlc0": return "scarlett";
+        case #"prt_zm_stanton":
+        case #"prt_zm_stanton_dlc0": return "stanton";
+        case #"prt_zm_bruno":
+        case #"prt_zm_bruno_dlc0": return "bruno";
+        case #"prt_zm_diego":
+        case #"prt_zm_diego_dlc0": return "diego";
+        case #"prt_zm_misty": return "misty";
+        case #"prt_zm_marlton": return "marlton";
+        case #"prt_zm_russman": return "russman";
+        case #"prt_zm_stuhlinger": return "stuhlinger";
+    }
+
+    return undefined;
 }
 
 // the gesture tables of the callouts of CalloutWheel.lua, in its order (the callout_wheel bundles of multiplayer)
@@ -93,6 +174,7 @@ CalloutGestureTable(index)
         case 5: return #"gestable_command_flanking";
         case 6: return #"gestable_command_acknowledge";
         case 7: return #"gestable_command_thanks";
+        case 8: return #"gestable_command_taunt";
     }
 
     return undefined;

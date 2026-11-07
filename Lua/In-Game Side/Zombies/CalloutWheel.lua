@@ -24,17 +24,23 @@ local RESPONSE = "callout"
 local NOTIFY = @"shield_callout"
 local ALT = 100
 
--- in the order of the support GSC's CalloutGestureTable; alt: the title while in last stand
+-- in Blackout's wheel order; id: the support GSC's index (CalloutGestureTable), alt: the title while in last stand
 local CALLOUTS = {
-	{ title = @"hash_750100D161C4D583", social = 1 }, -- Hello
-	{ title = @"hash_7382718D1BEA375C", social = 1 }, -- Nice Work
-	{ title = @"hash_EC2BD11204D4811", alt = @"hash_5DD4DE4914A2964B", social = 0 }, -- Need Help, Need Revive
-	{ title = @"hash_1E993A7261C62997", social = 0 }, -- Cover Me
-	{ title = @"hash_176DCB27E4A0B1F4", social = 0 }, -- Group Up
-	{ title = @"hash_6101245AEDFEB933", social = 0 }, -- Flanking
-	{ title = @"hash_1CF45EADD754592B", social = 0 }, -- Acknowledged
-	{ title = @"hash_2323687D4A52A88", social = 1 } -- Thanks
+	{ id = 0, title = @"hash_750100D161C4D583", social = 1 }, -- Hello
+	{ id = 1, title = @"hash_7382718D1BEA375C", social = 1 }, -- Nice Work
+	{ id = 2, title = @"hash_EC2BD11204D4811", alt = @"hash_5DD4DE4914A2964B", social = 0 }, -- Need Help, Need Revive
+	{ id = 3, title = @"hash_1E993A7261C62997", social = 0 }, -- Cover Me
+	{ id = 4, title = @"hash_176DCB27E4A0B1F4", social = 0 }, -- Group Up
+	{ id = 5, title = @"hash_6101245AEDFEB933", social = 0 }, -- Flanking
+	{ id = 8, title = @"hash_4B446844FF94C9EB", social = 0 }, -- Taunt
+	{ id = 6, title = @"hash_1CF45EADD754592B", social = 0 }, -- Acknowledged
+	{ id = 7, title = @"hash_2323687D4A52A88", social = 1 } -- Thanks
 }
+
+local CALLOUTS_BY_ID = {}
+for _, callout in ipairs( CALLOUTS ) do
+	CALLOUTS_BY_ID[callout.id] = callout
+end
 
 local function Log( text )
 	Engine[@"printinfo"]( 0, "[shield] callouts: " .. text .. "\n" )
@@ -69,7 +75,7 @@ local function SetupDataSource()
 				models = {
 					disabled = false,
 					text = alt or callout.title,
-					arrayIndex = index - 1,
+					arrayIndex = callout.id,
 					index = index - 1,
 					chosen = false,
 					addNumber = alt and ALT or 0,
@@ -91,7 +97,7 @@ end
 
 -- a callout of the team, as CoD.HUDUtility.ProcessPlayerCalloutInternal shows one (without its Blackout check)
 local function ShowCallout( controller, payload, client )
-	local callout = CALLOUTS[payload % ALT + 1]
+	local callout = CALLOUTS_BY_ID[payload % ALT]
 	if not callout or not client then
 		return
 	end
@@ -176,7 +182,7 @@ end
 ---------------------------
 
 -- the widgets of the wheel, from mp_common (ui/uieditor/widgets/hud/mpcalloutitems and what it uses). Changed: the data
--- source ShieldCalloutWheel and its 8 slots, the choice CoD.ShieldAddCalloutCallback, and the condition to show (the
+-- source ShieldCalloutWheel and its 9 slots, the choice CoD.ShieldAddCalloutCallback, and the condition to show (the
 -- decompiled one never shows it). The pointer and prompt widgets are SprayGestureWheel.lua's.
 
 if not CoD.CalloutItemText then
@@ -656,7 +662,7 @@ if not CoD.MPCalloutItems then
 		CalloutItems:setLeftRight( 0.5, 0.5, -177, 177 )
 		CalloutItems:setTopBottom( 0.5, 0.5, -177, 177 )
 		CalloutItems:setWidgetType( CoD.CalloutItem )
-		CalloutItems:setCount( 8 )
+		CalloutItems:setCount( #CALLOUTS )
 		CalloutItems:setDataSource( "ShieldCalloutWheel" )
 		self:addElement( CalloutItems )
 		self.CalloutItems = CalloutItems

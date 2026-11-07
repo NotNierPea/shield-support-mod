@@ -74,6 +74,14 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/ZombiesExtras",
+            "path": "Lua\\Frontend\\ZombiesExtras.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/DirectorPregameArena",
             "path": "Lua\\Frontend\\DirectorPregameArena.luac",
             "hooks_post": [
@@ -2857,6 +2865,11 @@
             "type": "localizeentry",
             "name": "hash_2323687d4a52a88",
             "value": "Thanks"
+        },
+        {
+            "type": "localizeentry",
+            "name": "hash_4b446844ff94c9eb",
+            "value": "Taunt"
         }
     ],
     "cache": [
