@@ -487,6 +487,8 @@ local function ShieldUnhideUltimis()
 	end
 end
 
+local ShieldOrderButtonsByCast
+
 local function ShieldShowUltimisCrew()
 	if CoD.PlayerRoleUtility == nil then
 		return
@@ -500,11 +502,86 @@ local function ShieldShowUltimisCrew()
 
 	CoD.PlayerRoleUtility.GetPlayerRolesListHelper = function ( menu, controller, mode, filter )
 		ShieldUnhideUltimis()
+		ShieldOrderButtonsByCast()
 		return CoD.PlayerRoleUtility.ShieldGameGetPlayerRolesListHelper( menu, controller, mode, filter )
 	end
 end
 
+--[[
+	The zombies lobby places each player's Select Class button by the next map's "cast" value: its order list
+	(story1 Primis/Ultimis, story2 Chaos, ...) puts a character's button over its spot on the stage. A custom map
+	whose cast value is another story's (Nacht der Untoten: Ultimis on story2, which keeps the Chaos perk altars
+	in game) had its buttons in the wrong spots. The order list used is now the one naming the lobby's characters,
+	the map's own when none or several match equally.
+]]
+local ShieldCastNames = {
+	{ @"hash_517389C0AE1875F9", { "niko", "Unik", "mist", "demp", "Udem", "russ", "rich", "Uric", "stuh", "take", "Utak", "marl" } }, -- story1
+	{ @"hash_517386C0AE1870E0", { "scar", "brun", "shaw", "dieg" } }, -- story2
+	{ @"hash_08EF85DD9EA9716E", { "brig", "butl", "guns", "psyc" } }
+}
+
+local function ShieldCastOfClients( clients )
+	local best, bestCount, tied = nil, 0, false
+	for _, cast in ipairs( ShieldCastNames ) do
+		local count = 0
+		for _, client in ipairs( clients ) do
+			local name = client.bundle and client.bundle[@"hash_64C380331760638F"]
+			if name then
+				for _, castName in ipairs( cast[2] ) do
+					if name == castName then
+						count = count + 1
+					end
+				end
+			end
+		end
+		if count > bestCount then
+			best, bestCount, tied = cast[1], count, false
+		elseif count > 0 and count == bestCount then
+			tied = true
+		end
+	end
+	if tied then
+		return nil
+	end
+	return best
+end
+
+ShieldOrderButtonsByCast = function ()
+	if CoD.ZombieUtility == nil or CoD.ZombieUtility.OrderCharacterButtonZMList == nil or CoD.MapUtility == nil then
+		return
+	end
+	if CoD.ZombieUtility.ShieldGameOrderCharacterButtonZMList ~= nil then
+		return
+	end
+
+	CoD.ZombieUtility.ShieldGameOrderCharacterButtonZMList = CoD.ZombieUtility.OrderCharacterButtonZMList
+	CoD.ZombieUtility.OrderCharacterButtonZMList = function ( model, controller, clients )
+		local order = CoD.ZombieUtility.ShieldGameOrderCharacterButtonZMList
+		local cast = ShieldCastOfClients( clients )
+		if cast == nil then
+			return order( model, controller, clients )
+		end
+
+		-- the game's ordering, its cast value read as the one found
+		local getMapValue = CoD.MapUtility.GetMapValue
+		CoD.MapUtility.GetMapValue = function ( map, key, default )
+			if key == @"hash_355E7090E879494E" then
+				return cast
+			end
+			return getMapValue( map, key, default )
+		end
+		local ok, result = pcall( order, model, controller, clients )
+		CoD.MapUtility.GetMapValue = getMapValue
+		if not ok then
+			error( result )
+		end
+		return result
+	end
+	CoD.EnhPrintInfo( "Select Class buttons ordered by the lobby's characters" )
+end
+
 ShieldShowUltimisCrew()
+ShieldOrderButtonsByCast()
 
 -- Reactives and Calling Card Fixes
 CoD.UnlockReload = function()
