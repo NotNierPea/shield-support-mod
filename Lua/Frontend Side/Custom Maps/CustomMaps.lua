@@ -108,7 +108,7 @@ local RoundStatsWrapper = nil
 local AARImageWrapper = nil
 
 --[[
-	A custom map's story (the client's "story"): Chaos or Aether is the map entry's story value (0 or 1) in the menus' two
+	A custom map's story (the client's "story"): Chaos or Aether is the map entry's story value (0 Aether, 1 Chaos) in the menus' two
 	maps tables, which the map select's story line and the story the menus pick read; a story of its own is a localize
 	entry of the client (storyText) shown on the story line in their place.
 ]]
