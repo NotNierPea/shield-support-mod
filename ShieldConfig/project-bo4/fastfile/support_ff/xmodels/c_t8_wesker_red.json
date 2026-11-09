@@ -1,0 +1,28 @@
+{
+    "name": "c_t8_wesker_red",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/wesker/wesker.gltf",
+    "skeleton": "../skeletons/mp_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "wesker_em8000": "materials/wesker_em8000_mat.json",
+        "wesker_em8001": "materials/wesker_em8001_mat.json",
+        "wesker_em8002": "materials/wesker_em8002_red_mat.json",
+        "wesker_em8003": "materials/wesker_em8003_mat.json",
+        "wesker_em8004": "materials/wesker_em8004_mat.json",
+        "wesker_em8006": "materials/wesker_em8006_mat.json",
+        "wesker_em8007": "materials/wesker_em8007_mat.json",
+        "wesker_em8008": "materials/wesker_em8008_mat.json",
+        "wesker_em8009": "materials/wesker_em8009_mat.json",
+        "wesker_em8010": "materials/wesker_em8010_mat.json",
+        "wesker_em8014": "materials/wesker_em8014_red_mat.json",
+        "wesker_em8016": "materials/wesker_em8016_mat.json",
+        "wesker_em8017": "materials/wesker_em8017_red_mat.json",
+        "wesker_em8018": "materials/wesker_em8018_red_mat.json",
+        "wesker_pl1500_00": "materials/wesker_pl1500_00_mat.json",
+        "wesker_pl1500_01": "materials/wesker_pl1500_01_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

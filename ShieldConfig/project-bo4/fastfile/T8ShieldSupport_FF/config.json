@@ -1,9 +1,134 @@
 {
     "modid": "support_ff_main",
-    "fastfiles" : {
+    "fastfiles": {
         "support": {
             "hook": "core_common",
-            "type": "common"
+            "type": "common",
+            "characters": [
+                {
+                    "name": "wesker",
+                    "mode": "mp",
+                    "base_role": 8,
+                    "role_slot": 0,
+                    "display_name": "Wesker",
+                    "title": "Frontal Assault",
+                    "description": "Albert Wesker brings a god complex and a body rebuilt by the virus: crush the battlefield with the Grav Slam and reach any vantage with the Grapple Gun.",
+                    "body": "c_t8_wesker",
+                    "head": "c_t8_wesker_head",
+                    "arms": "c_t8_wesker_arms",
+                    "legs": "c_t8_wesker_legs",
+                    "portrait": "wesker_portrait",
+                    "icon": "wesker_icon",
+                    "dialog": "wesker",
+                    "images": {
+                        "0x50": "",
+                        "0x58": "wesker_render",
+                        "0x60": "wesker_action"
+                    },
+                    "bundle": {
+                        "hash_215ac9daad709de1": "wesker_bio_header",
+                        "hash_38ea74cad0150cdf": "wesker_card",
+                        "hash_39baaa080c62d5e5": "wesker_story",
+                        "hash_5b2781a0b1bf2b7a": "wesker_emblem",
+                        "hash_32ca7e775f99d218": "wesker",
+                        "hash_3db969b978e2aba8": 0
+                    },
+                    "texts": {
+                        "hash_10cb98543e7ec137": "WESKER",
+                        "hash_13c8379c2b98a9c6": "WESKER - Frontal Assault",
+                        "hash_16d4e2fc988858de": "Albert Wesker",
+                        "hash_541919134fdff1": "Wesker's Bio",
+                        "hash_438e8b2f52f5538b": "Former S.T.A.R.S. captain and Umbrella researcher, reborn by the virus he carries…",
+                        "hash_2299bc20d2a6cd8": "Albert Wesker was raised by Umbrella as one of the Wesker Children, a project to breed the next generation of humanity.\n\nAs captain of the S.T.A.R.S. Alpha Team he led his own men into the Arklay mansion as test subjects, and was killed by the Tyrant he set loose. The prototype virus he had injected brought him back stronger, faster and colder than any man.\n\nWorking in the shadows of Tricell, he now pursues Uroboros: a virus to winnow mankind down to the few he deems worthy. To him the battlefield is a test, and few pass it."
+                    },
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "Albert Wesker",
+                            "icon": "wesker_outfit_default"
+                        },
+                        {
+                            "index": 1,
+                            "body": "c_t8_wesker_red",
+                            "arms": "c_t8_wesker_red_arms",
+                            "legs": "c_t8_wesker_red_legs",
+                            "name": "Crimson",
+                            "icon": "wesker_outfit_red"
+                        },
+                        {
+                            "index": 2,
+                            "body": "c_t8_wesker_blue",
+                            "arms": "c_t8_wesker_blue_arms",
+                            "legs": "c_t8_wesker_blue_legs",
+                            "name": "Midnight",
+                            "icon": "wesker_outfit_blue"
+                        }
+                    ],
+                    "outfit_count": 3,
+                    "role_index": 16
+                },
+                {
+                    "name": "wesker",
+                    "mode": "wz",
+                    "base_role": 5,
+                    "role_slot": 0,
+                    "display_name": "Wesker",
+                    "title": "Frontal Assault",
+                    "description": "Albert Wesker brings a god complex and a body rebuilt by the virus: crush the battlefield with the Grav Slam and reach any vantage with the Grapple Gun.",
+                    "body": "c_t8_wesker",
+                    "head": "c_t8_wesker_head",
+                    "arms": "c_t8_wesker_arms",
+                    "legs": "c_t8_wesker_legs",
+                    "portrait": "wesker_portrait",
+                    "icon": "wesker_icon",
+                    "dialog": "wesker",
+                    "images": {
+                        "0x50": "",
+                        "0x58": "wesker_render",
+                        "0x60": "wesker_action"
+                    },
+                    "bundle": {
+                        "hash_215ac9daad709de1": "wesker_bio_header",
+                        "hash_38ea74cad0150cdf": "wesker_card",
+                        "hash_39baaa080c62d5e5": "wesker_story",
+                        "hash_5b2781a0b1bf2b7a": "wesker_emblem",
+                        "hash_32ca7e775f99d218": "wesker",
+                        "hash_3db969b978e2aba8": 0
+                    },
+                    "texts": {
+                        "hash_10cb98543e7ec137": "WESKER",
+                        "hash_13c8379c2b98a9c6": "WESKER - Frontal Assault",
+                        "hash_16d4e2fc988858de": "Albert Wesker",
+                        "hash_541919134fdff1": "Wesker's Bio",
+                        "hash_438e8b2f52f5538b": "Former S.T.A.R.S. captain and Umbrella researcher, reborn by the virus he carries…",
+                        "hash_2299bc20d2a6cd8": "Albert Wesker was raised by Umbrella as one of the Wesker Children, a project to breed the next generation of humanity.\n\nAs captain of the S.T.A.R.S. Alpha Team he led his own men into the Arklay mansion as test subjects, and was killed by the Tyrant he set loose. The prototype virus he had injected brought him back stronger, faster and colder than any man.\n\nWorking in the shadows of Tricell, he now pursues Uroboros: a virus to winnow mankind down to the few he deems worthy. To him the battlefield is a test, and few pass it."
+                    },
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "Albert Wesker",
+                            "icon": "wesker_outfit_default"
+                        },
+                        {
+                            "index": 1,
+                            "body": "c_t8_wesker_red",
+                            "arms": "c_t8_wesker_red_arms",
+                            "legs": "c_t8_wesker_red_legs",
+                            "name": "Crimson",
+                            "icon": "wesker_outfit_red"
+                        },
+                        {
+                            "index": 2,
+                            "body": "c_t8_wesker_blue",
+                            "arms": "c_t8_wesker_blue_arms",
+                            "legs": "c_t8_wesker_blue_legs",
+                            "name": "Midnight",
+                            "icon": "wesker_outfit_blue"
+                        }
+                    ],
+                    "outfit_count": 3
+                }
+            ]
         }
     }
 }

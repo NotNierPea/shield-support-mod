@@ -1,0 +1,17 @@
+{
+    "name": "c_t8_wesker_arms",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/wesker/wesker_arms.gltf",
+    "skeleton": "../skeletons/zm_viewarms.json",
+    "hitboxes": "mesh",
+    "materials": {
+        "wesker_em8001": "materials/wesker_em8001_mat.json",
+        "wesker_em8004": "materials/wesker_em8004_mat.json",
+        "wesker_em8014": "materials/wesker_em8014_mat.json",
+        "wesker_em8016": "materials/wesker_em8016_mat.json",
+        "wesker_em8017": "materials/wesker_em8017_mat.json",
+        "wesker_em8018": "materials/wesker_em8018_mat.json"
+    },
+    "collision": "none"
+}

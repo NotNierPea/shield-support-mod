@@ -53,6 +53,133 @@ Init()
 
     if(SessionModeIsZombiesGame())
      thread ZMChanges();
+
+    if(SessionModeIsMultiplayerGame() || sessionmodeiswarzonegame())
+     level thread CustomCharacterDialog();
+}
+
+// enemies' kill lines for our characters' dialog bundles (shield-client "dialog"): a key no bundle has (no line), not
+// an undefined one (dialog_shared get_random_key indexes the key counts with it)
+CustomCharacterDialog()
+{
+    while(!isdefined(level.bcsounds) || !isdefined(level.bcsounds[#"kill_dialog"]))
+     waitframe(1);
+
+    level.bcsounds[#"kill_dialog"][#"wesker"] = "killWesker";
+
+    // battlechatter's callout (level.var_17d1b660) picks a line by the specialist's name and has none for ours; its
+    // scorestreak request (level.var_cb4eb1d1) is wrapped to log what ours resolve
+    while(!isdefined(level.var_17d1b660) || !isdefined(level.var_cb4eb1d1))
+     waitframe(1);
+
+    level.shield_stock_callout = level.var_17d1b660;
+    level.var_17d1b660 = &CustomCharacterCallout;
+    level.shield_stock_streak_dialog = level.var_cb4eb1d1;
+    level.var_cb4eb1d1 = &CustomCharacterStreakDialog;
+}
+
+// the player's dialog bundle is this one (getmpdialogname: its name, a string or a hash)
+IsDialogOf(player, name)
+{
+    dialog = player getmpdialogname();
+    if(!isdefined(dialog))
+     return false;
+    if(isstring(dialog))
+     dialog = hash(dialog);
+    return dialog == name;
+}
+
+// a callout (an sgc_* bundle: acknowledge, need help, flanking...) in our character's voice, else the game's
+CustomCharacterCallout(callout, teamonly)
+{
+    if(isdefined(self) && isplayer(self) && isdefined(callout) && IsDialogOf(self, #"wesker"))
+    {
+        self thread WeskerCallout(callout);
+        return;
+    }
+
+    self [[level.shield_stock_callout]](callout, teamonly);
+}
+
+WeskerCallout(callout)
+{
+    self notify(#"shield_callout");
+    self endon(#"shield_callout", #"death", #"disconnect");
+
+    // (battlechatter's calloutTriggerDelay)
+    wait 0.2;
+
+    if(!isdefined(self) || !isalive(self) || self isplayerunderwater() || (isdefined(self.playingdialog) && self.playingdialog))
+     return;
+
+    name = callout.name;
+    if(isstring(name))
+     name = hash(name);
+
+    alias = undefined;
+    switch(name)
+    {
+        case #"sgc_acknowledge":
+            alias = #"vox_wesker_sgc_acknowledge";
+            break;
+        case #"sgc_coverme":
+        case #"sgc_needhelp":
+        case #"sgc_needhelp_ffa":
+            alias = #"vox_wesker_sgc_help";
+            break;
+        case #"sgc_groupup":
+            alias = #"vox_wesker_sgc_groupup";
+            break;
+        case #"sgc_hello":
+            alias = #"vox_wesker_sgc_hello";
+            break;
+        case #"sgc_nicework":
+        case #"sgc_thanks":
+        case #"sgc_ffa_gg":
+            alias = #"vox_wesker_sgc_nicework";
+            break;
+        case #"sgc_ffa_bringit":
+        case #"sgc_ffa_nicetry":
+        case #"sgc_warzone_taunt":
+            alias = #"vox_wesker_sgc_taunt";
+            break;
+        case #"sgc_flanking_tdm":
+        case #"sgc_bounty_flanking":
+        case #"sgc_control_flanking":
+        case #"sgc_ctf_flanking":
+        case #"sgc_escort_flank":
+        case #"sgc_sd_flanking":
+            alias = #"vox_wesker_sgc_flanking";
+            break;
+        case #"sgc_ctf_defending":
+        case #"sgc_koth_defending":
+        case #"sgc_escort_base":
+            alias = #"vox_wesker_sgc_defending";
+            break;
+        case #"sgc_warzone_item":
+            alias = #"vox_wesker_sgc_item";
+            break;
+        default:
+            // the objectives (dom, sd, control, koth, ctf grabbing, bounty, escort robot): moving on one
+            alias = #"vox_wesker_sgc_attacking";
+            break;
+    }
+
+    self playsoundontag(alias, "J_Head");
+}
+
+// a scorestreak's request line (killstreaks.gsc: its requestdialogkey, the futz one), logged for ours
+CustomCharacterStreakDialog(dialogkey, futzkey)
+{
+    if(isdefined(self) && isplayer(self) && IsDialogOf(self, #"wesker"))
+    {
+        bundle = getscriptbundle(#"wesker");
+        alias = (isdefined(bundle) && isdefined(dialogkey)) ? bundle.(dialogkey) : undefined;
+        ShieldLog("^3Wesker scorestreak line: key " + (isdefined(dialogkey) ? dialogkey : "undefined") + ", alias " + (isdefined(alias) ? "found" : "undefined")
+            + ", specialist dialog " + (isdefined(level.allowspecialistdialog) && level.allowspecialistdialog ? "on" : "off") + ", current " + (isdefined(self.currentkillstreakdialog) ? "set" : "none"));
+    }
+
+    self [[level.shield_stock_streak_dialog]](dialogkey, futzkey);
 }
 
 PostInit() 

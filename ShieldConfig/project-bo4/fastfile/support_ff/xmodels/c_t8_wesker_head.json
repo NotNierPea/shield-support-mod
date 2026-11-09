@@ -1,0 +1,10 @@
+{
+    "name": "c_t8_wesker_head",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "obj": "../characters/wesker/wesker_head.obj",
+    "upAxis": "z",
+    "bone": "tag_origin",
+    "material": "materials/wesker_em8017_mat.json",
+    "collision": "none"
+}

@@ -39,7 +39,7 @@ stringtable,gamedata/shield/loot_items.csv
 image,shield_loot_wanted_card.png
 
 // calling cards of our own, real backgrounds (shield-client's custom_calling_cards.cpp): id, image (and its Lua widget),
-// name, description, mode, map, stat that unlocks it. Pictures: Giddy Park (BO4)/tools/build_calling_card.py
+// name, description, mode, map, stat that unlocks it.
 stringtable,gamedata/shield/calling_cards.csv
 image,shield_cc_zm_park_quest.png
 image,shield_cc_zm_park_quest_bg.png
@@ -201,3 +201,42 @@ gesturetable,gestures/gesturetable/file_44a4a0f1fb4bdff.json
 gesturetable,gestures/gesturetable/file_157d3b49990e7c47.json
 gesturetable,gestures/gesturetable/file_78cce64e1c6eced7.json
 bgcache,gestures/gestures_bgcache.csv
+
+// wesker: begin
+// Resident Evil 5's Albert Wesker, a specialist of multiplayer and a Blackout character (shield-client makes his roles from the config's "characters").
+xmodel,xmodels/c_t8_wesker.json
+xmodel,xmodels/c_t8_wesker_head.json
+xmodel,xmodels/c_t8_wesker_arms.json
+xmodel,xmodels/c_t8_wesker_legs.json
+
+// his test outfits (the config's "outfits": the base's outfit 1 red, 2 blue), his clothes recoloured
+xmodel,xmodels/c_t8_wesker_red.json
+xmodel,xmodels/c_t8_wesker_red_arms.json
+xmodel,xmodels/c_t8_wesker_red_legs.json
+xmodel,xmodels/c_t8_wesker_blue.json
+xmodel,xmodels/c_t8_wesker_blue_arms.json
+xmodel,xmodels/c_t8_wesker_blue_legs.json
+
+// his pictures (the config's portrait, icon, images and bundle values name them)
+image,wesker_icon.png,nomips
+image,wesker_portrait.png,nomips
+image,wesker_render.png,nomips
+image,wesker_action.png,nomips
+image,wesker_bio_header.png,nomips
+image,wesker_card.png,nomips
+image,wesker_story.png,nomips
+image,wesker_emblem.png,nomips
+image,wesker_outfit_default.png,nomips
+image,wesker_outfit_red.png,nomips
+image,wesker_outfit_blue.png,nomips
+
+// his battle chatter: the bundle his body type names (getmpdialogname "wesker"); its lines are in support.all
+// (sounds/support_sounds.json, the aliases vox_wesker_*)
+scriptbundle,mpdialog_player/wesker
+
+// the subtitles of his lines (their aliases name these entries)
+localizelist,characters/wesker/vox_strings.json
+
+// his models cached (the frontend spawns them), his lines (the player entity plays them)
+bgcache,characters/wesker/bgcache.csv
+// wesker: end

@@ -716,6 +716,15 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/GameCustomMapHud",
+            "path": "Lua\\Game\\CustomMapHud.luac",
+            "hooks_post": [
+                "x64:46f417a74d9ab424",
+                "x64:57d27ab8e2f7a9d0"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/uieditor/menus/cac/equipmentselect",
             "path": "Lua\\Game\\CAC\\047ad39cd4644bf9.luac",
             "fallback": true

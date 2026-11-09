@@ -1,0 +1,8 @@
+# the outfit head slot of Wesker, empty: one tiny triangle
+v 0 0 60
+v 0.01 0 60
+v 0 0.01 60
+vt 0 0
+vt 1 0
+vt 0 1
+f 1/1 2/2 3/3

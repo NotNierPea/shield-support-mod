@@ -1,0 +1,17 @@
+{
+    "name": "wesker_em8006_mat",
+    "template": "../templates/material_clip.json",
+    "textures": {
+        "colorMap": "wesker_em8006.png",
+        "glossMap": "#hash_903dd7f6bd2ee1ed",
+        "normalMap": "#hash_8c3c2dcaa1919434",
+        "aoMap": "#hash_bfd1eb9d1e41b805",
+        "specColorMap": "#hash_26c8688ba5b9e6b2"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            4
+        ]
+    }
+}
