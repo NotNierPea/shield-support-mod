@@ -1,0 +1,12 @@
+{
+    "name": "c_t8_mascot_arms",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/mascot/mascot_arms.gltf",
+    "skeleton": "../skeletons/zm_viewarms.json",
+    "hitboxes": "mesh",
+    "materials": {
+        "mascot_body": "materials/mascot_body_mat.json"
+    },
+    "collision": "none"
+}

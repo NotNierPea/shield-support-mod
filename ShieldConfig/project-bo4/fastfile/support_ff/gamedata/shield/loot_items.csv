@@ -5,3 +5,4 @@ INT,STRING,INT,INT,STRING,STRING,STRING,STRING,INT,INT,STRING,INT,INT,STRING,STR
 90000003,outfit,9004,0,shield_peeks,,Peeks,Peeks from Black Ops 6: an outfit for Scarlett in Zombies and Blackout.,500163,25,ultra,1000,3,,hash_7bc8bdc5b5d4f6a2
 90000004,outfit,9005,0,shield_wesker_red,,Wesker: Crimson,A crimson outfit for Albert Wesker in Multiplayer and Blackout.,500163,25,ultra,1000,3,shield_bodytype_support_wesker_mp,shield_bodytype_support_wesker_wz
 90000005,outfit,9006,0,shield_wesker_blue,,Wesker: Midnight,A midnight blue outfit for Albert Wesker in Multiplayer and Blackout.,500163,25,ultra,1000,3,shield_bodytype_support_wesker_mp,shield_bodytype_support_wesker_wz
+90000006,outfit,9007,0,shield_mascot,,School Mascot,Bully's Bullworth Academy mascot costume from Chapter IV: an outfit for Spectre in Multiplayer and Blackout.,500163,25,ultra,1000,3,hash_4c0746fa548d2220,hash_31de7ea677d54648

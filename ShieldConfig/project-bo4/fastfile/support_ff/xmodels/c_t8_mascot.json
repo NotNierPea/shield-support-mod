@@ -1,0 +1,15 @@
+{
+    "name": "c_t8_mascot",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/mascot/mascot.gltf",
+    "skeleton": "../skeletons/mascot_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "mascot_body": "materials/mascot_body_mat.json",
+        "mascot_head": "materials/mascot_head_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf",
+    "physConstraints": "#shield_mascot_ring"
+}

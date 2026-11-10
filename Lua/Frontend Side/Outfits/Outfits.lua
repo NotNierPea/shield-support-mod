@@ -111,7 +111,13 @@ end
 -- every require that replaced it
 local ours = nil
 
--- the outfit list of a character with outfits of ours: those alone
+-- a game outfit of a specialist (its presets: the colour variants a specialist outfit has; the zombies ones' war paint sets
+-- have none, the crews' broken ones had theirs taken off by shield-client)
+local function IsSpecialistOutfit( outfit )
+	return outfit ~= nil and outfit.presets ~= nil and #outfit.presets > 0
+end
+
+-- the outfit list of a character with outfits of ours: those and its specialist outfits (Spectre's beside the School Mascot)
 local function WrapOutfitList()
 	local themes = DataSources.MPSpecialistThemes
 	local helpers = themes and themes.getCategoryHelperFunctions
@@ -125,7 +131,7 @@ local function WrapOutfitList()
 		if result and owned > 0 then
 			local filter = result.filter
 			result.filter = function ( index, outfit )
-				return IsOurs( outfit ) and filter( index, outfit )
+				return ( IsOurs( outfit ) or IsSpecialistOutfit( outfit ) ) and filter( index, outfit )
 			end
 		end
 		return result
@@ -141,7 +147,8 @@ end
 	their own game's icon here, found by their list picture (the "icon" model: positionDraftIcon).
 ]]
 local GameIcons = {
-	[@"wesker_portrait"] = @"wesker_game_re5"
+	[@"wesker_portrait"] = @"wesker_game_re5",
+	[@"kagan_portrait"] = @"kagan_game_bo7"
 }
 
 local function GameIconOf( model )

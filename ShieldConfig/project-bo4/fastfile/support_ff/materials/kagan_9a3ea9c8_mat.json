@@ -1,0 +1,17 @@
+{
+    "name": "kagan_9a3ea9c8_mat",
+    "template": "../templates/material_clip.json",
+    "textures": {
+        "colorMap": "kagan_9a3ea9c8.png",
+        "glossMap": "kagan_9a3ea9c8_g.png,bc4",
+        "normalMap": "kagan_9a3ea9c8_n.png,linear",
+        "aoMap": "kagan_9a3ea9c8_o.png,bc4",
+        "specColorMap": "#hash_26c8688ba5b9e6b2"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            14
+        ]
+    }
+}

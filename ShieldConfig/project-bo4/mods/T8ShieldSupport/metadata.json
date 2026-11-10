@@ -47,7 +47,6 @@
                 "scripts/core_common/load_shared.csc"
             ]
         },
-
         {
             "type": "luafile",
             "name": "ui/shield/Utils",
@@ -576,7 +575,6 @@
                 "x64:4ed0bcba9d999e0f"
             ]
         },
-
         {
             "type": "luafile",
             "name": "ui/shield/GameUtils",
@@ -716,6 +714,32 @@
             "type": "luafile",
             "name": "ui/shield/GameSpecialistWeapons",
             "path": "Lua\\Game\\SpecialistWeapons.luac",
+            "hooks_post": [
+                "x64:46f417a74d9ab424",
+                "x64:57d27ab8e2f7a9d0"
+            ]
+        },
+        {
+            "type": "luafile",
+            "name": "ui/shield/DraftArrows",
+            "path": "Lua\\Frontend\\DraftArrows.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
+            "name": "ui/shield/GameDraftArrows",
+            "path": "Lua\\Game\\DraftArrows.luac",
+            "hooks_post": [
+                "x64:46f417a74d9ab424",
+                "x64:57d27ab8e2f7a9d0"
+            ]
+        },
+        {
+            "type": "luafile",
+            "name": "ui/shield/OutfitPortraits",
+            "path": "Lua\\Game\\OutfitPortraits.luac",
             "hooks_post": [
                 "x64:46f417a74d9ab424",
                 "x64:57d27ab8e2f7a9d0"
@@ -1456,7 +1480,6 @@
             "path": "Lua\\Game\\CAC\\05d32bf1798e8717.luac",
             "fallback": true
         },
-
         {
             "type": "stringtable",
             "name": "gamedata/shield/support_errors.csv",
@@ -2375,7 +2398,6 @@
             "name": "shield/gun_fov_set",
             "value": "^2Gun scale has been set!"
         },
-        
         {
             "type": "localizeentry",
             "name": "shield/achv",
@@ -2948,6 +2970,20 @@
         },
         {
             "type": "eventstring",
+            "name": "mp_custom",
+            "mode": [
+                "mp"
+            ]
+        },
+        {
+            "type": "eventstring",
+            "name": "shield_custom_request",
+            "mode": [
+                "mp"
+            ]
+        },
+        {
+            "type": "eventstring",
             "name": "zm_outfit",
             "mode": [
                 "zm"
@@ -2957,7 +2993,9 @@
             "type": "eventstring",
             "name": "shield_outfit",
             "mode": [
-                "zm"
+                "zm",
+                "mp",
+                "wz"
             ]
         }
     ],

@@ -30,6 +30,69 @@ autoexec InitSystem()
 Init()
 {
     ShieldLog("^1Support CSC Loaded!");
+
+    if(SessionModeIsMultiplayerGame())
+    {
+        // (Support.gsc's, same order)
+        clientfield::register("allplayers", "shield_custom_a", 1, 30, "int", &ShieldCustomChanged, 0, 0);
+        clientfield::register("allplayers", "shield_custom_b", 1, 30, "int", &ShieldCustomChanged, 0, 0);
+        clientfield::register("allplayers", "shield_custom_c", 1, 16, "int", &ShieldCustomChanged, 0, 0);
+    }
+}
+
+// a player's picks changed: the draft reads its players again (as at a pick)
+ShieldCustomChanged(localclientnum, oldval, newval, bnewent, binitialsnap, fieldname, bwastimejump)
+{
+    if(oldval === newval)
+     return;
+    s = spawnstruct();
+    s.localclientnum = localclientnum;
+    level notify(#"positiondraft_update", s);
+}
+
+/*
+    The draft's character of a player (its data: function_82e05d64, var_d781e2e4) puts on the look of their public profile
+    (var_c018da16, function_79a48799), which has no picks for characters past the 17: those of the clientfields
+    (MenuReponses.gsc SetShieldCustomFields) put in it first. Its items go by the engine's order: arms, decal, head,
+    headgear, legs, palette, torso, war paint.
+*/
+detour draft<scripts\mp_common\draft.csc>::function_93a4f3c5(localclientnum, draftcharacter)
+{
+    PatchDraftCharacter(draftcharacter);
+    return [[ @draft<scripts\mp_common\draft.csc>::function_93a4f3c5 ]](localclientnum, draftcharacter);
+}
+
+PatchDraftCharacter(draftcharacter)
+{
+    if(!isdefined(draftcharacter) || !isdefined(draftcharacter.var_d781e2e4))
+     return;
+    data = draftcharacter.var_d781e2e4;
+    if(!isdefined(data.player) || !isdefined(data.var_c018da16) || !isdefined(data.var_c018da16.charactertype))
+     return;
+
+    a = data.player clientfield::get("shield_custom_a");
+    if(!isdefined(a) || a % 2 == 0 || int(a / 2) % 128 != data.var_c018da16.charactertype)
+     return;
+    b = data.player clientfield::get("shield_custom_b");
+    c = data.player clientfield::get("shield_custom_c");
+    if(!isdefined(b))
+     b = 0;
+    if(!isdefined(c))
+     c = 0;
+
+    character = data.var_c018da16;
+    character.outfit = int(a / 256) % 64;
+    character.warpaintoutfit = int(a / 16384) % 64;
+    if(!isdefined(character.outfititems))
+     character.outfititems = [];
+    character.outfititems[0] = int(b / 4096) % 64; // arms
+    character.outfititems[1] = int(c / 256) % 256; // decal
+    character.outfititems[2] = b % 64; // head
+    character.outfititems[3] = int(b / 64) % 64; // headgear
+    character.outfititems[4] = int(b / 16777216) % 64; // legs
+    character.outfititems[5] = c % 256; // palette
+    character.outfititems[6] = int(b / 262144) % 64; // torso
+    character.outfititems[7] = int(a / 1048576) % 1024; // war paint
 }
 
 PostInit()

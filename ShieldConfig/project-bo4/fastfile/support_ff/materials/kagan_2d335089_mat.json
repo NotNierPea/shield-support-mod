@@ -1,0 +1,16 @@
+{
+    "name": "kagan_2d335089_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "kagan_2d335089.png",
+        "glossMap": "kagan_2d335089_g.png,bc4",
+        "normalMap": "kagan_2d335089_n.png,linear",
+        "aoMap": "kagan_2d335089_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            14
+        ]
+    }
+}

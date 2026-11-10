@@ -1,0 +1,19 @@
+{
+    "name": "c_t8_kagan_head",
+    "templateModel": "../templates/xmodel_head.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/kagan/kagan_head.gltf",
+    "skeleton": "../skeletons/kagan_head.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "kagan_2e3a7400": "materials/kagan_2e3a7400_mat.json",
+        "kagan_4e33c643": "materials/kagan_4e33c643_mat.json",
+        "kagan_51b2aa34": "materials/kagan_51b2aa34_mat.json",
+        "kagan_5a1fc430": "materials/kagan_5a1fc430_mat.json",
+        "kagan_613e5e17": "materials/kagan_613e5e17_mat.json",
+        "kagan_7445742a": "materials/kagan_7445742a_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf",
+    "physConstraints": "#hash_1e78a9fa3e465439"
+}

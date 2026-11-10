@@ -5,7 +5,109 @@ AddMenuReponses()
     self callback::function_d8abfc3d(#"menu_response", &SetSprayGesture);
     self callback::function_d8abfc3d(#"menu_response", &TryCallout);
     self callback::function_d8abfc3d(#"menu_response", &SetZombiesOutfit);
+    self callback::function_d8abfc3d(#"menu_response", &SetShieldCustomization);
     //ShieldLog("^2Added menu responses..");
+}
+
+/*
+    Multiplayer characters past the loadout's 17 (the support zone's crews as specialists, shield-client mp_loadouts.cpp
+    keeps their picks): the game reads a player's look in a match from their public profile, which has no entry for them.
+    Their client sends its picks when asked (shield_custom_request, at the connection; OutfitPortraits.lua): 16384 *
+    character + 1024 * field + value, fields 0 outfit, 1 war paint outfit, 2.. the items (CustomItemTypes), those not the default, then 15
+    (the end); put on as the player picks the character and at each spawn
+*/
+CustomItemTypes()
+{
+    return array("head", "headgear", "arms", "torso", "legs", "palette", "warpaint", "decal");
+}
+
+SetShieldCustomization(params)
+{
+    if(!sessionmodeismultiplayergame() || !isdefined(self) || !isdefined(params))
+     return;
+
+    if(params.menu !== #"shield_support_menu" || params.response !== #"mp_custom")
+     return;
+
+    character = int(params.intpayload / 16384);
+    field = int(params.intpayload / 1024) % 16;
+    value = params.intpayload % 1024;
+
+    // the end of the picks (only those not the default come): logged, the look put on (alive or not: the draft shows it)
+    if(field == 15)
+    {
+        self.shield_custom_done = 1;
+        role = self getspecialistindex();
+        custom = (isdefined(role) && isdefined(self.shield_custom) && isdefined(self.shield_custom[role])) ? self.shield_custom[role] : [];
+        ShieldLog("^3MP custom of " + self.name + " in (character " + (isdefined(role) ? role : -1) + ": outfit " + (isdefined(custom[0]) ? custom[0] : 0)
+            + ", war paint outfit " + (isdefined(custom[1]) ? custom[1] : 0) + ", war paint " + (isdefined(custom[8]) ? custom[8] : 0) + ")");
+        self ApplyShieldCustomization();
+        return;
+    }
+
+    if(!isdefined(self.shield_custom))
+     self.shield_custom = [];
+    if(!isdefined(self.shield_custom[character]))
+     self.shield_custom[character] = [];
+    self.shield_custom[character][field] = value;
+}
+
+ApplyShieldCustomization()
+{
+    role = self getspecialistindex();
+    if(!isdefined(role) || !isdefined(self.shield_custom) || !isdefined(self.shield_custom[role]))
+    {
+        self SetShieldCustomFields(undefined, undefined);
+        return;
+    }
+
+    custom = self.shield_custom[role];
+    ShieldLog("^3MP custom put on " + self.name + " (character " + role + ": outfit " + (isdefined(custom[0]) ? custom[0] : 0)
+        + ", war paint outfit " + (isdefined(custom[1]) ? custom[1] : 0) + ", war paint " + (isdefined(custom[8]) ? custom[8] : 0) + ")");
+    if(isdefined(custom[0]))
+     self setcharacteroutfit(custom[0]);
+    if(isdefined(custom[1]))
+     self setcharacterwarpaintoutfit(custom[1]);
+
+    types = CustomItemTypes();
+    for(i = 0; i < types.size; i++)
+    {
+        if(isdefined(custom[i + 2]))
+         self function_ab96a9b5(types[i], custom[i + 2]);
+    }
+    self SetShieldCustomFields(role, custom);
+}
+
+// a field of the picks, 0 when it doesn't fit its bits
+ShieldCustomValue(custom, field, limit)
+{
+    value = isdefined(custom[field]) ? int(custom[field]) : 0;
+    return (value >= 0 && value < limit) ? value : 0;
+}
+
+/*
+    The draft shows a player's look from their public profile (none for characters past the 17): the picks go to every
+    client in clientfields, Support.csc puts them on the draft's character.
+    a: valid 1, role 7, outfit 6, war paint outfit 6, war paint 10; b: head, headgear, arms, torso, legs 6 each; c: palette, decal 8 each
+*/
+SetShieldCustomFields(role, custom)
+{
+    if(!sessionmodeismultiplayergame())
+     return;
+
+    a = 0;
+    b = 0;
+    c = 0;
+    if(isdefined(role) && isdefined(custom) && role >= 0 && role < 128)
+    {
+        a = 1 + 2 * role + 256 * ShieldCustomValue(custom, 0, 64) + 16384 * ShieldCustomValue(custom, 1, 64) + 1048576 * ShieldCustomValue(custom, 8, 1024);
+        b = ShieldCustomValue(custom, 2, 64) + 64 * ShieldCustomValue(custom, 3, 64) + 4096 * ShieldCustomValue(custom, 4, 64)
+            + 262144 * ShieldCustomValue(custom, 5, 64) + 16777216 * ShieldCustomValue(custom, 6, 64);
+        c = ShieldCustomValue(custom, 7, 256) + 256 * ShieldCustomValue(custom, 9, 256);
+    }
+    self clientfield::set("shield_custom_a", a);
+    self clientfield::set("shield_custom_b", b);
+    self clientfield::set("shield_custom_c", c);
 }
 
 /*

@@ -203,9 +203,14 @@ gesturetable,gestures/gesturetable/file_78cce64e1c6eced7.json
 bgcache,gestures/gestures_bgcache.csv
 
 // wesker: begin
-// Resident Evil 5's Albert Wesker, a specialist of multiplayer and a Blackout character (shield-client makes his roles from the config's "characters").
+// Resident Evil 5's Albert Wesker, a specialist of multiplayer and a Blackout character (shield-client makes his
+// roles from the config's "characters"). BO4 Custom Maps/Wesker (BO4)/tools/build_wesker.py writes these lines
+// and his files here: edit them there and run it again
+// his body on the MP body skeleton (Ruin's), his own proportions; the empty head slot; his first person arms
+// (the view arms skeleton) and legs
 xmodel,xmodels/c_t8_wesker.json
 xmodel,xmodels/c_t8_wesker_head.json
+xmodel,xmodels/c_t8_wesker_face.json
 xmodel,xmodels/c_t8_wesker_arms.json
 xmodel,xmodels/c_t8_wesker_legs.json
 
@@ -222,8 +227,6 @@ image,wesker_icon.png,nomips
 image,wesker_portrait.png,nomips
 image,wesker_render.png,nomips
 image,wesker_action.png,nomips
-// his game's icon in WZ's character select (Outfits.lua)
-image,wesker_game_re5.png,nomips
 image,wesker_bio_header.png,nomips
 image,wesker_card.png,nomips
 image,wesker_story.png,nomips
@@ -231,6 +234,8 @@ image,wesker_emblem.png,nomips
 image,wesker_outfit_default.png,nomips
 image,wesker_outfit_red.png,nomips
 image,wesker_outfit_blue.png,nomips
+// his game's icon in WZ's character select (Outfits.lua)
+image,wesker_game_re5.png,nomips
 
 // his battle chatter: the bundle his body type names (getmpdialogname "wesker"); its lines are in support.all
 // (sounds/support_sounds.json, the aliases vox_wesker_*)
@@ -268,12 +273,137 @@ localizelist,weapons/wesker/weapon_strings.json
 image,wesker_gun_icon.png,nomips
 // wesker weapon: end
 
-// dotn: begin
-// the DOTN crew in Blackout (the config's dotn_* characters): their battle chatter, their zombies lines (zm_mansion.en, voices 9-12) in support.all (vox_dotn_*).
-scriptbundle,mpdialog_player/dotn_scarlett
-scriptbundle,mpdialog_player/dotn_bruno
-scriptbundle,mpdialog_player/dotn_diego
-scriptbundle,mpdialog_player/dotn_stanton
+// list arrows: begin
+// the character select lists' arrows (the support mod's Lua DraftArrows.lua: more characters above / below), the
+// frontend hasn't the game's uie_ui_arrow_up / down
+image,shield_list_arrow_up.png,nomips
+image,shield_list_arrow_down.png,nomips
+// list arrows: end
+
+// crew vox: begin
+// the zombies crews as MP specialists, the DOTN crew as Blackout characters (the config's crew_* characters):
+// their battle chatter, their zombies lines and exerts in support.all (vox_crew_*). BO4 Custom Maps/Core/tools/
+// build_crew_vox.py writes these lines
+scriptbundle,mpdialog_player/crew_scarlett
+scriptbundle,mpdialog_player/crew_bruno
+scriptbundle,mpdialog_player/crew_diego
+scriptbundle,mpdialog_player/crew_stanton
+scriptbundle,mpdialog_player/crew_scarlett_ix
+scriptbundle,mpdialog_player/crew_bruno_ix
+scriptbundle,mpdialog_player/crew_diego_ix
+scriptbundle,mpdialog_player/crew_stanton_ix
+scriptbundle,mpdialog_player/crew_richtofen
+scriptbundle,mpdialog_player/crew_dempsey
+scriptbundle,mpdialog_player/crew_nikolai
+scriptbundle,mpdialog_player/crew_takeo
+scriptbundle,mpdialog_player/crew_richtofen_u
+scriptbundle,mpdialog_player/crew_dempsey_u
+scriptbundle,mpdialog_player/crew_nikolai_u
+scriptbundle,mpdialog_player/crew_takeo_u
+scriptbundle,mpdialog_player/crew_mirela
+scriptbundle,mpdialog_player/crew_mirela_wz
+scriptbundle,mpdialog_player/crew_warwick
+scriptbundle,mpdialog_player/crew_warwick_wz
+scriptbundle,mpdialog_player/crew_gideon
+scriptbundle,mpdialog_player/crew_gideon_wz
+scriptbundle,mpdialog_player/crew_godfrey
+scriptbundle,mpdialog_player/crew_godfrey_wz
+scriptbundle,mpdialog_player/crew_russman
+scriptbundle,mpdialog_player/crew_misty
+scriptbundle,mpdialog_player/crew_marlton
+scriptbundle,mpdialog_player/crew_stuhlinger
+scriptbundle,mpdialog_player/crew_bo_reznov
+scriptbundle,mpdialog_player/crew_bo_mason
+scriptbundle,mpdialog_player/crew_bo_woods
+scriptbundle,mpdialog_player/crew_bo_menendez
+scriptbundle,mpdialog_player/crew_bo_hudson
+scriptbundle,mpdialog_player/crew_bo_weaver
+scriptbundle,mpdialog_player/crew_bo_price
+scriptbundle,mpdialog_player/crew_bo_david_mason
+scriptbundle,mpdialog_player/crew_bo_sarah_hall
+scriptbundle,mpdialog_player/crew_bo_sergei
+scriptbundle,mpdialog_player/crew_bo_replacer
+scriptbundle,mpdialog_player/crew_bo_liquidator
+scriptbundle,mpdialog_player/crew_bo_uncle_frank
+scriptbundle,mpdialog_player/crew_bo_ladies_man
+scriptbundle,mpdialog_player/crew_bo_vacation_hudson
+scriptbundle,mpdialog_player/crew_bo_shadows
+scriptbundle,mpdialog_player/crew_bo_ranger
+scriptbundle,mpdialog_player/crew_bo_frogman
+scriptbundle,mpdialog_player/crew_bo_airborne
+scriptbundle,mpdialog_player/crew_bo_seal
+scriptbundle,mpdialog_player/crew_bo_battle_hardened
+scriptbundle,mpdialog_player/crew_bo_merc_m1
+scriptbundle,mpdialog_player/crew_bo_merc_m2
+scriptbundle,mpdialog_player/crew_bo_merc_m3
+scriptbundle,mpdialog_player/crew_bo_merc_m4
+scriptbundle,mpdialog_player/crew_bo_merc_f1
+scriptbundle,mpdialog_player/crew_bo_merc_f2
+scriptbundle,mpdialog_player/crew_bo_merc_f3
+scriptbundle,mpdialog_player/crew_bo_merc_f4
+scriptbundle,mpdialog_player/crew_bo_brutus
+scriptbundle,mpdialog_player/crew_bo_trejo
+scriptbundle,mpdialog_player/crew_bo_tedd
+scriptbundle,mpdialog_player/crew_bo_silverback
+scriptbundle,mpdialog_player/crew_bo_yuri
+scriptbundle,mpdialog_player/crew_bo_shadow_man
+scriptbundle,mpdialog_player/crew_bo_john_doe
+scriptbundle,mpdialog_player/crew_bo_jane_doe
+scriptbundle,mpdialog_player/crew_bo_blackjack
+// their subtitles (the takes name entries of en_<map>: shield-client custom_subtitles answers them from this table)
+stringtable,gamedata/shield/subtitles.csv
 // their lines cached (the player entity plays them)
-bgcache,characters/dotn/bgcache.csv
-// dotn: end
+bgcache,characters/crew/bgcache.csv
+// crew vox: end
+
+// mascot: begin
+// Bully's School Mascot (Chapter IV's bull costume), an outfit of Spectre (MP, Blackout; the config's "outfit_adds").
+// BO4 Custom Maps/School Mascot (BO4)/tools/build_mascot.py writes these lines and its files here: edit them there and run it again
+// the costume on the MP body skeleton (its bull head in it: the head slot is Wesker's empty one), its first person arms and legs
+// its nose ring's swing (the body model names it)
+physconstraints,physconstraints/shield_mascot_ring.json
+xmodel,xmodels/c_t8_mascot.json
+xmodel,xmodels/c_t8_mascot_arms.json
+xmodel,xmodels/c_t8_mascot_legs.json
+
+// its picture in the outfit list
+image,mascot_outfit.png,nomips
+
+// its models cached (the frontend spawns them)
+bgcache,characters/mascot/bgcache.csv
+// mascot: end
+
+// kagan: begin
+// Black Ops 7's Emma Kagan, a specialist of multiplayer and a Blackout character (shield-client makes her roles from
+// the config's "characters"). BO4 Custom Maps/Emma Kagan (BO4)/tools/build_kagan.py writes these lines and her
+// files here: edit them there and run it again
+// her body on the MP body skeleton, her own proportions; her head on Battery's head rig (eyes, jaw); her first
+// person arms (BO7's view model on the view arms skeleton) and legs; the jsoc outfit's body, arms and legs
+xmodel,xmodels/c_t8_kagan.json
+xmodel,xmodels/c_t8_kagan_head.json
+xmodel,xmodels/c_t8_kagan_arms.json
+xmodel,xmodels/c_t8_kagan_legs.json
+xmodel,xmodels/c_t8_kagan_jsoc.json
+xmodel,xmodels/c_t8_kagan_jsoc_arms.json
+xmodel,xmodels/c_t8_kagan_jsoc_legs.json
+
+// her pictures (the config's portrait, icon, images and bundle values name them), her game's icon (Outfits.lua)
+image,kagan_icon.png,nomips
+image,kagan_portrait.png,nomips
+image,kagan_render.png,nomips
+image,kagan_action.png,nomips
+image,kagan_bio_header.png,nomips
+image,kagan_card.png,nomips
+image,kagan_story.png,nomips
+image,kagan_emblem.png,nomips
+image,kagan_outfit_default.png,nomips
+image,kagan_outfit_jsoc.png,nomips
+image,kagan_game_bo7.png,nomips
+
+// her battle chatter: the bundle her body type names (getmpdialogname "kagan"); its lines are in support.all
+// (sounds/support_sounds.json, the aliases vox_kagan_*), their subtitles in gamedata/shield/subtitles.csv
+scriptbundle,mpdialog_player/kagan
+
+// her models cached (the frontend spawns them), her lines (the player entity plays them)
+bgcache,characters/kagan/bgcache.csv
+// kagan: end

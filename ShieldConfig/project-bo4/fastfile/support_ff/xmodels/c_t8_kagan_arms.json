@@ -1,0 +1,14 @@
+{
+    "name": "c_t8_kagan_arms",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/kagan/kagan_arms.gltf",
+    "skeleton": "../skeletons/zm_viewarms.json",
+    "hitboxes": "mesh",
+    "materials": {
+        "kagan_28e6b194": "materials/kagan_28e6b194_mat.json",
+        "kagan_3386704f": "materials/kagan_3386704f_mat.json",
+        "kagan_skin": "materials/kagan_skin_mat.json"
+    },
+    "collision": "none"
+}

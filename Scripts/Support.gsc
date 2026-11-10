@@ -55,29 +55,44 @@ Init()
      thread ZMChanges();
 
     if(SessionModeIsMultiplayerGame() || sessionmodeiswarzonegame())
-     level thread CustomCharacterDialog();
+    {
+        level thread CustomCharacterDialog();
+        callback::on_spawned(&CharacterOutfitOnSpawned);
+        if(sessionmodeismultiplayergame())
+        {
+            // picks of characters past the 17 for the draft (Support.csc PatchDraftCharacter)
+            clientfield::register("allplayers", "shield_custom_a", 1, 30, "int");
+            clientfield::register("allplayers", "shield_custom_b", 1, 30, "int");
+            clientfield::register("allplayers", "shield_custom_c", 1, 16, "int");
+            callback::on_connect(&ShieldCustomizationOnConnect);
+        }
+    }
 }
 
 // enemies' kill lines for our characters' dialog bundles (shield-client "dialog"): a key no bundle has (no line), not
-// an undefined one (dialog_shared get_random_key indexes the key counts with it)
+// an undefined one (dialog_shared get_random_key indexes the key counts with it); a crew bundle's own name is its
+// shieldcallout, as Blackout's DOTN ones (crew_<who>_wz) share their MP callout lines
 CustomCharacterDialog()
 {
     while(!isdefined(level.bcsounds) || !isdefined(level.bcsounds[#"kill_dialog"]))
      waitframe(1);
 
-    // our characters with callout lines of their own: their dialog bundle -> the prefix of their aliases (vox_<prefix>_sgc_<kind>)
+    // our characters: the dialog bundles with "shieldcallout" (their own name, the prefix of their callout aliases
+    // vox_<prefix>_sgc_<kind>; Wesker, BO4 Custom Maps' build_crew_vox.py crews)
     level.shield_callout_voices = [];
-    level.shield_callout_voices[#"wesker"] = "wesker";
-    level.shield_callout_voices[#"dotn_scarlett"] = "dotn_scarlett";
-    level.shield_callout_voices[#"dotn_bruno"] = "dotn_bruno";
-    level.shield_callout_voices[#"dotn_diego"] = "dotn_diego";
-    level.shield_callout_voices[#"dotn_stanton"] = "dotn_stanton";
-
+    foreach(bundle in getscriptbundles("mpdialog_player"))
+    {
+        if(!isdefined(bundle) || !isdefined(bundle.shieldcallout))
+         continue;
+        // (by its own name: getmpdialogname)
+        name = hash(isdefined(bundle.name) ? bundle.name : bundle.shieldcallout);
+        level.shield_callout_voices[name] = bundle.shieldcallout;
+        level.bcsounds[#"kill_dialog"][name] = "killShieldCharacter";
+    }
+    // (Wesker's bundle before it had the field)
+    if(!isdefined(level.shield_callout_voices[#"wesker"]))
+     level.shield_callout_voices[#"wesker"] = "wesker";
     level.bcsounds[#"kill_dialog"][#"wesker"] = "killWesker";
-    level.bcsounds[#"kill_dialog"][#"dotn_scarlett"] = "killDotn";
-    level.bcsounds[#"kill_dialog"][#"dotn_bruno"] = "killDotn";
-    level.bcsounds[#"kill_dialog"][#"dotn_diego"] = "killDotn";
-    level.bcsounds[#"kill_dialog"][#"dotn_stanton"] = "killDotn";
 
     // battlechatter's callout (level.var_17d1b660) picks a line by the specialist's name and has none for ours; its
     // scorestreak request (level.var_cb4eb1d1) is wrapped to log what ours resolve
@@ -88,6 +103,98 @@ CustomCharacterDialog()
     level.var_17d1b660 = &CustomCharacterCallout;
     level.shield_stock_streak_dialog = level.var_cb4eb1d1;
     level.var_cb4eb1d1 = &CustomCharacterStreakDialog;
+}
+
+// each player's character and outfit for the HUDs (OutfitPortraits.lua: an outfit of ours' own pictures, Peeks'): the
+// spawned player's to everyone, everyone's to them (not every pair at every spawn: Blackout has a hundred players)
+CharacterOutfitOnSpawned()
+{
+    self endon(#"disconnect");
+    waitframe(1);
+
+    // a multiplayer character past the loadout's 17: its picks put on again at each spawn (MenuReponses.gsc
+    // SetShieldCustomization), before its outfit is told to the HUDs
+    if(sessionmodeismultiplayergame())
+     self ApplyShieldCustomization();
+
+    players = getplayers();
+    foreach(other in players)
+    {
+        if(!isdefined(other))
+         continue;
+        SendCharacterOutfit(self, other);
+        if(other != self)
+         SendCharacterOutfit(other, self);
+    }
+}
+
+/*
+    A multiplayer character past the loadout's 17: the draft and ready screens show each player's look as the server has it
+    (bots' random looks too), not their picks: asked of the client at the connection (they come during the draft) and put
+    on as soon as the player picks the character, before any spawn
+*/
+ShieldCustomizationOnConnect()
+{
+    self endon(#"disconnect");
+
+    if(!isdefined(self.shield_custom_asked))
+    {
+        self.shield_custom_asked = 1;
+        self thread AskShieldCustomization();
+    }
+
+    last = -1;
+    for(;;)
+    {
+        role = self getspecialistindex();
+        if(isdefined(role) && role !== last)
+        {
+            last = role;
+            self thread ReapplyShieldCustomization();
+        }
+        wait 0.25;
+    }
+}
+
+// a character picked: its look put on, then again a few times (the game puts the profile's back on after a pick)
+ReapplyShieldCustomization()
+{
+    self notify(#"shield_reapply");
+    self endon(#"shield_reapply", #"disconnect");
+
+    foreach(delay in array(0, 0.5, 1, 2, 3))
+    {
+        if(delay > 0)
+         wait delay;
+        self ApplyShieldCustomization();
+    }
+}
+
+// the client's picks asked until they come (the host's HUD may not listen yet)
+AskShieldCustomization()
+{
+    self endon(#"disconnect");
+
+    // (a few seconds apart: the client sends its picks a few at a time, its end marker stops this)
+    for(tries = 0; tries < 6 && !isdefined(self.shield_custom_done); tries++)
+    {
+        self luinotifyevent(#"shield_custom_request", 0);
+        wait 5;
+    }
+}
+
+// a player's character (getspecialistindex) and outfit to another's HUD: client, character, outfit
+SendCharacterOutfit(player, to)
+{
+    if(!isdefined(player) || !isdefined(to) || !isplayer(player) || !isplayer(to))
+     return;
+    role = player getspecialistindex();
+    if(!isdefined(role))
+     return;
+    outfit = player getcharacteroutfit();
+    if(!isdefined(outfit))
+     outfit = 0;
+    to luinotifyevent(#"shield_outfit", 3, player getentitynumber(), role, outfit);
 }
 
 // the player's dialog bundle is this one (getmpdialogname: its name, a string or a hash)
