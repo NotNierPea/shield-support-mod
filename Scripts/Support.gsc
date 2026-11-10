@@ -65,7 +65,19 @@ CustomCharacterDialog()
     while(!isdefined(level.bcsounds) || !isdefined(level.bcsounds[#"kill_dialog"]))
      waitframe(1);
 
+    // our characters with callout lines of their own: their dialog bundle -> the prefix of their aliases (vox_<prefix>_sgc_<kind>)
+    level.shield_callout_voices = [];
+    level.shield_callout_voices[#"wesker"] = "wesker";
+    level.shield_callout_voices[#"dotn_scarlett"] = "dotn_scarlett";
+    level.shield_callout_voices[#"dotn_bruno"] = "dotn_bruno";
+    level.shield_callout_voices[#"dotn_diego"] = "dotn_diego";
+    level.shield_callout_voices[#"dotn_stanton"] = "dotn_stanton";
+
     level.bcsounds[#"kill_dialog"][#"wesker"] = "killWesker";
+    level.bcsounds[#"kill_dialog"][#"dotn_scarlett"] = "killDotn";
+    level.bcsounds[#"kill_dialog"][#"dotn_bruno"] = "killDotn";
+    level.bcsounds[#"kill_dialog"][#"dotn_diego"] = "killDotn";
+    level.bcsounds[#"kill_dialog"][#"dotn_stanton"] = "killDotn";
 
     // battlechatter's callout (level.var_17d1b660) picks a line by the specialist's name and has none for ours; its
     // scorestreak request (level.var_cb4eb1d1) is wrapped to log what ours resolve
@@ -89,19 +101,31 @@ IsDialogOf(player, name)
     return dialog == name;
 }
 
+// the prefix of the player's callout lines when they're one of ours (level.shield_callout_voices), else undefined
+CharacterCalloutVoice(player)
+{
+    dialog = player getmpdialogname();
+    if(!isdefined(dialog) || !isdefined(level.shield_callout_voices))
+     return undefined;
+    if(isstring(dialog))
+     dialog = hash(dialog);
+    return level.shield_callout_voices[dialog];
+}
+
 // a callout (an sgc_* bundle: acknowledge, need help, flanking...) in our character's voice, else the game's
 CustomCharacterCallout(callout, teamonly)
 {
-    if(isdefined(self) && isplayer(self) && isdefined(callout) && IsDialogOf(self, #"wesker"))
+    voice = (isdefined(self) && isplayer(self) && isdefined(callout)) ? CharacterCalloutVoice(self) : undefined;
+    if(isdefined(voice))
     {
-        self thread WeskerCallout(callout);
+        self thread CharacterCallout(callout, voice);
         return;
     }
 
     self [[level.shield_stock_callout]](callout, teamonly);
 }
 
-WeskerCallout(callout)
+CharacterCallout(callout, voice)
 {
     self notify(#"shield_callout");
     self endon(#"shield_callout", #"death", #"disconnect");
@@ -116,32 +140,32 @@ WeskerCallout(callout)
     if(isstring(name))
      name = hash(name);
 
-    alias = undefined;
+    kind = undefined;
     switch(name)
     {
         case #"sgc_acknowledge":
-            alias = #"vox_wesker_sgc_acknowledge";
+            kind = "acknowledge";
             break;
         case #"sgc_coverme":
         case #"sgc_needhelp":
         case #"sgc_needhelp_ffa":
-            alias = #"vox_wesker_sgc_help";
+            kind = "help";
             break;
         case #"sgc_groupup":
-            alias = #"vox_wesker_sgc_groupup";
+            kind = "groupup";
             break;
         case #"sgc_hello":
-            alias = #"vox_wesker_sgc_hello";
+            kind = "hello";
             break;
         case #"sgc_nicework":
         case #"sgc_thanks":
         case #"sgc_ffa_gg":
-            alias = #"vox_wesker_sgc_nicework";
+            kind = "nicework";
             break;
         case #"sgc_ffa_bringit":
         case #"sgc_ffa_nicetry":
         case #"sgc_warzone_taunt":
-            alias = #"vox_wesker_sgc_taunt";
+            kind = "taunt";
             break;
         case #"sgc_flanking_tdm":
         case #"sgc_bounty_flanking":
@@ -149,23 +173,24 @@ WeskerCallout(callout)
         case #"sgc_ctf_flanking":
         case #"sgc_escort_flank":
         case #"sgc_sd_flanking":
-            alias = #"vox_wesker_sgc_flanking";
+            kind = "flanking";
             break;
         case #"sgc_ctf_defending":
         case #"sgc_koth_defending":
         case #"sgc_escort_base":
-            alias = #"vox_wesker_sgc_defending";
+            kind = "defending";
             break;
         case #"sgc_warzone_item":
-            alias = #"vox_wesker_sgc_item";
+            kind = "item";
             break;
         default:
             // the objectives (dom, sd, control, koth, ctf grabbing, bounty, escort robot): moving on one
-            alias = #"vox_wesker_sgc_attacking";
+            kind = "attacking";
             break;
     }
 
-    self playsoundontag(alias, "J_Head");
+    // its alias vox_<voice>_sgc_<kind>, hashed as the bank names it
+    self playsoundontag(hash("vox_" + voice + "_sgc_" + kind), "J_Head");
 }
 
 // a scorestreak's request line (killstreaks.gsc: its requestdialogkey, the futz one), logged for ours
@@ -173,9 +198,10 @@ CustomCharacterStreakDialog(dialogkey, futzkey)
 {
     if(isdefined(self) && isplayer(self) && IsDialogOf(self, #"wesker"))
     {
+        // (the key is a hash: not put in the text, a hash in a string is "unmatching types")
         bundle = getscriptbundle(#"wesker");
         alias = (isdefined(bundle) && isdefined(dialogkey)) ? bundle.(dialogkey) : undefined;
-        ShieldLog("^3Wesker scorestreak line: key " + (isdefined(dialogkey) ? dialogkey : "undefined") + ", alias " + (isdefined(alias) ? "found" : "undefined")
+        ShieldLog("^3Wesker scorestreak line: key " + (isdefined(dialogkey) ? "set" : "undefined") + ", alias " + (isdefined(alias) ? "found" : "undefined")
             + ", specialist dialog " + (isdefined(level.allowspecialistdialog) && level.allowspecialistdialog ? "on" : "off") + ", current " + (isdefined(self.currentkillstreakdialog) ? "set" : "none"));
     }
 
@@ -213,6 +239,9 @@ ZMChanges()
 {
     // for zm reactive camo fix
     callback::on_spawned(&ZMReactiveFix);
+
+    // outfits of ours picked (MenuReponses.gsc): zm_characters sets outfit 0 at each spawn
+    callback::on_spawned(&ZombiesOutfitOnSpawned);
 }
 
 ZMOnSpawned()

@@ -144,8 +144,7 @@ end
 
 ---------------------------
 
--- zm_park's Giddy Park Main Quest: its background and the ferris wheel turning (build_calling_card.py: 12 pictures, a
--- period of its 6 carts), on the card's 960x240 as the game's animated cards
+-- zm_park's Giddy Park Main Quest: its background and the ferris wheel turning, on the card's 960x240 as the game's animated cards
 local PARK_WHEEL_MS = 90
 local PARK_WHEEL = {
 	@"shield_cc_zm_park_quest_wheel_00", @"shield_cc_zm_park_quest_wheel_01", @"shield_cc_zm_park_quest_wheel_02",

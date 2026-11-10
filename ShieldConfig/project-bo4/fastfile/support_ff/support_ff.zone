@@ -222,6 +222,8 @@ image,wesker_icon.png,nomips
 image,wesker_portrait.png,nomips
 image,wesker_render.png,nomips
 image,wesker_action.png,nomips
+// his game's icon in WZ's character select (Outfits.lua)
+image,wesker_game_re5.png,nomips
 image,wesker_bio_header.png,nomips
 image,wesker_card.png,nomips
 image,wesker_story.png,nomips
@@ -240,3 +242,38 @@ localizelist,characters/wesker/vox_strings.json
 // his models cached (the frontend spawns them), his lines (the player entity plays them)
 bgcache,characters/wesker/bgcache.csv
 // wesker: end
+
+// peaks: begin
+// Black Ops 6's Peeks bunny, an outfit of Scarlett (zombies, Blackout; the config's "outfit_adds").
+xmodel,xmodels/c_t8_peaks.json
+xmodel,xmodels/c_t8_peaks_head.json
+xmodel,xmodels/c_t8_peaks_arms.json
+xmodel,xmodels/c_t8_peaks_legs.json
+
+// its picture in the outfit list, its ZM HUD portrait, its scoreboard / party list icon (SprayGestureWheel.lua)
+image,peaks_outfit.png,nomips
+image,peaks_hud.png,nomips
+image,peaks_portrait.png,nomips
+
+// its models cached (the frontend spawns them)
+bgcache,characters/peaks/bgcache.csv
+// peaks: end
+
+// wesker weapon: begin
+// Wesker's specialist weapon (MP): its models (their materials and images in them), fire sounds and name; the weapon itself is in support_mp.zone (mp_common: its anims and effects).
+xmodel,xmodels/c_t8_wesker_gun_view.json
+xmodel,xmodels/c_t8_wesker_gun_world.json
+localizelist,weapons/wesker/weapon_strings.json
+// its icon in the character select / Specialist HQ (SpecialistWeapons.lua)
+image,wesker_gun_icon.png,nomips
+// wesker weapon: end
+
+// dotn: begin
+// the DOTN crew in Blackout (the config's dotn_* characters): their battle chatter, their zombies lines (zm_mansion.en, voices 9-12) in support.all (vox_dotn_*).
+scriptbundle,mpdialog_player/dotn_scarlett
+scriptbundle,mpdialog_player/dotn_bruno
+scriptbundle,mpdialog_player/dotn_diego
+scriptbundle,mpdialog_player/dotn_stanton
+// their lines cached (the player entity plays them)
+bgcache,characters/dotn/bgcache.csv
+// dotn: end

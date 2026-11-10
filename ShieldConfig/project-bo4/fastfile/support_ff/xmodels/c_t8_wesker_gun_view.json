@@ -1,0 +1,15 @@
+{
+    "name": "c_t8_wesker_gun_view",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/wesker/weapon/view.gltf",
+    "skeleton": "../characters/wesker/weapon/view_skeleton.json",
+    "bone": "tag_weapon",
+    "hitboxes": "mesh",
+    "materials": {
+        "wesker_gun_frame1": "materials/wesker_gun_frame1_mat.json",
+        "wesker_gun_frame2": "materials/wesker_gun_frame2_mat.json",
+        "wesker_gun_mag": "materials/wesker_gun_mag_mat.json"
+    },
+    "collision": "none"
+}

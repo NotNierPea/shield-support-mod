@@ -1,0 +1,15 @@
+{
+    "name": "c_t8_peaks_head",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/peaks/peaks_head.gltf",
+    "skeleton": "../skeletons/bunny_head.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "peaks_fur": "materials/peaks_fur_mat.json",
+        "peaks_head": "materials/peaks_head_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf",
+    "physConstraints": "#hash_4a640d8b3aea4bf"
+}

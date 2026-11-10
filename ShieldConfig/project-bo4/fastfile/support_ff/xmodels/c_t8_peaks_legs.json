@@ -1,0 +1,15 @@
+{
+    "name": "c_t8_peaks_legs",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/peaks/peaks_legs.gltf",
+    "skeleton": "../skeletons/zm_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "peaks_body_a": "materials/peaks_body_a_mat.json",
+        "peaks_body_b": "materials/peaks_body_b_mat.json",
+        "peaks_fur": "materials/peaks_fur_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

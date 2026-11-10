@@ -100,6 +100,126 @@ local function SendItems( controller )
 	end
 end
 
+-- the outfits picked of zombies characters with outfits of ours (Outfits.lua's outfit list): zm_characters sets outfit 0,
+-- the support GSC sets these again (64 * character index + outfit)
+local function SendOutfits( controller )
+	local mode = Enum[@"emodes"][@"mode_zombies"]
+	for _, hero in ipairs( Engine[@"getherolist"]( mode ) or {} ) do
+		local info = hero.bodyIndex and Engine[@"getequippedinfoforhero"]( controller, mode, hero.bodyIndex )
+		local outfit = info and info[@"selectedoutfit"]
+		if outfit and outfit > 0 and outfit < 64 then
+			CoD.BaseUtility.SendCustomMenuResponse( controller, MENU, "zm_outfit", hero.bodyIndex * 64 + outfit )
+		end
+	end
+end
+
+--[[
+	Character pictures of outfits of ours (Peeks on Scarlett), for every player: the ammo widget's portrait
+	(GetPositionDraftStatePortraitByIndex), the scoreboard's (GetPositionDraftIconByIndex) and the party list's and game
+	over's (the controller's PlayerList.<slot>.zombiePlayerIcon models). The support GSC tells every HUD each player's
+	outfit (the notify shield_outfit: client, character index, outfit); an outfit of these, by its name (shield-client
+	"shield/outfits/<zone>/<mode>/<role>/name"), has its own pictures: the 84x60 portrait, the 168x148 icon.
+]]
+local OUTFIT_NOTIFY = @"shield_outfit"
+local OutfitPictures = {
+	[@"shield/outfits/support/zm/1/name"] = { portrait = @"peaks_hud", icon = @"peaks_portrait" },
+	[@"shield/outfits/support/zm/15/name"] = { portrait = @"peaks_hud", icon = @"peaks_portrait" }
+}
+
+-- client number: { character, outfit }
+local ClientOutfits = {}
+
+local function PicturesOf( characterIndex, outfit )
+	if not outfit or outfit <= 0 then
+		return nil
+	end
+	local customization = CoD.PlayerRoleUtility.GetCachedHeroCustomization( Enum[@"emodes"][@"mode_zombies"], characterIndex )
+	local picked = customization and customization.outfits and customization.outfits[outfit + 1]
+	return picked and OutfitPictures[picked.displayName]
+end
+
+-- the pictures of the player playing that character (before any notify: this player's own pick)
+local function CharacterPictures( characterIndex )
+	for _, worn in pairs( ClientOutfits ) do
+		if worn.character == characterIndex then
+			return PicturesOf( characterIndex, worn.outfit )
+		end
+	end
+	local info = Engine[@"getequippedinfoforhero"]( Engine[@"getprimarycontroller"](), Enum[@"emodes"][@"mode_zombies"], characterIndex )
+	return PicturesOf( characterIndex, info and info[@"selectedoutfit"] )
+end
+
+local function PictureOf( characterIndex, field )
+	local ok, pictures = pcall( CharacterPictures, characterIndex )
+	return ok and pictures and pictures[field]
+end
+
+local function HookPortraits()
+	if GetPositionDraftStatePortraitByIndex and CoD.ShieldPortraits ~= GetPositionDraftStatePortraitByIndex then
+		local game = GetPositionDraftStatePortraitByIndex
+		CoD.ShieldPortraits = function ( state, characterIndex )
+			return PictureOf( characterIndex, "portrait" ) or game( state, characterIndex )
+		end
+		GetPositionDraftStatePortraitByIndex = CoD.ShieldPortraits
+	end
+	if GetPositionDraftIconByIndex and CoD.ShieldIcons ~= GetPositionDraftIconByIndex then
+		local game = GetPositionDraftIconByIndex
+		CoD.ShieldIcons = function ( characterIndex )
+			return PictureOf( characterIndex, "icon" ) or game( characterIndex )
+		end
+		GetPositionDraftIconByIndex = CoD.ShieldIcons
+	end
+end
+
+-- a party list / game over icon: ours for a player in an outfit of these (set again whenever the game sets its own)
+local function PlayerIconOf( clientNum )
+	local worn = ClientOutfits[clientNum]
+	local pictures = worn and PicturesOf( worn.character, worn.outfit )
+	return pictures and pictures.icon
+end
+
+-- subscribed once per HUD, applied again on each notify
+local function WatchPlayerIcons( menu, controller )
+	if not menu.ShieldPlayerIcons then
+		menu.ShieldPlayerIcons = {}
+		local list = DataSources.ZMPlayerList.getModel( controller )
+		local me = Engine[@"getclientnum"]( controller )
+		for clientNum = 0, 3 do
+			local entry = Engine[@"createmodel"]( list, DataSources.PlayerListZM.clientNumToArrayIndex( clientNum, me ) )
+			local icon = Engine[@"createmodel"]( entry, "zombiePlayerIcon" )
+			local apply = function ()
+				local ours = PlayerIconOf( clientNum )
+				if ours and Engine[@"getmodelvalue"]( icon ) ~= ours then
+					Engine[@"setmodelvalue"]( icon, ours )
+				end
+			end
+			menu:subscribeToModel( icon, apply, false )
+			table.insert( menu.ShieldPlayerIcons, apply )
+		end
+	end
+	for _, apply in ipairs( menu.ShieldPlayerIcons ) do
+		apply()
+	end
+end
+
+local function ListenOutfits( menu, controller )
+	if menu.ShieldOutfitPictures then
+		return
+	end
+	menu.ShieldOutfitPictures = true
+	menu:subscribeToGlobalModel( controller, "PerController", "scriptNotify", function ( model )
+		if Engine[@"getmodelvalue"]( model ) ~= OUTFIT_NOTIFY then
+			return
+		end
+		local data = CoD.GetScriptNotifyData( model )
+		if data and data[1] then
+			ClientOutfits[data[1]] = { character = data[2], outfit = data[3] }
+			pcall( WatchPlayerIcons, menu, controller )
+		end
+	end )
+	WatchPlayerIcons( menu, controller )
+end
+
 local function AddWheel( menu, controller )
 	if menu.ShieldSpraysAndGestures then
 		return
@@ -134,10 +254,21 @@ local function HookHud()
 		if not ok then
 			Log( "not sent to the server: " .. tostring( err ) )
 		end
+
+		ok, err = pcall( SendOutfits, controller )
+		if not ok then
+			Log( "outfits not sent to the server: " .. tostring( err ) )
+		end
+
+		ok, err = pcall( ListenOutfits, menu or hud, controller )
+		if not ok then
+			Log( "no outfit pictures: " .. tostring( err ) )
+		end
 	end
 end
 
 HookHud()
+HookPortraits()
 
 -- the zombies utility may be read after this file: hooked once it is
 if not CoD.ShieldSprayWheelRequire then
@@ -146,6 +277,7 @@ if not CoD.ShieldSprayWheelRequire then
 	require = function ( ... )
 		local result = GameRequire( ... )
 		HookHud()
+		HookPortraits()
 		return result
 	end
 end

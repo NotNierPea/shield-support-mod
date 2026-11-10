@@ -53,7 +53,8 @@
                             "arms": "c_t8_wesker_red_arms",
                             "legs": "c_t8_wesker_red_legs",
                             "name": "Crimson",
-                            "icon": "wesker_outfit_red"
+                            "icon": "wesker_outfit_red",
+                            "loot": "shield_wesker_red"
                         },
                         {
                             "index": 2,
@@ -61,11 +62,21 @@
                             "arms": "c_t8_wesker_blue_arms",
                             "legs": "c_t8_wesker_blue_legs",
                             "name": "Midnight",
-                            "icon": "wesker_outfit_blue"
+                            "icon": "wesker_outfit_blue",
+                            "loot": "shield_wesker_blue"
                         }
                     ],
                     "outfit_count": 3,
-                    "role_index": 16
+                    "role_index": 16,
+                    "role_bundle": {
+                        "characterint4": 0,
+                        "characterint5": 0,
+                        "characterint6": 0,
+                        "characterint7": 0,
+                        "characterint8": 0,
+                        "hash_41d6157dba773da3:hash_86b663f1": "shield_wesker"
+                    },
+                    "specialist_weapon": "wesker_samurai_edge"
                 },
                 {
                     "name": "wesker",
@@ -115,7 +126,8 @@
                             "arms": "c_t8_wesker_red_arms",
                             "legs": "c_t8_wesker_red_legs",
                             "name": "Crimson",
-                            "icon": "wesker_outfit_red"
+                            "icon": "wesker_outfit_red",
+                            "loot": "shield_wesker_red"
                         },
                         {
                             "index": 2,
@@ -123,12 +135,139 @@
                             "arms": "c_t8_wesker_blue_arms",
                             "legs": "c_t8_wesker_blue_legs",
                             "name": "Midnight",
-                            "icon": "wesker_outfit_blue"
+                            "icon": "wesker_outfit_blue",
+                            "loot": "shield_wesker_blue"
                         }
                     ],
-                    "outfit_count": 3
+                    "outfit_count": 3,
+                    "role_bundle": {
+                        "characterint4": 0,
+                        "characterint5": 0,
+                        "characterint6": 0,
+                        "characterint7": 0,
+                        "characterint8": 0,
+                        "hash_41d6157dba773da3:hash_86b663f1": "shield_wesker"
+                    }
+                },
+                {
+                    "name": "dotn_scarlett",
+                    "mode": "wz",
+                    "base_role": 22,
+                    "role_slot": 1,
+                    "outfits_from": "hash_3bf34c69c202c907",
+                    "dialog": "dotn_scarlett",
+                    "display_name": "Madame Mirela",
+                    "bundle": {
+                        "hash_32ca7e775f99d218": "dotn_scarlett"
+                    },
+                    "description": "A medium who hears what the dead have to say, and was invited to the mansion the night they rose.",
+                    "texts": {
+                        "hash_10cb98543e7ec137": "Madame Mirela"
+                    }
+                },
+                {
+                    "name": "dotn_bruno",
+                    "mode": "wz",
+                    "base_role": 20,
+                    "role_slot": 2,
+                    "outfits_from": "hash_6b5c057f2fa03fb",
+                    "dialog": "dotn_bruno",
+                    "display_name": "Jonathan Warwick",
+                    "bundle": {
+                        "hash_32ca7e775f99d218": "dotn_bruno"
+                    },
+                    "description": "A towering brute of a man who settles every argument with his fists, the undead included.",
+                    "texts": {
+                        "hash_10cb98543e7ec137": "Jonathan Warwick"
+                    }
+                },
+                {
+                    "name": "dotn_diego",
+                    "mode": "wz",
+                    "base_role": 21,
+                    "role_slot": 3,
+                    "outfits_from": "hash_1916deee2ac05058",
+                    "dialog": "dotn_diego",
+                    "display_name": "Gideon Jones",
+                    "bundle": {
+                        "hash_32ca7e775f99d218": "dotn_diego"
+                    },
+                    "description": "A gunslinger from the American frontier, quick on the draw and slow to trust.",
+                    "texts": {
+                        "hash_10cb98543e7ec137": "Gideon Jones"
+                    }
+                },
+                {
+                    "name": "dotn_stanton",
+                    "mode": "wz",
+                    "base_role": 23,
+                    "role_slot": 4,
+                    "outfits_from": "hash_41748e70e3d2766a",
+                    "dialog": "dotn_stanton",
+                    "display_name": "Godfrey",
+                    "bundle": {
+                        "hash_32ca7e775f99d218": "dotn_stanton"
+                    },
+                    "description": "The mansion's loyal butler, who knows every corridor of the house and every secret it keeps.",
+                    "texts": {
+                        "hash_10cb98543e7ec137": "Godfrey"
+                    }
+                }
+            ],
+            "outfit_adds": [
+                {
+                    "mode": "zm",
+                    "role": 1,
+                    "name": "Peeks",
+                    "default_name": "Default",
+                    "icon": "peaks_outfit",
+                    "body": "c_t8_peaks",
+                    "head": "c_t8_peaks_head",
+                    "arms": "c_t8_peaks_arms",
+                    "legs": "c_t8_peaks_legs",
+                    "loot": "shield_peeks"
+                },
+                {
+                    "mode": "zm",
+                    "role": 15,
+                    "name": "Peeks",
+                    "default_name": "Default",
+                    "icon": "peaks_outfit",
+                    "body": "c_t8_peaks",
+                    "head": "c_t8_peaks_head",
+                    "arms": "c_t8_peaks_arms",
+                    "legs": "c_t8_peaks_legs",
+                    "loot": "shield_peeks"
+                },
+                {
+                    "mode": "wz",
+                    "role": 22,
+                    "name": "Peeks",
+                    "default_name": "Default",
+                    "icon": "peaks_outfit",
+                    "body": "c_t8_peaks",
+                    "head": "c_t8_peaks_head",
+                    "arms": "c_t8_peaks_arms",
+                    "legs": "c_t8_peaks_legs",
+                    "loot": "shield_peeks"
+                },
+                {
+                    "mode": "wz",
+                    "role": 26,
+                    "name": "Peeks",
+                    "default_name": "Default",
+                    "icon": "peaks_outfit",
+                    "body": "c_t8_peaks",
+                    "head": "c_t8_peaks_head",
+                    "arms": "c_t8_peaks_arms",
+                    "legs": "c_t8_peaks_legs",
+                    "loot": "shield_peeks"
                 }
             ]
+        },
+        "support_mp": {
+            "hook": "mp_common",
+            "type": "mode_common"
         }
     }
 }

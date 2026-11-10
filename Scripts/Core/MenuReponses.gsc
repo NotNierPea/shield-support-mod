@@ -4,7 +4,65 @@ AddMenuReponses()
     self callback::function_d8abfc3d(#"menu_response", &HostLeaveAfterGameEnd);
     self callback::function_d8abfc3d(#"menu_response", &SetSprayGesture);
     self callback::function_d8abfc3d(#"menu_response", &TryCallout);
+    self callback::function_d8abfc3d(#"menu_response", &SetZombiesOutfit);
     //ShieldLog("^2Added menu responses..");
+}
+
+/*
+    Zombies outfits of ours (shield-client "outfit_adds", Outfits.lua's outfit list): zm_characters sets outfit 0 on every
+    player, SprayGestureWheel.lua sends the outfit picked of each character that has one (64 * character index + outfit),
+    set again here and on each spawn
+*/
+SetZombiesOutfit(params)
+{
+    if(!sessionmodeiszombiesgame() || !isdefined(self) || !isdefined(params))
+     return;
+
+    if(params.menu !== #"shield_support_menu" || params.response !== #"zm_outfit")
+     return;
+
+    if(!isdefined(self.shield_outfits))
+     self.shield_outfits = [];
+
+    self.shield_outfits[int(params.intpayload / 64)] = params.intpayload % 64;
+    self ApplyZombiesOutfit();
+    BroadcastZombiesOutfits();
+}
+
+ApplyZombiesOutfit()
+{
+    if(!isdefined(self.shield_outfits) || !isdefined(self.characterindex) || !isdefined(self.shield_outfits[self.characterindex]))
+     return;
+
+    self setcharacteroutfit(self.shield_outfits[self.characterindex]);
+}
+
+ZombiesOutfitOnSpawned()
+{
+    self endon(#"disconnect");
+
+    // (after zm_characters' outfit 0)
+    waitframe(1);
+    self ApplyZombiesOutfit();
+    BroadcastZombiesOutfits();
+}
+
+// every player's outfit to every player's HUD (SprayGestureWheel.lua: portraits, scoreboard): client, character, outfit
+BroadcastZombiesOutfits()
+{
+    players = getplayers();
+    foreach(player in players)
+    {
+        if(!isdefined(player.characterindex))
+         continue;
+
+        outfit = 0;
+        if(isdefined(player.shield_outfits) && isdefined(player.shield_outfits[player.characterindex]))
+         outfit = player.shield_outfits[player.characterindex];
+
+        foreach(other in players)
+         other luinotifyevent(#"shield_outfit", 3, player getentitynumber(), player.characterindex, outfit);
+    }
 }
 
 /*

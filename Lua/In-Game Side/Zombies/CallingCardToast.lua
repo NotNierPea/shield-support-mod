@@ -14,7 +14,7 @@ CoD.ShieldInitLuaFile()
 
 --[[
 	A calling card of ours earned in a match (shield-client's custom_calling_cards.cpp; a map's GSC sends
-	`player luinotifyevent(#"shield_calling_card", 1, <background id>)`, zm_park's bfn_quest.py): the game's challenge
+	`player luinotifyevent(#"shield_calling_card", 1, <background id>)`): the game's challenge
 	toast, as when a challenge gives a calling card (CoD.NotificationUtility, "Challenges"): the card's name and
 	description, the Custom challenges' icon, the card as its reward.
 ]]

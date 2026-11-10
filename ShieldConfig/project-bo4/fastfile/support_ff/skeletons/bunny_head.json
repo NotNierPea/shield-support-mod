@@ -1,0 +1,299 @@
+{
+    "name": "#hash_3fbc6dcda727164d",
+    "header": "4d1627a7cd6dbc3f0000000000000000f4a6021c5501000048a7021c55010000f0a7021c5501000008a8021c55010000a8a8021c55010000e8a9021c5501000000aa021c5501000028b0021c5501000000000000000000000000000000000000000000000000000060bbb54f55010000000000000000000050e3b73055010000b07dbb305501000090d1ac3055010000309099305501000040e9b0305501000050f9943055010000206098305501000020059e3055010000a0ac021c5501000050cd2b0d5501000008000000babb723ff7f2f23e755b843ef9b9213efcf6cf3d68a28a3d7e2a333d23e2e83cfd44d73e000080400000803f0000803e000080400000803f000000400000003faeb1a0c026792fc14c4569421832ec401a4a1b41f7489742c80000000000000000000000000000000000000000000000f5939942000000000000000a0407001501000000",
+    "boneNames": [
+        "tag_origin",
+        "j_mainroot",
+        "j_spinelower",
+        "j_spineupper",
+        "j_spine4",
+        "j_clavicle_le",
+        "j_clavicle_ri",
+        "j_neck",
+        "j_shoulderraise_le",
+        "j_shoulderraise_ri",
+        "j_neck2",
+        "j_head",
+        "j_bunny_ear_le",
+        "j_bunny_ear_ri",
+        "j_eyeball_le",
+        "j_eyeball_ri",
+        "j_helmet",
+        "j_teeth_lower",
+        "j_teeth_upper",
+        "j_tongue",
+        "tag_eye"
+    ],
+    "boneNameIndices": [
+        {
+            "name": "j_clavicle_le",
+            "index": 5
+        },
+        {
+            "name": "j_clavicle_ri",
+            "index": 6
+        },
+        {
+            "name": "j_spine4",
+            "index": 4
+        },
+        {
+            "name": "j_shoulderraise_ri",
+            "index": 9
+        },
+        {
+            "name": "j_bunny_ear_le",
+            "index": 12
+        },
+        {
+            "name": "j_bunny_ear_ri",
+            "index": 13
+        },
+        {
+            "name": "j_spinelower",
+            "index": 2
+        },
+        {
+            "name": "j_spineupper",
+            "index": 3
+        },
+        {
+            "name": "j_neck",
+            "index": 7
+        },
+        {
+            "name": "j_shoulderraise_le",
+            "index": 8
+        },
+        {
+            "name": "j_mainroot",
+            "index": 1
+        },
+        {
+            "name": "tag_origin",
+            "index": 0
+        },
+        {
+            "name": "j_neck2",
+            "index": 10
+        },
+        {
+            "name": "j_helmet",
+            "index": 16
+        },
+        {
+            "name": "j_head",
+            "index": 11
+        },
+        {
+            "name": "tag_eye",
+            "index": 20
+        },
+        {
+            "name": "j_eyeball_le",
+            "index": 14
+        },
+        {
+            "name": "j_eyeball_ri",
+            "index": 15
+        },
+        {
+            "name": "j_teeth_lower",
+            "index": 17
+        },
+        {
+            "name": "j_teeth_upper",
+            "index": 18
+        },
+        {
+            "name": "j_tongue",
+            "index": 19
+        }
+    ],
+    "parentList": "0101010101020304050301010203040506070809",
+    "quats": "645bebb6b58673980100800000bc843b0100c0ffff3f230101008000009caf007ae8c0a3ba594c3f594cff5b458a173f0100400100b8d70101000000000000000100000000000000010000000018603f010080ffffeb9f00d516d1c6a1820519417e27d758b16b110a1d02e1fef9e23d0a1d02e1fef9e23d01000000000000000a1d02e1fef9e23d0a1d02e1fef9e23d0a1d02e1fef9e23d3c95d05409295e1b",
+    "trans": "2462a0bfd083b1387de9144240fe4e40000000b50000402ed8238c40000080b300000000e0238c40000000000000002e64520041c00f33bff357104070520041c00f33bf195b10c090113d41000080340000002e0000803600000000d0f77b400000000000000000cef77bc060ddc93f0000000080ef1437b074004000000035000000000000dd40308c0cbf7e384f406046e840c05d95bf337219c0806a1c403e2a3d402bc1993f006b1c403e2a3d40bfc199bf0000dd4000000000000070b000408dbeee928740005e53b600e007bc17c188400000802e00e599bec54d8140005e53b600d6664096d454400000b4320000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "partClassification": "000606050504040305050302020202020102020202",
+    "baseMat": "0000000000000000000000000000803f000000000000000000000000000000405d510abfa58ce9be4b8ce9be3c510a3f2462a0bfd083b1387de9144200000040b125fcbed1e501bfd2e501bfca25fc3e79e835bf1174d13879aa214200000040a44c01bf0660fdbedb5ffdbe9a4c013fe46557bf2d10ca38f42c3342000000405b3403bfe96cf9be196df9be7d34033fab8540bfad94db3881b04442000000407208b8bdc807b83d378d333f438d333fc1a085bf35591040dcde644201000040308d33bf4a8d33bf7808b8bdda07b83daaa085bfd75910c0dcde6442000000403f2c08bf4088eebe5589eebed02c083f94941cbecea5863855e57342000000405b3403bfe96cf9be196df9be7d34033fc98540bf87f97b4086b04442000000405b3403bfe96cf9be196df9be7d34033f8a8540bf17f67bc07db0444200000040818306bfc244f2bedb45f2be1084063f2c09613d172643382a267a4200000040542c08bf7088eebe2689eebebb2c083f3a66873e609454371d11814200000040d6f714bf84afcdbe29eded3e6670083f9d64213f62374f4056e78e42000000400e490dbf7154e23ed2b611bfa6ced63e8cce833d637319c0d3c38f42000000400000b6b4000020b6f604353ff004353f070e6140cdc0993f16228542000000400000b6b4000020b6f604353ff004353f170e61401dc299bf1622854200000040542c08bf7088eebe2689eebebb2c083f775b963fec0a8cb845c28e42000000400000b6b4000020b6f604353ff004353fb6b08d40d9549d376ace7e42000000400000b6b4000020b6f604353ff004353f24fd8f40985f9e370dd97f42000000400000b6b4000020b6f604353ff004353fe35e8740035d9d37cacf7e420000004000007f36fed131be00002036501c7c3f37298140a0afc9b74a578742feffff3f",
+    "boneInfo": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000861da2c03a32d9c088cd03c1ea3b6740d68ce440d9cc034144fe39bfc0a9353e0000afb8b4320743000000000d2080c0d49cbbc02ed1f7c0d4dedd40c36fab408bcff7408e7dbb3f886881be0080d1b886b4f24200000000000000003f13b7c0079bdcc08319fb40259d94401699dc4083197b4068d809bf0080f8b8278eb342000000000000000056dbb7c0e29adcc0c5991e412bad91403c99dc40c5999e40acb818bf0000d3b8ad33c54200000000419157c08bc484c0c046cfc0c1bee7401458814029dc704041ecf73fc01d5bbd57b1adbfbd458e420000000004f4eec0764181c0d49070c08623494030db8440a16acf4041620ac0806e663d6e44ae3fa4448e4200000000c56ccac0364f94c0f8b829c0313514406bd82d40a0b429402c5200c0028c75bf00000bb94ad71c420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000043be15c05d4694c0879e60c029f9e44053919b403a9e6040081a1a40c05ee93d00001ab7e2956542000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f4acc2c0a745c8c01f678cc03810b53ff0bbcb40985e8c40e66815c040925d3d007008ba414d9242000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "unkC0": "0000fc0f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "meshes": [
+        "#hash_5e65d7528e12bcd1",
+        "#hash_5f823b713ac72369",
+        "#hash_68c5bbfa79b0d70f",
+        "#hash_16e5bfeeb0491b83",
+        "#hash_42148f61b2702f70",
+        "#hash_33120e612cb7ef79",
+        "#hash_11b3147b46b7093b",
+        "#hash_2060b990e0b3ddd4"
+    ],
+    "meshMaterials": [
+        {
+            "entry": "090000000000000060ad021c55010000a8ad021c55010000",
+            "materials": [
+                "#hash_5855f732998630f3",
+                "#hash_50cead93bf46119c",
+                "#hash_7a3ff44b58632ccf",
+                "#hash_7b9b2e94443f7b19",
+                "#hash_4cd6a6529a27a3ae",
+                "#hash_28e3721ad0d50dc3",
+                "#hash_5a8d970a09a72f1",
+                "#hash_5a8d870a09a713e",
+                "#hash_5a8d770a09a6f8b"
+            ],
+            "himipInvSqRadii": "59367d3c4713c43d077fe23d955fab3c470c483c18de163d4f622d3cccc2393ca35b413c"
+        },
+        {
+            "entry": "0a00000000000000d0ad021c5501000020ae021c55010000",
+            "materials": [
+                "#hash_5855f732998630f3",
+                "#hash_50cead93bf46119c",
+                "#hash_7a3ff44b58632ccf",
+                "#hash_185d8a0e07d7dfae",
+                "#hash_7b9b2e94443f7b19",
+                "#hash_4cd6a6529a27a3ae",
+                "#hash_28e3721ad0d50dc3",
+                "#hash_5a8d970a09a72f1",
+                "#hash_5a8d870a09a713e",
+                "#hash_5a8d770a09a6f8b"
+            ],
+            "himipInvSqRadii": "c5887a3c9640c33d9087bf3d756a543eaee2913c16fc493cd86e193daaf2383c46c13f3c122a493c"
+        },
+        {
+            "entry": "0f0000000000000048ae021c55010000c0ae021c55010000",
+            "materials": [
+                "#hash_2d7bdb7133873d2d",
+                "#hash_2d7bbd7133870a33",
+                "#hash_5855f732998630f3",
+                "#hash_50cead93bf46119c",
+                "#hash_7a3ff44b58632ccf",
+                "#hash_185d8a0e07d7dfae",
+                "#hash_7b9b2e94443f7b19",
+                "#hash_60da0cabe9b3e6a0",
+                "#hash_724a0accb0451048",
+                "#hash_4cd6a6529a27a3ae",
+                "#hash_28e3721ad0d50dc3",
+                "#hash_5a8d970a09a72f1",
+                "#hash_5a8d870a09a713e",
+                "#hash_5a8d770a09a6f8b",
+                "#hash_3dbe81e006e81e65"
+            ],
+            "himipInvSqRadii": "23e6a04085185540db96953c3303c53d56bcdf3d19fe023f02e7853cee6e563ef7a7003ec5ae563ca920173d6801413ca80d433c9af2503c0965643e"
+        },
+        {
+            "entry": "0f0000000000000048ae021c55010000fcae021c55010000",
+            "materials": [
+                "#hash_2d7bdb7133873d2d",
+                "#hash_2d7bbd7133870a33",
+                "#hash_5855f732998630f3",
+                "#hash_50cead93bf46119c",
+                "#hash_7a3ff44b58632ccf",
+                "#hash_185d8a0e07d7dfae",
+                "#hash_7b9b2e94443f7b19",
+                "#hash_60da0cabe9b3e6a0",
+                "#hash_724a0accb0451048",
+                "#hash_4cd6a6529a27a3ae",
+                "#hash_28e3721ad0d50dc3",
+                "#hash_5a8d970a09a72f1",
+                "#hash_5a8d870a09a713e",
+                "#hash_5a8d770a09a6f8b",
+                "#hash_3dbe81e006e81e65"
+            ],
+            "himipInvSqRadii": "192a9a403cca6440ee3f963c792dc33daa34d43d31ff283f2c7f8d3c3e57603e80fbfa3d0402613c80ee133da975443c22db4a3cae9f573c0965643e"
+        },
+        {
+            "entry": "0f0000000000000048ae021c5501000038af021c55010000",
+            "materials": [
+                "#hash_2d7bdb7133873d2d",
+                "#hash_2d7bbd7133870a33",
+                "#hash_5855f732998630f3",
+                "#hash_50cead93bf46119c",
+                "#hash_7a3ff44b58632ccf",
+                "#hash_185d8a0e07d7dfae",
+                "#hash_7b9b2e94443f7b19",
+                "#hash_60da0cabe9b3e6a0",
+                "#hash_724a0accb0451048",
+                "#hash_4cd6a6529a27a3ae",
+                "#hash_28e3721ad0d50dc3",
+                "#hash_5a8d970a09a72f1",
+                "#hash_5a8d870a09a713e",
+                "#hash_5a8d770a09a6f8b",
+                "#hash_3dbe81e006e81e65"
+            ],
+            "himipInvSqRadii": "e7385e4015d86c40185d9e3c06e9c23daa75e83d7a80293f6ede833c04495d3e0f53013e4eb5673c6d23173d6e9e463c24f64e3c98b55c3c0965643e"
+        },
+        {
+            "entry": "0f0000000000000048ae021c5501000074af021c55010000",
+            "materials": [
+                "#hash_2d7bdb7133873d2d",
+                "#hash_2d7bbd7133870a33",
+                "#hash_5855f732998630f3",
+                "#hash_50cead93bf46119c",
+                "#hash_7a3ff44b58632ccf",
+                "#hash_185d8a0e07d7dfae",
+                "#hash_7b9b2e94443f7b19",
+                "#hash_60da0cabe9b3e6a0",
+                "#hash_724a0accb0451048",
+                "#hash_4cd6a6529a27a3ae",
+                "#hash_28e3721ad0d50dc3",
+                "#hash_5a8d970a09a72f1",
+                "#hash_5a8d870a09a713e",
+                "#hash_5a8d770a09a6f8b",
+                "#hash_3dbe81e006e81e65"
+            ],
+            "himipInvSqRadii": "06473840e2912a406d16ae3cf929c33d51affb3db4e7383f0e75883cdee5563eb79d133ed4e8693c329a193d4d20463cc78d4e3c385b5d3c7953683e"
+        },
+        {
+            "entry": "0f0000000000000048ae021c55010000b0af021c55010000",
+            "materials": [
+                "#hash_2d7bdb7133873d2d",
+                "#hash_2d7bbd7133870a33",
+                "#hash_5855f732998630f3",
+                "#hash_50cead93bf46119c",
+                "#hash_7a3ff44b58632ccf",
+                "#hash_185d8a0e07d7dfae",
+                "#hash_7b9b2e94443f7b19",
+                "#hash_60da0cabe9b3e6a0",
+                "#hash_724a0accb0451048",
+                "#hash_4cd6a6529a27a3ae",
+                "#hash_28e3721ad0d50dc3",
+                "#hash_5a8d970a09a72f1",
+                "#hash_5a8d870a09a713e",
+                "#hash_5a8d770a09a6f8b",
+                "#hash_3dbe81e006e81e65"
+            ],
+            "himipInvSqRadii": "8202114046da27400c24b43cf929c33dbfc4013e2784423f5ac18d3ce452543e0e29163e09186a3c8b461c3db9d4453cc54a4e3c10345d3cf4ce683e"
+        },
+        {
+            "entry": "0f0000000000000048ae021c55010000ecaf021c55010000",
+            "materials": [
+                "#hash_2d7bdb7133873d2d",
+                "#hash_2d7bbd7133870a33",
+                "#hash_5855f732998630f3",
+                "#hash_50cead93bf46119c",
+                "#hash_7a3ff44b58632ccf",
+                "#hash_185d8a0e07d7dfae",
+                "#hash_7b9b2e94443f7b19",
+                "#hash_60da0cabe9b3e6a0",
+                "#hash_724a0accb0451048",
+                "#hash_4cd6a6529a27a3ae",
+                "#hash_28e3721ad0d50dc3",
+                "#hash_5a8d970a09a72f1",
+                "#hash_5a8d870a09a713e",
+                "#hash_5a8d770a09a6f8b",
+                "#hash_3dbe81e006e81e65"
+            ],
+            "himipInvSqRadii": "8e5f2d40c55f2d400b24b43cfb29c33dbfc4013e70d5423f2bab9d3cdd52543e0929163e42266a3c8d461c3db7d4453cc24a4e3c10345d3c94e7683e"
+        }
+    ],
+    "physConstraints": "#hash_4a640d8b3aea4bf",
+    "numCollSurfs": 0,
+    "numCollmaps": 0,
+    "collSurfs": [],
+    "collmaps": [],
+    "submodels": [],
+    "lossless": true,
+    "numSubmodels": 0,
+    "numLods": 8,
+    "numBones": 21
+}

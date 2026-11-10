@@ -530,6 +530,22 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/Outfits",
+            "path": "Lua\\Frontend\\Outfits.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
+            "name": "ui/shield/SpecialistWeapons",
+            "path": "Lua\\Frontend\\SpecialistWeapons.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/CustomCamos",
             "path": "Lua\\Frontend\\CustomCamos.luac",
             "hooks_post": [
@@ -691,6 +707,15 @@
             "type": "luafile",
             "name": "ui/shield/GameSprayGestureWheel",
             "path": "Lua\\Game\\SprayGestureWheel.luac",
+            "hooks_post": [
+                "x64:46f417a74d9ab424",
+                "x64:57d27ab8e2f7a9d0"
+            ]
+        },
+        {
+            "type": "luafile",
+            "name": "ui/shield/GameSpecialistWeapons",
+            "path": "Lua\\Game\\SpecialistWeapons.luac",
             "hooks_post": [
                 "x64:46f417a74d9ab424",
                 "x64:57d27ab8e2f7a9d0"
@@ -2917,6 +2942,20 @@
         {
             "type": "eventstring",
             "name": "shield_callout",
+            "mode": [
+                "zm"
+            ]
+        },
+        {
+            "type": "eventstring",
+            "name": "zm_outfit",
+            "mode": [
+                "zm"
+            ]
+        },
+        {
+            "type": "eventstring",
+            "name": "shield_outfit",
             "mode": [
                 "zm"
             ]
