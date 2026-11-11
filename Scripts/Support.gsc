@@ -315,7 +315,142 @@ CustomCharacterStreakDialog(dialogkey, futzkey)
     self [[level.shield_stock_streak_dialog]](dialogkey, futzkey);
 }
 
-PostInit() 
+// the game's own roles of this mode's table (multiplayer 17, Blackout 76): ours come after them (shield-client custom_zones)
+ShieldStockRoleCount()
+{
+    return sessionmodeiswarzonegame() ? 76 : 17;
+}
+
+/*
+    Our characters' roles for bots (the random bot looks were the game's characters only): the enabled roles after the
+    table's (multiplayer from 15: 15 is a placeholder that's off, 16 Wesker's replaced row)
+*/
+ShieldBotRoles()
+{
+    if(isdefined(level.shield_bot_roles))
+     return level.shield_bot_roles;
+    mode = currentsessionmode();
+    roles = [];
+    first = sessionmodeiswarzonegame() ? ShieldStockRoleCount() : 15;
+    count = getplayerroletemplatecount(mode);
+    for(i = first; i < count; i++)
+    {
+        fields = getplayerrolefields(i, mode);
+        if(isdefined(fields) && isdefined(fields.var_422e172f) && fields.var_422e172f)
+         roles[roles.size] = i;
+    }
+    level.shield_bot_roles = roles;
+    ShieldLog("^3Bot characters of ours: " + roles.size);
+    return roles;
+}
+
+/*
+    Our characters' specialist lines where the game has none for them: a kill with the specialist weapon (the Ripper, the
+    War Machine at their kill count...) and an equipment that worked play the weapon's sound events (playsoundevent),
+    silent for ours; a specialist weapon of ours (Wesker's Samurai Edge) has no case in the ready / activate lines. Their
+    kill line (their bundle's killGeneric) instead. The kit's ready / activate keys are in their bundles
+    (BO4 Custom Maps/Core/tools/ability_dialog.py)
+*/
+IsShieldCharacter(player)
+{
+    return isdefined(player) && isplayer(player) && isdefined(CharacterCalloutVoice(player)) && !player hasperk(#"specialty_quieter");
+}
+
+IsShieldSpecialistWeapon(weapon)
+{
+    if(!isdefined(weapon))
+     return false;
+    custom = array(#"wesker_samurai_edge", #"jacket_the_punch", #"jacket_the_punch_projectile");
+    return isinarray(custom, weapon.name) || (isdefined(weapon.rootweapon) && isinarray(custom, weapon.rootweapon.name));
+}
+
+/*
+    Bots use a specialist weapon only when its name is registered (mp_bot_action.gsc: Seraph's Annihilator, Spectre's
+    Ripper...): our copies as the weapons they copy (Wesker's Samurai Edge the Annihilator, Jacket's bat the Ripper)
+*/
+RegisterShieldBotWeapons()
+{
+    level endon(#"game_ended");
+    // (after mp_bot_action's main: its actions and weapons registered, the Ripper's among them)
+    for(i = 0; i < 1200 && !(isdefined(level.botweapons) && isdefined(level.botweapons[#"sig_blade"])); i++)
+     waitframe(1);
+    if(!isdefined(level.botweapons) || !isdefined(level.botweapons[#"sig_blade"]))
+     return;
+
+    weapons = [];
+    weapons[#"wesker_samurai_edge"] = @bot_action<scripts\core_common\bots\bot_action.gsc>::function_2c39b990;
+    weapons[#"jacket_the_punch"] = @bot_action<scripts\core_common\bots\bot_action.gsc>::function_1879a202;
+    foreach(name, activate in weapons)
+    {
+        [[ @bot_action<scripts\core_common\bots\bot_action.gsc>::function_f4302f2a ]](name, activate, @bot_action<scripts\core_common\bots\bot_action.gsc>::function_ec16df22);
+        [[ @bot_action<scripts\core_common\bots\bot_action.gsc>::function_7e847a84 ]](name, #"hash_5397239dd3c8da8d");
+        [[ @bot_action<scripts\core_common\bots\bot_action.gsc>::function_a2c83569 ]](name, #"hash_7aaeac32a4e1bf84");
+        [[ @bot_action<scripts\core_common\bots\bot_action.gsc>::function_a2c83569 ]](name, #"hash_434716893aa869f3");
+    }
+}
+
+ShieldKillLine(delay, victim)
+{
+    self endon(#"death", #"disconnect", #"cancel_kill_dialog");
+    level endon(#"game_ended");
+    if(isdefined(delay) && delay > 0)
+     wait delay;
+    if(!isdefined(self) || !isalive(self))
+     return;
+    self thread [[ @battlechatter<scripts\mp_common\gametypes\battlechatter.gsc>::play_dialog ]]("killGeneric", 2, undefined, victim);
+}
+
+detour battlechatter<scripts\mp_common\gametypes\battlechatter.gsc>::function_e6457410(attacker, victim, weapon, inflictor)
+{
+    played = [[ @battlechatter<scripts\mp_common\gametypes\battlechatter.gsc>::function_e6457410 ]](attacker, victim, weapon, inflictor);
+    if(!IsShieldCharacter(attacker) || !isplayer(victim) || !isdefined(weapon))
+     return played;
+    if(played || (isdefined(weapon.isheroweapon) && weapon.isheroweapon) || IsShieldSpecialistWeapon(weapon))
+    {
+        attacker thread ShieldKillLine(0.5, victim);
+        return 1;
+    }
+    return played;
+}
+
+detour battlechatter<scripts\mp_common\gametypes\battlechatter.gsc>::play_gadget_success(weapon, waitkey, victim, var_5d738b56)
+{
+    if(!IsShieldCharacter(self))
+    {
+        [[ @battlechatter<scripts\mp_common\gametypes\battlechatter.gsc>::play_gadget_success ]](weapon, waitkey, victim, var_5d738b56);
+        return;
+    }
+    // (the stock marks a played success: it played for ours only when it set the mark again)
+    before = self.playedgadgetsuccess;
+    self.playedgadgetsuccess = undefined;
+    [[ @battlechatter<scripts\mp_common\gametypes\battlechatter.gsc>::play_gadget_success ]](weapon, waitkey, victim, var_5d738b56);
+    if(isdefined(self) && self.playedgadgetsuccess === 1)
+     self thread ShieldKillLine(0, victim);
+    else if(isdefined(self))
+     self.playedgadgetsuccess = before;
+}
+
+detour battlechatter<scripts\mp_common\gametypes\battlechatter.gsc>::play_gadget_ready(weapon, userflip = 0)
+{
+    if(IsShieldCharacter(self) && IsShieldSpecialistWeapon(weapon))
+    {
+        self thread ShieldKillLine(0, undefined);
+        return;
+    }
+    [[ @battlechatter<scripts\mp_common\gametypes\battlechatter.gsc>::play_gadget_ready ]](weapon, userflip);
+}
+
+detour battlechatter<scripts\mp_common\gametypes\battlechatter.gsc>::play_gadget_activate(weapon)
+{
+    if(IsShieldCharacter(self) && IsShieldSpecialistWeapon(weapon))
+    {
+        self thread ShieldKillLine(0, undefined);
+        return;
+    }
+    [[ @battlechatter<scripts\mp_common\gametypes\battlechatter.gsc>::play_gadget_activate ]](weapon);
+}
+
+PostInit()
 {
     callback::on_connect(&AddMenuReponses);
 }
@@ -331,6 +466,9 @@ MPChanges()
 {
     // the skill of the bots, from the bot settings of the menu
     level BotSkillInit();
+
+    // our characters' specialist weapons for bots
+    level thread RegisterShieldBotWeapons();
 
     // lua option...
     if (getdvarint(#"shield_botsrandom", 1))

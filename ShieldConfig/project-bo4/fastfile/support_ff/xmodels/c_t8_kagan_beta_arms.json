@@ -1,0 +1,15 @@
+{
+    "name": "c_t8_kagan_beta_arms",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/kagan/kagan_beta_arms.gltf",
+    "skeleton": "../skeletons/zm_viewarms.json",
+    "hitboxes": "mesh",
+    "materials": {
+        "kagan_27768a14": "materials/kagan_27768a14_mat.json",
+        "kagan_293af3a5": "materials/kagan_293af3a5_mat.json",
+        "kagan_426e8005": "materials/kagan_426e8005_mat.json",
+        "kagan_60f59598": "materials/kagan_60f59598_mat.json"
+    },
+    "collision": "none"
+}

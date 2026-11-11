@@ -12,6 +12,8 @@ autoexec InitSystem()
     {
         // the camera of the cookbook menu of the zombies laboratory, see Cookbook.lua
         level thread CookbookCamera(0);
+        // the zombies lobby's character plays the lobby gesture wheel's picks, see ZMLobbyGestures.lua
+        level thread ZombiesLobbyGestures(0);
         return;
     }
 
@@ -60,6 +62,129 @@ detour draft<scripts\mp_common\draft.csc>::function_93a4f3c5(localclientnum, dra
 {
     PatchDraftCharacter(draftcharacter);
     return [[ @draft<scripts\mp_common\draft.csc>::function_93a4f3c5 ]](localclientnum, draftcharacter);
+}
+
+/*
+    The zombies ready-up screen stands each player's character at the spot of its scene (its role's draftscene): two
+    characters with the same spot stood in each other (a bot's Bruno and our characters on Bruno IX, a forced Shadow Man
+    and a cast character, a leftover Scarlett). The whole lobby's spots are worked out together (ZombiesLobbyScenes):
+    each keeps its own when free, else takes a free one; this one gets its spot, and the others whose spot changed are
+    updated too (they would wait for their own next update, standing in each other until then).
+*/
+detour draft<scripts\core\gametypes\frontend_draft.csc>::function_93a4f3c5(localclientnum, draftcharacter, characterselected = 0)
+{
+    result = [[ @draft<scripts\core\gametypes\frontend_draft.csc>::function_93a4f3c5 ]](localclientnum, draftcharacter, characterselected);
+    if(!sessionmodeiszombiesgame() || !isdefined(draftcharacter) || !isdefined(draftcharacter.var_d781e2e4))
+     return result;
+
+    spots = ZombiesLobbyScenes(localclientnum);
+    if(!isdefined(spots))
+     return result;
+
+    if(ZombiesTakeScene(draftcharacter, spots))
+     result = 1;
+
+    foreach(other in level.draftcharacters)
+    {
+        if(isdefined(other) && other !== draftcharacter && ZombiesTakeScene(other, spots))
+         other [[ @namespace_7da27482<scripts\core_common\character_customization.csc>::update ]](other.var_d781e2e4.params);
+    }
+    return result;
+}
+
+// a draft character to its lobby spot (from ZombiesLobbyScenes); whether its scene changed
+ZombiesTakeScene(draftcharacter, spots)
+{
+    data = draftcharacter.var_d781e2e4;
+    if(!isdefined(data) || !isdefined(data.params))
+     return 0;
+
+    foreach(spot in spots)
+    {
+        if(spot.character === draftcharacter)
+        {
+            if(data.params.scene === spot.scene)
+             return 0;
+            data.params.scene = spot.scene;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// the scene of a zombies role (its draftscene, as frontend_draft.csc reads it), undefined without one
+ZombiesRoleScene(index)
+{
+    fields = getcharacterfields(index, currentsessionmode());
+    if(isdefined(fields) && isdefined(fields.draftscene))
+     return fields.draftscene;
+    return (isdefined(fields) && isdefined(fields.var_e297151a)) ? fields.var_e297151a : undefined;
+}
+
+/*
+    Every shown draft character's spot, [{character, scene}]: the game's characters first (the cast, bots), then ours
+    (roles 30 up), each in slot order its own spot when free, else the first free one. From the draft's characters, not
+    the lobby's xuids: those were another list than the draft's in a game lobby, and bots stood in players' spots.
+*/
+ZombiesLobbyScenes(localclientnum)
+{
+    if(!isdefined(level.shield_zm_scenes))
+    {
+        // the IX crew's spots first
+        level.shield_zm_scenes = [];
+        foreach(index in array(13, 14, 15, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29))
+        {
+            scene = ZombiesRoleScene(index);
+            if(isdefined(scene) && !isinarray(level.shield_zm_scenes, scene))
+             level.shield_zm_scenes[level.shield_zm_scenes.size] = scene;
+        }
+    }
+
+    if(!isdefined(level.draftcharacters))
+     return undefined;
+    players = [];
+    foreach(character in level.draftcharacters)
+    {
+        if(!isdefined(character) || !isdefined(character.var_d781e2e4))
+         continue;
+        shown = character.var_d781e2e4.var_435f68bc;
+        if(!isdefined(shown) || !isdefined(shown.charactertype) || shown.charactertype <= 0)
+         continue;
+        // (the class's method by its namespace: an empty slot's model is hidden)
+        if(!(character [[ @namespace_7da27482<scripts\core_common\character_customization.csc>::is_visible ]]()))
+         continue;
+        players[players.size] = {#character:character, #type:shown.charactertype};
+    }
+
+    spots = [];
+    taken = [];
+    foreach(ours in array(0, 1))
+    {
+        foreach(player in players)
+        {
+            if((player.type >= 30) != ours)
+             continue;
+            scene = ZombiesRoleScene(player.type);
+            if(isdefined(scene) && isinarray(taken, scene))
+             scene = undefined;
+            if(!isdefined(scene))
+            {
+                foreach(free in level.shield_zm_scenes)
+                {
+                    if(!isinarray(taken, free))
+                    {
+                        scene = free;
+                        break;
+                    }
+                }
+            }
+            if(!isdefined(scene))
+             continue;
+            taken[taken.size] = scene;
+            spots[spots.size] = {#character:player.character, #scene:scene};
+        }
+    }
+    return spots;
 }
 
 PatchDraftCharacter(draftcharacter)
@@ -115,6 +240,34 @@ PostInit()
     The bottles are placed again every frame by where the camera is: they are there at once and go with the camera
     while it moves to the book, and the dvars that tune them work while they are shown.
 */
+/*
+    The zombies lobby (room "zombie") shows one character, the frozen moment's: ZMLobbyGestures.lua sends the lobby
+    wheel's picks (-1 stops). A spray plays the spraying animation only (play_gesture -1): no overhead name there to
+    show its icon on. play_gesture stops the character's scene and plays it again after, as on the draft's characters.
+*/
+ZombiesLobbyGestures(localclientnum)
+{
+    level endon(#"disconnect");
+
+    for(;;)
+    {
+        waitresult = level waittill("shield_zm_lobby_gesture" + localclientnum);
+        character = level.frozen_moment_character;
+
+        if(level.lastlobbystate !== "zombie" || !isdefined(character) || !isdefined(waitresult.gesture_index))
+            continue;
+
+        index = waitresult.gesture_index;
+        character notify(#"cancel_gesture");
+
+        if(index < 0)
+            continue;
+
+        // (the class's method by its namespace: the compiler has no class calls)
+        character thread [[ @namespace_7da27482<scripts\core_common\character_customization.csc>::play_gesture ]](isgesture(index) ? index : -1, 1, 1, 0);
+    }
+}
+
 CookbookCamera(localclientnum)
 {
     level.shield_cookbook_bottles = [];

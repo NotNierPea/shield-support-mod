@@ -342,9 +342,15 @@ end
 local SubscriptionIds = {}
 local SubscriptionClasses = {}
 local SubscriptionElements = setmetatable( {}, { __mode = "v" } )
+-- the last ones only: the tables kept every subscription ever made, a big table's growth ran out of memory in the
+-- middle of a subscribe (lua_panic "a value of type 0" at its line, the game frozen) after browsing the menus a while
+local SubscriptionsKept = 0
+local SUBSCRIPTIONS_KEPT_MAX = 4096
 
 -- shared and held here, so the engine's weak reference never loses it
 local NoCallback = function () end
+-- subscriptions to no model (logged the first times)
+local NoModelCount = 0
 
 CoD.ShieldDeadSubscription = function ( id )
 	local element = SubscriptionElements[id]
@@ -368,9 +374,25 @@ local function GuardSubscriptions( class, className )
 			callback = NoCallback
 		end
 
+		-- no model (a create when the UI model pool is out gives nil): the engine's subscribe was a lua_panic, a frozen game
+		if model == nil then
+			NoModelCount = NoModelCount + 1
+			if NoModelCount <= 20 then
+				CoD.EnhPrintInfo( "no model, by " .. tostring( self.id ) .. " (" .. NoModelCount .. ")", "Model subscription" )
+			end
+			return nil
+		end
+
 		local id = subscribe( self, model, callback, ... )
 
 		if id ~= nil then
+			SubscriptionsKept = SubscriptionsKept + 1
+			if SubscriptionsKept > SUBSCRIPTIONS_KEPT_MAX then
+				SubscriptionsKept = 1
+				SubscriptionIds = {}
+				SubscriptionClasses = {}
+				SubscriptionElements = setmetatable( {}, { __mode = "v" } )
+			end
 			SubscriptionIds[id] = self.id
 			SubscriptionClasses[id] = className
 			SubscriptionElements[id] = self

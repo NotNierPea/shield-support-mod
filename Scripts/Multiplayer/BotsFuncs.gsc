@@ -42,8 +42,15 @@ SetRandomSkin()
 
     */
 
+    // half of them one of our characters (ShieldBotRoles: the table's rows are the game's specialists only)
     if(!isDefined(self.random_data))
-     self.random_data = GetBotSkinRandom();
+    {
+        ours = ShieldBotRoles();
+        if(ours.size > 0 && randomint(2) == 0)
+         self.random_data = array(array::random(ours), 0, 0);
+        else
+         self.random_data = GetBotSkinRandom();
+    }
     
     // the char id
     self setspecialistindex(int(self.random_data[0]));

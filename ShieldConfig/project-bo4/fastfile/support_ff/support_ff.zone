@@ -250,6 +250,7 @@ bgcache,characters/wesker/bgcache.csv
 
 // peaks: begin
 // Black Ops 6's Peeks bunny, an outfit of Scarlett (zombies, Blackout; the config's "outfit_adds").
+physconstraints,physconstraints/shield_peaks_ears.json
 xmodel,xmodels/c_t8_peaks.json
 xmodel,xmodels/c_t8_peaks_head.json
 xmodel,xmodels/c_t8_peaks_arms.json
@@ -265,12 +266,19 @@ bgcache,characters/peaks/bgcache.csv
 // peaks: end
 
 // wesker weapon: begin
-// Wesker's specialist weapon (MP): its models (their materials and images in them), fire sounds and name; the weapon itself is in support_mp.zone (mp_common: its anims and effects).
+// Wesker's specialist weapon (MP): its models (their materials and images in them), fire sounds and name; the weapon
+// itself is in support_mp.zone (mp_common: its anims and effects). BO4 Custom Maps/Wesker (BO4)/tools/build_wesker_weapon.py writes this
 xmodel,xmodels/c_t8_wesker_gun_view.json
 xmodel,xmodels/c_t8_wesker_gun_world.json
 localizelist,weapons/wesker/weapon_strings.json
 // its icon in the character select / Specialist HQ (SpecialistWeapons.lua)
 image,wesker_gun_icon.png,nomips
+// its HUD icons (the weapon names them in place of the Annihilator's: ready, charging, its pictures, the kill feed's)
+image,wesker_gun_hud_ready.png,nomips
+image,wesker_gun_hud_charging.png,nomips
+image,wesker_gun_hud.png,nomips
+image,wesker_gun_hud_small.png,nomips
+image,wesker_gun_hud_line.png,nomips
 // wesker weapon: end
 
 // list arrows: begin
@@ -279,6 +287,84 @@ image,wesker_gun_icon.png,nomips
 image,shield_list_arrow_up.png,nomips
 image,shield_list_arrow_down.png,nomips
 // list arrows: end
+
+
+// mascot: begin
+// Bully's School Mascot (Chapter IV's bull costume), an outfit of Spectre (MP, Blackout; the config's "outfit_adds").
+// BO4 Custom Maps/School Mascot (BO4)/tools/build_mascot.py writes these lines and its files here: edit them there and run it again
+// the costume on the MP body skeleton (its bull head in it: the head slot is Wesker's empty one), its first person arms and legs
+// its nose ring's swing (the body model names it)
+physconstraints,physconstraints/shield_mascot_ring.json
+xmodel,xmodels/c_t8_mascot.json
+xmodel,xmodels/c_t8_mascot_arms.json
+xmodel,xmodels/c_t8_mascot_legs.json
+
+// its picture in the outfit list
+image,mascot_outfit.png,nomips
+
+// its models cached (the frontend spawns them)
+bgcache,characters/mascot/bgcache.csv
+// mascot: end
+
+// kagan: begin
+// Black Ops 7's Emma Kagan, a specialist of multiplayer and a Blackout character (shield-client makes her roles from
+// the config's "characters"). BO4 Custom Maps/Emma Kagan (BO4)/tools/build_kagan.py writes these lines and her
+// files here: edit them there and run it again
+// her body on the MP body skeleton, her own proportions; her head on Battery's head rig (eyes, jaw); her first
+// person arms (BO7's view model on the view arms skeleton) and legs; the jsoc outfit's body, arms and legs
+xmodel,xmodels/c_t8_kagan.json
+xmodel,xmodels/c_t8_kagan_head.json
+xmodel,xmodels/c_t8_kagan_arms.json
+xmodel,xmodels/c_t8_kagan_legs.json
+xmodel,xmodels/c_t8_kagan_jsoc.json
+xmodel,xmodels/c_t8_kagan_jsoc_arms.json
+xmodel,xmodels/c_t8_kagan_jsoc_legs.json
+xmodel,xmodels/c_t8_kagan_beta.json
+xmodel,xmodels/c_t8_kagan_beta_head.json
+xmodel,xmodels/c_t8_kagan_beta_arms.json
+xmodel,xmodels/c_t8_kagan_beta_legs.json
+
+// her pictures (the config's portrait, icon, images and bundle values name them), her game's icon (Outfits.lua)
+image,kagan_icon.png,nomips
+image,kagan_portrait.png,nomips
+image,kagan_render.png,nomips
+image,kagan_action.png,nomips
+image,kagan_bio_header.png,nomips
+image,kagan_card.png,nomips
+image,kagan_story.png,nomips
+image,kagan_emblem.png,nomips
+image,kagan_outfit_default.png,nomips
+image,kagan_outfit_jsoc.png,nomips
+image,kagan_outfit_beta.png,nomips
+image,kagan_game_bo7.png,nomips
+
+// her battle chatter: the bundle her body type names (getmpdialogname "kagan"); its lines are in support.all
+// (sounds/support_sounds.json, the aliases vox_kagan_*), their subtitles in gamedata/shield/subtitles.csv
+scriptbundle,mpdialog_player/kagan
+
+// her models cached (the frontend spawns them), her lines (the player entity plays them)
+bgcache,characters/kagan/bgcache.csv
+// kagan: end
+
+
+// sb fireworks: begin
+// Super Brainz's Firework Out (PvZ BfN), a wheel gesture: its icon, the rocket (the anim's markup attaches it), the
+// anim (its notetracks play the effects and the sounds: support.all, shield_sbfw_*), the effects, the two gestures,
+// the wheel item, the game's wheel item list with it last (it replaces core_common's: the support config's
+// "override"). BO4 Custom Maps/Fireworks Gesture (BO4)/tools/build_sb_fireworks.py writes this block: edit it there
+image,shield_ges_sb_fireworks_icon.png,nomips
+xmodel,xmodels/shield_sb_firework_prop.json
+xanim,anims/shield_ges_sb_fireworks.json
+material,materials/shield_sbfw_fx_12989276870346519587.json
+fx,fx/shield_sbfw/burst.json
+fx,fx/shield_sbfw/fuse.json
+gesture,gestures/sb_fireworks/ges_shield_sb_fireworks.json
+gesture,gestures/sb_fireworks/ges_shield_sb_fireworks_2.json
+sprayorgestureitem,gestures/sb_fireworks/shield_sb_fireworks.json
+sprayorgesturelist,gestures/sb_fireworks/list.json
+localizelist,gestures/sb_fireworks/strings.json
+bgcache,gestures/sb_fireworks/bgcache.csv
+// sb fireworks: end
 
 // crew vox: begin
 // the zombies crews as MP specialists, the DOTN crew as Blackout characters (the config's crew_* characters):
@@ -356,54 +442,56 @@ stringtable,gamedata/shield/subtitles.csv
 bgcache,characters/crew/bgcache.csv
 // crew vox: end
 
-// mascot: begin
-// Bully's School Mascot (Chapter IV's bull costume), an outfit of Spectre (MP, Blackout; the config's "outfit_adds").
-// BO4 Custom Maps/School Mascot (BO4)/tools/build_mascot.py writes these lines and its files here: edit them there and run it again
-// the costume on the MP body skeleton (its bull head in it: the head slot is Wesker's empty one), its first person arms and legs
-// its nose ring's swing (the body model names it)
-physconstraints,physconstraints/shield_mascot_ring.json
-xmodel,xmodels/c_t8_mascot.json
-xmodel,xmodels/c_t8_mascot_arms.json
-xmodel,xmodels/c_t8_mascot_legs.json
-
-// its picture in the outfit list
-image,mascot_outfit.png,nomips
-
-// its models cached (the frontend spawns them)
-bgcache,characters/mascot/bgcache.csv
-// mascot: end
-
-// kagan: begin
-// Black Ops 7's Emma Kagan, a specialist of multiplayer and a Blackout character (shield-client makes her roles from
-// the config's "characters"). BO4 Custom Maps/Emma Kagan (BO4)/tools/build_kagan.py writes these lines and her
+// jacket: begin
+// Payday 3's Jacket, a specialist of multiplayer, a Blackout and a zombies character (shield-client makes his roles
+// from the config's "characters"). BO4 Custom Maps/Jacket (BO4)/tools/build_jacket.py writes these lines and his
 // files here: edit them there and run it again
-// her body on the MP body skeleton, her own proportions; her head on Battery's head rig (eyes, jaw); her first
-// person arms (BO7's view model on the view arms skeleton) and legs; the jsoc outfit's body, arms and legs
-xmodel,xmodels/c_t8_kagan.json
-xmodel,xmodels/c_t8_kagan_head.json
-xmodel,xmodels/c_t8_kagan_arms.json
-xmodel,xmodels/c_t8_kagan_legs.json
-xmodel,xmodels/c_t8_kagan_jsoc.json
-xmodel,xmodels/c_t8_kagan_jsoc_arms.json
-xmodel,xmodels/c_t8_kagan_jsoc_legs.json
+// his body (his mask on it) on the MP body skeleton, the empty head slot, his first person arms and legs
+xmodel,xmodels/c_t8_jacket.json
+xmodel,xmodels/c_t8_jacket_head.json
+xmodel,xmodels/c_t8_jacket_arms.json
+xmodel,xmodels/c_t8_jacket_legs.json
 
-// her pictures (the config's portrait, icon, images and bundle values name them), her game's icon (Outfits.lua)
-image,kagan_icon.png,nomips
-image,kagan_portrait.png,nomips
-image,kagan_render.png,nomips
-image,kagan_action.png,nomips
-image,kagan_bio_header.png,nomips
-image,kagan_card.png,nomips
-image,kagan_story.png,nomips
-image,kagan_emblem.png,nomips
-image,kagan_outfit_default.png,nomips
-image,kagan_outfit_jsoc.png,nomips
-image,kagan_game_bo7.png,nomips
+// his pictures (the config's portrait, icon, images and bundle values name them), his game's icon (Outfits.lua)
+image,jacket_icon.png,nomips
+image,jacket_portrait.png,nomips
+image,jacket_render.png,nomips
+image,jacket_action.png,nomips
+image,jacket_bio_header.png,nomips
+image,jacket_card.png,nomips
+image,jacket_story.png,nomips
+image,jacket_emblem.png,nomips
+image,jacket_outfit_default.png,nomips
+image,jacket_game_pd3.png,nomips
 
-// her battle chatter: the bundle her body type names (getmpdialogname "kagan"); its lines are in support.all
-// (sounds/support_sounds.json, the aliases vox_kagan_*), their subtitles in gamedata/shield/subtitles.csv
-scriptbundle,mpdialog_player/kagan
+// his battle chatter: the bundle his body type names (getmpdialogname "jacket"); its lines are in support.all
+// (sounds/support_sounds.json, the aliases vox_jacket_*), their subtitles in gamedata/shield/subtitles.csv
+scriptbundle,mpdialog_player/jacket
 
-// her models cached (the frontend spawns them), her lines (the player entity plays them)
-bgcache,characters/kagan/bgcache.csv
-// kagan: end
+// his models cached (the frontend spawns them), his lines (the player entity plays them)
+bgcache,characters/jacket/bgcache.csv
+// jacket: end
+
+// zm vox: begin
+// the zombies copies of the MP specialists: their lines (vox_zmc_<specialist>_<line> in support.all; the
+// others play their crew lines, ZombiesVoxTable.gsc). BO4 Custom Maps/Core/tools/build_zm_vox.py writes these lines
+bgcache,characters/zm_vox/bgcache.csv
+// zm vox: end
+
+// jacket weapon: begin
+// Jacket's specialist weapon (MP): the bat's models (their material and images in them), name and icon; the weapons
+// themselves are in support_mp.zone (mp_common). BO4 Custom Maps/Jacket (BO4)/tools/build_jacket_weapon.py writes this
+xmodel,xmodels/c_t8_jacket_bat_view.json
+xmodel,xmodels/c_t8_jacket_bat_world.json
+xmodel,xmodels/c_t8_jacket_bat_projectile.json
+localizelist,weapons/jacket/weapon_strings.json
+// its icon in the character select / Specialist HQ (SpecialistWeapons.lua)
+image,jacket_bat_icon.png,nomips
+// its HUD icons (the weapons name them in place of the Ripper's: ready, charging, its pictures, the kill feed's)
+image,jacket_bat_hud_ready.png,nomips
+image,jacket_bat_hud_charging.png,nomips
+image,jacket_bat_hud.png,nomips
+image,jacket_bat_hud_dark.png,nomips
+image,jacket_bat_hud_line.png,nomips
+image,jacket_bat_hud_small.png,nomips
+// jacket weapon: end

@@ -265,5 +265,11 @@
     "boostwin": "#vox_crew_bo_liquidator_win",
     "characterselect": "#vox_crew_bo_liquidator_select",
     "tauntboast": "#vox_crew_bo_liquidator_taunt",
-    "tauntgeneric": "#vox_crew_bo_liquidator_taunt"
+    "tauntgeneric": "#vox_crew_bo_liquidator_taunt",
+    "visionpulseabilityready": "#hash_20668b8e71a0e62d",
+    "visionpulseabilityuse": "#hash_20668b8e71a0e62d",
+    "hash_67b2ce4c841ee8d4:hash_8c880e98": "#hash_20668b8e71a0e62d",
+    "hash_2665b6db0cb27da9:hash_e4a019a": "#hash_20668b8e71a0e62d",
+    "hash_62f742438381ca95:hash_8a8c748": "#hash_20668b8e71a0e62d",
+    "hash_5d9e0f73faf1a0ee:hash_15990d1b": "#hash_20668b8e71a0e62d"
 }

@@ -6,9 +6,12 @@
     "skeleton": "../skeletons/zm_viewarms.json",
     "hitboxes": "mesh",
     "materials": {
+        "kagan_1feebda0": "materials/kagan_1feebda0_mat.json",
+        "kagan_210d627e": "materials/kagan_210d627e_mat.json",
         "kagan_24fdf16e": "materials/kagan_24fdf16e_mat.json",
         "kagan_2d335089": "materials/kagan_2d335089_mat.json",
-        "kagan_skin": "materials/kagan_skin_mat.json"
+        "kagan_67e16341": "materials/kagan_67e16341_mat.json",
+        "kagan_67e18141": "materials/kagan_67e18141_mat.json"
     },
     "collision": "none"
 }

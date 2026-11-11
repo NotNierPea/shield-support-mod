@@ -1,0 +1,10 @@
+{
+    "name": "c_t8_jacket_head",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "obj": "../characters/jacket/jacket_head.obj",
+    "upAxis": "z",
+    "bone": "tag_origin",
+    "material": "materials/jacket_upper_mat.json",
+    "collision": "none"
+}

@@ -1,0 +1,8 @@
+{
+ "name": "shield_sbfw_fx_12989276870346519587",
+ "template": "../templates/material_fx_em.json",
+ "textures": {
+  "colorMap": "shield_sbfw_fx_12989276870346519587.png",
+  "emissiveMap": "shield_sbfw_fx_12989276870346519587.png"
+ }
+}

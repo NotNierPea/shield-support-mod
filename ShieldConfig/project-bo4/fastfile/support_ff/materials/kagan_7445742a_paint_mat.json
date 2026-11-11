@@ -1,0 +1,21 @@
+{
+    "name": "kagan_7445742a_paint_mat",
+    "template": "../templates/material_skin.json",
+    "textures": {
+        "colorMap": "kagan_7445742a_paint.png",
+        "normalMap": "kagan_7445742a_paint_n.png,linear",
+        "glossMap": "kagan_7445742a_paint_g.png,bc4",
+        "aoMap": "kagan_7445742a_paint_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            17
+        ],
+        "colorTint": [
+            1,
+            1,
+            1
+        ]
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "name": "c_t8_jacket_legs",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/jacket/jacket_legs.gltf",
+    "skeleton": "../skeletons/mp_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "jacket_accessories": "materials/jacket_accessories_mat.json",
+        "jacket_lower": "materials/jacket_lower_mat.json",
+        "jacket_upper": "materials/jacket_upper_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

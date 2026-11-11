@@ -725,7 +725,8 @@ if not CoD.MPCalloutItems then
 					return CoD.HUDUtility.IsCalloutsButtonPressed( f1_arg1 )
 						and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_game_ended"] )
 						and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_player_dead"] )
-						and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_scoreboard_open"] )
+						-- (the inventory a held Back keeps open, when the Back hub opened it: SprayGestureWheel.lua)
+						and (CoD.ShieldBackHubActive or not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_scoreboard_open"] ))
 						and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_spectating_client"] )
 						and not IsInTheaterMode()
 				end

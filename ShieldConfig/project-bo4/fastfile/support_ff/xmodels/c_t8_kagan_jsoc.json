@@ -9,7 +9,9 @@
         "kagan_17300f3d": "materials/kagan_17300f3d_mat.json",
         "kagan_1c8d07a8": "materials/kagan_1c8d07a8_mat.json",
         "kagan_1de1e127": "materials/kagan_1de1e127_mat.json",
+        "kagan_1feebda0": "materials/kagan_1feebda0_mat.json",
         "kagan_203a4dc9": "materials/kagan_203a4dc9_mat.json",
+        "kagan_210d627e": "materials/kagan_210d627e_mat.json",
         "kagan_21ed4e6b": "materials/kagan_21ed4e6b_mat.json",
         "kagan_33557f5e": "materials/kagan_33557f5e_mat.json",
         "kagan_3972f850": "materials/kagan_3972f850_mat.json",
@@ -17,13 +19,13 @@
         "kagan_3f4efc59": "materials/kagan_3f4efc59_mat.json",
         "kagan_49b00d83": "materials/kagan_49b00d83_mat.json",
         "kagan_61dfdc84": "materials/kagan_61dfdc84_mat.json",
+        "kagan_67e18141": "materials/kagan_67e18141_mat.json",
         "kagan_6cb7ff26": "materials/kagan_6cb7ff26_mat.json",
         "kagan_6ee94bb1": "materials/kagan_6ee94bb1_mat.json",
         "kagan_706dc5b8": "materials/kagan_706dc5b8_mat.json",
         "kagan_710ced51": "materials/kagan_710ced51_mat.json",
         "kagan_75d99754": "materials/kagan_75d99754_mat.json",
-        "kagan_78410c5f": "materials/kagan_78410c5f_mat.json",
-        "kagan_skin": "materials/kagan_skin_mat.json"
+        "kagan_78410c5f": "materials/kagan_78410c5f_mat.json"
     },
     "collision": "none",
     "skeletonPositions": "gltf"

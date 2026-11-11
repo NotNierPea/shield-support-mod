@@ -113,6 +113,19 @@ local function SendOutfits( controller )
 	end
 end
 
+-- the forced zombies character (ZMForcedCharacter.lua: its role index, 0 none), always sent: the support GSC puts it on
+local function SendForcedCharacter( controller )
+	-- (the frontend read it: a game started straight into a match reads it here)
+	Engine[@"exec"]( controller, "readjson shield_zm_character lua zm_character uint64_t 0" )
+	-- (a custom map's crew can't be forced: role 30 + slot 0-2 or 12-32, ZMForcedCharacter.lua)
+	local forced = Engine[@"getdvarint"]( "shield_zm_character" ) or 0
+	local slot = forced - 30
+	if slot >= 0 and ( slot < 3 or ( slot >= 12 and slot < 33 ) ) then
+		forced = 0
+	end
+	CoD.BaseUtility.SendCustomMenuResponse( controller, MENU, "zm_character", forced )
+end
+
 --[[
 	Character pictures of outfits of ours (Peeks on Scarlett), for every player: the ammo widget's portrait
 	(GetPositionDraftStatePortraitByIndex), the scoreboard's (GetPositionDraftIconByIndex) and the party list's and game
@@ -220,6 +233,333 @@ local function ListenOutfits( menu, controller )
 	WatchPlayerIcons( menu, controller )
 end
 
+--[[
+	Controllers have no button for the wheels or for inspecting in zombies: all four D-pad directions are elixirs there
+	(multiplayer's D-pad left / right inspect and open the wheels), and the scores are in the pause menu. Back/Select
+	instead: held (HOLD_MS) it opens a hub, as Black Ops 7's, the right stick pointing at one of three, each taken once pointed at a moment (PICK_MS, its glow shown):
+	- Gestures / Callouts: the hub gives way to that wheel (as the PC keys open them, hudItems.PCWheels.*), on the still
+	  held Back: the stick picks in it, letting go plays the pick;
+	- Inspect: the weapon is inspected (shield-client's shield_inspect: "flourish" is a key system action, the console
+	  can't run it).
+	A short press stays the inventory. While the hub or its wheels are up (CoD.ShieldBackHubActive) the inventory the held
+	Back keeps open (zombies' scoreboard bit) is hidden, and the wheels show in spite of that bit. The UI's ButtonBits for
+	Back are a pulse at each press, so the hold is shield-client's shield.backHeld (weapon_patches.cpp, the key's down flag).
+	The hub is a WheelLayout as the game's wheels: it picks with their stick functions (CoD.HUDUtility), and its items are
+	drawn as CoD.SprayOrGesture's (the wedge backings on angleWidth, the item turned by zRot, its label turned back upright).
+]]
+local HOLD_MS = 300
+-- how long the stick stays on an option before it is taken (its hover glow shows meanwhile)
+local PICK_MS = 180
+local HUB_SIZE = 354
+local HUB = {
+	{ name = "INSPECT", action = "inspect" },
+	{ name = "GESTURES", action = "gestures" },
+	{ name = "CALLOUTS", action = "callouts" }
+}
+local LIT = { 0.87, 0.53, 0.05 }
+
+CoD.ShieldBackHubActive = false
+
+-- one of the wedge backings of the game's wheel items (angleWidth: the wedge the wheel gives it)
+local function Wedge( item, material, r, g, b, alpha, inner )
+	local image = LUI.UIImage.new( -0.5, 1.5, 0, 0, -0.5, 0.5, -8, -8 )
+	image:setRGB( r, g, b )
+	image:setAlpha( alpha )
+	image:setMaterial( LUI.UIImage.GetCachedMaterial( material ) )
+	image:setShaderVector( 0, 0.1, inner, 0, 0 )
+	image:setShaderVector( 2, 0, 0, 0, 0 )
+	image:linkToElementModel( item, "angleWidth", true, function ( model )
+		local width = model:get()
+		if width ~= nil then
+			image:setShaderVector( 1, CoD.GetVectorComponentFromString( width, 1 ), CoD.GetVectorComponentFromString( width, 2 ),
+				CoD.GetVectorComponentFromString( width, 3 ), CoD.GetVectorComponentFromString( width, 4 ) )
+		end
+	end )
+	item:addElement( image )
+	return image
+end
+
+local function SetupHub()
+	if DataSources.ShieldBackHub then
+		return
+	end
+	DataSources.ShieldBackHub = DataSourceHelpers.ListSetup( "ShieldBackHub", function ( controller, list )
+		local items = {}
+		for i, entry in ipairs( HUB ) do
+			table.insert( items, { models = { displayName = entry.name, index = i - 1 }, properties = { action = entry.action } } )
+		end
+		return items
+	end, nil )
+
+	CoD.ShieldBackHubItem = InheritFrom( LUI.UIElement )
+	CoD.ShieldBackHubItem.__defaultWidth = 382
+	CoD.ShieldBackHubItem.__defaultHeight = 382
+	CoD.ShieldBackHubItem.new = function ( menu, controller, l, r, la, ra, t, b, ta, ba )
+		local self = LUI.UIElement.new( l, r, la, ra, t, b, ta, ba )
+		self:setClass( CoD.ShieldBackHubItem )
+		self.id = "ShieldBackHubItem"
+		self.backing = Wedge( self, @"hash_3027EBC307ABF865", 0, 0, 0, 0.5, 0 )
+		-- the little arrow to the middle, and its glow (CoD.SprayOrGesture's SocialArrow / SocialArrowAdd)
+		local function Arrow( r, g, b, alpha )
+			local arrow = LUI.UIImage.new( 0.35, 0.35, 48.5, 60.5, 0, 0, 84, 92 )
+			arrow:setRGB( r, g, b )
+			arrow:setAlpha( alpha )
+			arrow:setImage( RegisterImage( @"hash_56EE9D102BDF58E4" ) )
+			arrow:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_31CC85D0A86303B0" ) )
+			arrow:setShaderVector( 0, 1, 0, 0, 0 )
+			self:addElement( arrow )
+			return arrow
+		end
+		self.arrow = Arrow( 1, 1, 1, 0.2 )
+		self.arrowGlow = Arrow( 0.87, 0.65, 0.05, 0 )
+		self.lit = Wedge( self, @"hash_4FB9F1A22257E145", LIT[1], LIT[2], LIT[3], 0, 0.8 )
+		-- its name where CoD.SprayOrGesture has its picture, upright whatever the item's turn
+		local label = LUI.UIText.new( 0.35, 0.35, -42, 157, 0, 0, -78, -50 )
+		label:setTTF( "ttmussels_demibold" )
+		label:setAlignment( Enum[@"luialignment"][@"lui_alignment_center"] )
+		label:setRGB( 0.85, 0.83, 0.78 )
+		label:linkToElementModel( self, "displayName", true, function ( model )
+			local name = model:get()
+			if name then
+				label:setText( name )
+			end
+		end )
+		label:linkToElementModel( self, "zRot", true, function ( model )
+			local turn = model:get()
+			if turn then
+				label:setZRot( -turn )
+			end
+		end )
+		self:addElement( label )
+		self.label = label
+		return self
+	end
+end
+
+-- the gestures wheel's hover (CoD.SprayOrGesture's Highlighted clip, 150 ms): the arrow out and glowing, the backing
+-- amber, the wedge's glow in, the name bright; back the same way
+local HOVER_MS = 150
+local function LightItem( item, lit )
+	if not item or not item.lit or item.isLit == lit then
+		return
+	end
+	item.isLit = lit
+	local ease = Enum[@"hash_1F50FFF429AB1890"] and Enum[@"hash_1F50FFF429AB1890"][@"hash_2053CEB9A0427197"]
+	for _, arrow in ipairs( { item.arrow, item.arrowGlow } ) do
+		arrow:beginAnimation( HOVER_MS )
+		arrow:setTopBottom( 0, 0, lit and 65 or 84, lit and 73 or 92 )
+		arrow:setScale( lit and 1.5 or 1, lit and 1.5 or 1 )
+	end
+	item.arrow:setAlpha( lit and 0.5 or 0.2 )
+	item.arrowGlow:setAlpha( lit and 1 or 0 )
+	item.backing:beginAnimation( HOVER_MS, ease )
+	item.backing:setRGB( lit and 0.57 or 0, lit and 0.42 or 0, lit and 0.03 or 0 )
+	item.backing:setAlpha( lit and 0.25 or 0.5 )
+	item.lit:beginAnimation( HOVER_MS, ease )
+	item.lit:setAlpha( lit and 0.9 or 0 )
+	item.lit:setShaderVector( 0, 0.1, lit and 0.95 or 1.5, 0, 0 )
+	item.label:beginAnimation( HOVER_MS )
+	if lit then
+		item.label:setRGB( 1, 1, 1 )
+	else
+		item.label:setRGB( 0.85, 0.83, 0.78 )
+	end
+end
+
+local function AddBackButton( menu, controller )
+	SetupHub()
+	local root = Engine[@"getmodelforcontroller"]( controller )
+	local held = Engine[@"createmodel"]( root, "shield.backHeld" )
+	local gestures = Engine[@"createmodel"]( root, "hudItems.PCWheels.sprayGestureWheelKeyPressed" )
+	local callouts = Engine[@"createmodel"]( root, "hudItems.PCWheels.calloutWheelKeyPressed" )
+	local scoreboard = Enum[@"uivisibilitybit"][@"bit_scoreboard_open"]
+
+	local hub = LUI.UIElement.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	hub:setAlpha( 0 )
+	local dim = LUI.UIImage.new( 0, 1, 0, 0, 0, 1, 0, 0 )
+	dim:setRGB( 0, 0, 0 )
+	dim:setAlpha( 0.45 )
+	hub:addElement( dim )
+	local wheel = LUI.WheelLayout.new( menu, controller, nil )
+	wheel:setLeftRight( 0.5, 0.5, -HUB_SIZE / 2, HUB_SIZE / 2 )
+	wheel:setTopBottom( 0.5, 0.5, -HUB_SIZE / 2, HUB_SIZE / 2 )
+	wheel:setWidgetType( CoD.ShieldBackHubItem )
+	wheel:setCount( #HUB )
+	wheel:setDataSource( "ShieldBackHub" )
+	hub:addElement( wheel )
+	local center = LUI.UIImage.new( 0.5, 0.5, -78, 78, 0.5, 0.5, -78, 78 )
+	center:setImage( RegisterImage( @"uie_ui_hud_radial_menu_center_circle" ) )
+	center:setMaterial( LUI.UIImage.GetCachedMaterial( @"hash_F755127C95CF5B6" ) )
+	center:setShaderVector( 0, 1.5, 0, 0, 0 )
+	hub:addElement( center )
+	-- the name of what the stick points at, in the middle
+	local title = LUI.UIText.new( 0.5, 0.5, -70, 70, 0.5, 0.5, -11, 11 )
+	title:setTTF( "ttmussels_demibold" )
+	title:setAlignment( Enum[@"luialignment"][@"lui_alignment_center"] )
+	title:setRGB( LIT[1], LIT[2], LIT[3] )
+	title:setText( "" )
+	hub:addElement( title )
+	if CoD.WheelTriangleIndicator then
+		local pointer = CoD.WheelTriangleIndicator.new( menu, controller, 0.5, 0.5, -12, 12, 0.5, 0.5, -12, 12 )
+		pointer:subscribeToGlobalModel( controller, "HUDItems", "wheelPointerDegrees", function ( model )
+			local degrees = model:get()
+			if degrees ~= nil then
+				pointer:setZRot( degrees )
+			end
+		end )
+		hub:addElement( pointer )
+	end
+	menu:addElement( hub )
+	menu.ShieldBackHub = hub
+
+	-- "hub" (pointing), "gestures" / "callouts" (that wheel open), "done" (inspected, until let go), nil when closed
+	local state = { down = false, pressedAt = 0, mode = nil }
+	local stick = wheel:getStickModel( controller )
+
+	-- the wheels show in spite of the inventory's bit while the hub is up
+	local function SetActive( active )
+		CoD.ShieldBackHubActive = active
+	end
+
+	-- the inventory the press toggles (each map's HUD has it as ZMInventory): hidden from the press to the let go, as a
+	-- press may be a hold (it showed the first HOLD_MS and again after an inspect, still held)
+	local function HideInventory( hidden )
+		local inventory = menu.ZMInventory
+		if inventory then
+			inventory:setAlpha( hidden and 0 or 1 )
+		end
+	end
+
+	local function Selected()
+		local wedge = stick.SelectedWedge:get()
+		return wedge and wedge >= 0 and HUB[wedge + 1] and HUB[wedge + 1].action or nil
+	end
+
+	local function CloseHub( lockedAfter )
+		hub:beginAnimation( 120 )
+		hub:setAlpha( 0 )
+		if not lockedAfter then
+			CoD.HUDUtility.MenuDelayedSetRightStickLock( menu, controller, 125, false )
+		end
+	end
+
+	hub:subscribeToGlobalModel( controller, "RightStick", "Length", function ( model )
+		if state.mode == "hub" then
+			CoD.HUDUtility.UpdateSelectionModelFromLength( controller, hub, wheel, model, false )
+		end
+	end )
+	hub:subscribeToGlobalModel( controller, "RightStick", "Degrees", function ()
+		if state.mode == "hub" then
+			CoD.HUDUtility.UpdateSelectionModelFromDegrees( controller, hub, wheel, false )
+		end
+	end )
+	hub:subscribeToModel( stick.SelectedWedge, function ( model )
+		local wedge = model:get() or -1
+		for i = 0, #HUB - 1 do
+			LightItem( wheel:getElementAtZeroBasedIndex( i ), i == wedge )
+		end
+		title:setText( wedge >= 0 and HUB[wedge + 1] and HUB[wedge + 1].name or "" )
+		-- taken once the stick stays on it PICK_MS (its glow shown first: taken at once, the hub was gone before it lit)
+		state.pickAction = state.mode == "hub" and Selected() or nil
+		state.pickAt = Engine[@"milliseconds"]() + PICK_MS
+	end, false )
+
+	local function Take( action )
+		state.pickAction = nil
+		stick.SelectedWedge:set( -1 )
+		hub._gamepadSelectionEnabled = false
+		if action == "inspect" then
+			state.mode = "done"
+			CloseHub( false )
+			SetActive( false )
+			Engine[@"exec"]( controller, "shield_inspect " .. tostring( Engine[@"getlocalclientnum"]( controller ) or 0 ) )
+		else
+			state.mode = action
+			CloseHub( true )
+			if action == "gestures" then
+				gestures:set( 1 )
+			else
+				callouts:set( 1 )
+			end
+		end
+		Log( "back hub: " .. action )
+	end
+
+	-- Back held / let go (shield-client)
+	hub:subscribeToModel( held, function ( model )
+		local down = ( model:get() or 0 ) ~= 0
+		if down == state.down then
+			return
+		end
+		state.down = down
+		if down then
+			state.pressedAt = Engine[@"milliseconds"]()
+			if not IsGamepad or IsGamepad( controller ) then
+				HideInventory( true )
+			end
+			return
+		end
+
+		-- let go: a short press was the game's (its toggle of the inventory shown as it is now)
+		local mode = state.mode
+		state.mode = nil
+		if mode == nil then
+			HideInventory( false )
+			return
+		end
+		-- a hold: the open wheel plays its pick as it closes, and the inventory the press toggled on is toggled off again
+		if mode == "gestures" then
+			gestures:set( 0 )
+		elseif mode == "callouts" then
+			callouts:set( 0 )
+		elseif mode == "hub" then
+			CloseHub( false )
+		end
+		SetActive( false )
+		if Engine[@"isvisibilitybitset"]( controller, scoreboard ) then
+			Engine[@"exec"]( controller, "togglescores" )
+		end
+		-- (shown again once the toggle is through)
+		state.showAt = Engine[@"milliseconds"]() + 150
+	end, false )
+
+	-- the hold: checked on the HUD every 50 ms
+	menu:addElement( LUI.UITimer.newElementTimer( 50, false, function ()
+		if state.showAt and Engine[@"milliseconds"]() >= state.showAt then
+			state.showAt = nil
+			if Engine[@"isvisibilitybitset"]( controller, scoreboard ) then
+				Log( "back hub closed: inventory still open after togglescores" )
+				Engine[@"hidescoreboard"]( controller )
+			end
+			HideInventory( false )
+		end
+		if state.mode == "hub" and state.pickAction and Engine[@"milliseconds"]() >= state.pickAt and Selected() == state.pickAction then
+			Take( state.pickAction )
+			return
+		end
+		if not state.down or state.mode ~= nil or Engine[@"milliseconds"]() - state.pressedAt < HOLD_MS then
+			return
+		end
+		if IsGamepad and not IsGamepad( controller ) then
+			return
+		end
+		SetActive( true )
+		stick.SelectedWedge:set( -1 )
+		hub._gamepadSelectionEnabled = false
+		state.pickAction = nil
+		-- (each item unlit: the last one taken stayed lit to the next opening)
+		for i = 0, #HUB - 1 do
+			LightItem( wheel:getElementAtZeroBasedIndex( i ), false )
+		end
+		title:setText( "" )
+		state.mode = "hub"
+		hub:beginAnimation( 100 )
+		hub:setAlpha( 1 )
+		CoD.HUDUtility.MenuDelayedSetRightStickLock( menu, controller, 0, true )
+		Log( "back held: hub open" )
+	end ) )
+end
+
 local function AddWheel( menu, controller )
 	if menu.ShieldSpraysAndGestures then
 		return
@@ -230,6 +570,11 @@ local function AddWheel( menu, controller )
 	local wheel = CoD.MPSpraysAndGestures.new( menu, controller, 0, 1, 0, 0, 0, 1, 0, 0 )
 	menu:addElement( wheel )
 	menu.ShieldSpraysAndGestures = wheel
+
+	local ok, err = pcall( AddBackButton, menu, controller )
+	if not ok then
+		Log( "no back button: " .. tostring( err ) )
+	end
 end
 
 -- every zombies HUD (T7Hud_zm_factory and those of the maps) ends with this
@@ -258,6 +603,11 @@ local function HookHud()
 		ok, err = pcall( SendOutfits, controller )
 		if not ok then
 			Log( "outfits not sent to the server: " .. tostring( err ) )
+		end
+
+		ok, err = pcall( SendForcedCharacter, controller )
+		if not ok then
+			Log( "forced character not sent to the server: " .. tostring( err ) )
 		end
 
 		ok, err = pcall( ListenOutfits, menu or hud, controller )
@@ -1331,7 +1681,7 @@ if not CoD.MPSpraysAndGestures then
 				condition = function ( menu, element, event )
 					local f7_local0 = CoD.HUDUtility.IsSpraysAndGesturesButtonHeld( f1_arg1 )
 					if f7_local0 then
-						if not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_game_ended"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_in_guided_missile"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_in_remote_killstreak_static"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_in_remote_missile"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_in_vehicle"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_is_demo_playing"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_player_dead"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_round_end_killcam"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_scoreboard_open"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_spectating_client"] ) and not CoD.HUDUtility.HideWheelInPrematch( f1_arg1 ) then
+						if not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_game_ended"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_in_guided_missile"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_in_remote_killstreak_static"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_in_remote_missile"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_in_vehicle"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_is_demo_playing"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_player_dead"] ) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_round_end_killcam"] ) and (CoD.ShieldBackHubActive or not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_scoreboard_open"] )) and not Engine[@"isvisibilitybitset"]( f1_arg1, Enum[@"uivisibilitybit"][@"bit_spectating_client"] ) and not CoD.HUDUtility.HideWheelInPrematch( f1_arg1 ) then
 							f7_local0 = not CoD.ModelUtility.IsClientModelValueTrue( f1_arg1, "isInLastStand" )
 						else
 							f7_local0 = false

@@ -1,0 +1,27 @@
+{
+    "name": "c_t8_kagan_beta",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/kagan/kagan_beta_body.gltf",
+    "skeleton": "../skeletons/kagan_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "kagan_1dba466b": "materials/kagan_1dba466b_mat.json",
+        "kagan_1ff3f04f": "materials/kagan_1ff3f04f_mat.json",
+        "kagan_22d7e5ac": "materials/kagan_22d7e5ac_mat.json",
+        "kagan_24ac163e": "materials/kagan_24ac163e_mat.json",
+        "kagan_26b0f63f": "materials/kagan_26b0f63f_mat.json",
+        "kagan_281b5090": "materials/kagan_281b5090_mat.json",
+        "kagan_2951270f": "materials/kagan_2951270f_mat.json",
+        "kagan_2b90e975": "materials/kagan_2b90e975_mat.json",
+        "kagan_2c844a13": "materials/kagan_2c844a13_mat.json",
+        "kagan_39e53203": "materials/kagan_39e53203_mat.json",
+        "kagan_3f8baea0": "materials/kagan_3f8baea0_mat.json",
+        "kagan_426e8005": "materials/kagan_426e8005_mat.json",
+        "kagan_517ea5e5": "materials/kagan_517ea5e5_mat.json",
+        "kagan_6bcf3c49": "materials/kagan_6bcf3c49_mat.json",
+        "kagan_79a7884c": "materials/kagan_79a7884c_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

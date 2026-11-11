@@ -1,0 +1,12 @@
+xanim,shield_ges_sb_fireworks
+gesture,ges_shield_sb_fireworks
+gesture,ges_shield_sb_fireworks_2
+model,shield_sb_firework_prop
+client_fx,shield_sbfw/burst
+client_fx,shield_sbfw/fuse
+soundalias,shield_sbfw_fuse
+soundalias,shield_sbfw_throw
+soundalias,shield_sbfw_whistle
+soundalias,shield_sbfw_explode
+soundalias,shield_sbfw_crackle
+soundalias,shield_sbfw_vo

@@ -1,0 +1,13 @@
+{
+    "name": "c_t8_jacket_arms",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/jacket/jacket_arms.gltf",
+    "skeleton": "../skeletons/zm_viewarms.json",
+    "hitboxes": "mesh",
+    "materials": {
+        "jacket_gloves": "materials/jacket_gloves_mat.json",
+        "jacket_upper": "materials/jacket_upper_mat.json"
+    },
+    "collision": "none"
+}

@@ -1,0 +1,7 @@
+{
+ "name": "shield_sb_firework_mat_q1",
+ "template": "../templates/material_model.json",
+ "textures": {
+  "colorMap": "shield_sb_firework_q1.png"
+ }
+}

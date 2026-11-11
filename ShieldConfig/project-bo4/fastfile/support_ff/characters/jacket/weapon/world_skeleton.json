@@ -1,0 +1,123 @@
+{
+    "name": "#hash_7197512be6fb0c35",
+    "header": "350cfbe62b5197710000000000000000b09c0959a5010000bc9c0959a5010000e4f2ad58a5010000d89c0959a5010000e89c0959a501000018f3ad58a5010000109d0959a5010000a89e0959a501000000000000000000000000000000000000000000000000000000000000000000000000000000000000f0ea946da5010000702ea36da50100001045806da5010000707a996da5010000a0a5d632a5010000007a976da501000000ec976da5010000c0ea806da5010000709d0959a501000094b7034aa5010000080000007b89393fa120b73e609a463e141ef33d8f069c3d33f04f3d1b74063d839fae3cfd44d73e000080400000803f0000803e000080400000803f000000400000003f110091bf93a44bbfc37f1fc17520903f93a44b3f760af941c800000000000000000000000100000000000000000000007549f94100000000000020020707000301000000",
+    "boneNames": [
+        "tag_weapon",
+        "tag_flash",
+        "tag_knife_fx"
+    ],
+    "boneNameIndices": [
+        {
+            "name": "tag_weapon",
+            "index": 0
+        },
+        {
+            "name": "tag_flash",
+            "index": 1
+        },
+        {
+            "name": "tag_knife_fx",
+            "index": 2
+        }
+    ],
+    "parentList": "0102",
+    "quats": "0100c028ae0300000100c028ae030000",
+    "trans": "a0c81f3f000000005fa0d441a0c81f3f000000005fa0d4410000000000000000",
+    "partClassification": "000000",
+    "baseMat": "0000000000000000000000000000803f0000000000000000000000000000004000000000337be7bd00000000095c7e3fa0c81f3f000000005fa0d441feffff3f00000000337be7bd00000000095c7e3fa0c81f3f000000005fa0d441feffff3f",
+    "boneInfo": "110091bf3c556abfc47f1fc17520903f3eef4d3f760af941009c5fbb00000000944a2941d517d4430000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "unkC0": "000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "meshes": [
+        "#hash_6bcc061cf038106b",
+        "#hash_6012df1adb543bf9",
+        "#hash_13500d5cbb7a4ce1",
+        "#hash_45f60c4ec62af075",
+        "#hash_877f76fd7ad29b4",
+        "#hash_3de22ccee4a31d26",
+        "#hash_3faf7a4db9642217",
+        "#hash_165d89e46ca40883"
+    ],
+    "meshMaterials": [
+        {
+            "entry": "0300000000000000309e0959a5010000489e0959a5010000",
+            "materials": [
+                "#hash_2727eeeab32fe547",
+                "#hash_106647dde4aff9e3",
+                "#hash_58306172be16b41d"
+            ],
+            "himipInvSqRadii": "fe83f53c45fa843dc2f8cb3d"
+        },
+        {
+            "entry": "0300000000000000309e0959a5010000549e0959a5010000",
+            "materials": [
+                "#hash_2727eeeab32fe547",
+                "#hash_106647dde4aff9e3",
+                "#hash_58306172be16b41d"
+            ],
+            "himipInvSqRadii": "baa2f53c1704913de9cbbf3d"
+        },
+        {
+            "entry": "0300000000000000309e0959a5010000609e0959a5010000",
+            "materials": [
+                "#hash_2727eeeab32fe547",
+                "#hash_106647dde4aff9e3",
+                "#hash_58306172be16b41d"
+            ],
+            "himipInvSqRadii": "c4a5f33c23549c3d6389d43d"
+        },
+        {
+            "entry": "0300000000000000309e0959a50100006c9e0959a5010000",
+            "materials": [
+                "#hash_2727eeeab32fe547",
+                "#hash_106647dde4aff9e3",
+                "#hash_58306172be16b41d"
+            ],
+            "himipInvSqRadii": "4543f33c010a9e3dafb6cc3d"
+        },
+        {
+            "entry": "0300000000000000309e0959a5010000789e0959a5010000",
+            "materials": [
+                "#hash_2727eeeab32fe547",
+                "#hash_106647dde4aff9e3",
+                "#hash_58306172be16b41d"
+            ],
+            "himipInvSqRadii": "d88af33c835fa23dc672d33d"
+        },
+        {
+            "entry": "0300000000000000309e0959a5010000849e0959a5010000",
+            "materials": [
+                "#hash_2727eeeab32fe547",
+                "#hash_106647dde4aff9e3",
+                "#hash_58306172be16b41d"
+            ],
+            "himipInvSqRadii": "8bfef33cf8aaa23dca9ed23d"
+        },
+        {
+            "entry": "0300000000000000309e0959a5010000909e0959a5010000",
+            "materials": [
+                "#hash_2727eeeab32fe547",
+                "#hash_106647dde4aff9e3",
+                "#hash_58306172be16b41d"
+            ],
+            "himipInvSqRadii": "28b8f33c6b94a33d4411e23d"
+        },
+        {
+            "entry": "0300000000000000309e0959a50100009c9e0959a5010000",
+            "materials": [
+                "#hash_2727eeeab32fe547",
+                "#hash_106647dde4aff9e3",
+                "#hash_58306172be16b41d"
+            ],
+            "himipInvSqRadii": "6967f43c5fc5a43d28d1f23d"
+        }
+    ],
+    "numCollSurfs": 0,
+    "numCollmaps": 0,
+    "collSurfs": [],
+    "collmaps": [],
+    "submodels": [],
+    "lossless": true,
+    "numSubmodels": 0,
+    "numLods": 8,
+    "numBones": 3
+}

@@ -1,0 +1,16 @@
+{
+    "name": "kagan_210d627e_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "kagan_210d627e.png",
+        "glossMap": "kagan_210d627e_g.png,bc4",
+        "normalMap": "kagan_210d627e_n.png,linear",
+        "aoMap": "kagan_210d627e_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            14
+        ]
+    }
+}

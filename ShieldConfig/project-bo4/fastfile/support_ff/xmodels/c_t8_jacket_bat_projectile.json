@@ -1,0 +1,13 @@
+{
+    "name": "c_t8_jacket_bat_projectile",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/jacket/weapon/projectile.gltf",
+    "skeleton": "../characters/jacket/weapon/projectile_skeleton.json",
+    "bone": "sig_blade_projectile_geo",
+    "hitboxes": "mesh",
+    "materials": {
+        "jacket_bat": "materials/jacket_bat_mat.json"
+    },
+    "collision": "none"
+}

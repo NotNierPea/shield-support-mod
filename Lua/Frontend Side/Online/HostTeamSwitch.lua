@@ -417,11 +417,151 @@ local function Wrap( selection )
 	end
 end
 
+--[[
+	Zombies forced characters (the support mod's ZMForcedCharacter.lua): a player's lobby pick may be a character outside
+	the map's cast, sent by their client when they forced one; the host's check (CharacterIsValid: the cast only, each
+	once) let it through, else it put a random cast character back. The lobby's own list offers the cast only.
+]]
+-- this machine's forced zombies character (ZMForcedCharacter.lua's dvar), 0 none; the custom maps' crews never
+local function OwnForced()
+	local dvar = Dvar[@"shield_zm_character"]
+	if not dvar or not dvar:exists() then
+		return 0
+	end
+	local value = tonumber( tostring( dvar:get() ) ) or 0
+	local slot = value - 30
+	if slot >= 0 and ( slot < 3 or ( slot >= 12 and slot < 33 ) ) then
+		return 0
+	end
+	return value
+end
+
+-- whether a client of the host's lobby is this machine's player
+local function OwnXuid()
+	return tostring( Engine[@"getxuid64"]( Engine[@"getprimarycontroller"]() ) )
+end
+
+-- a client of the host's lobby's xuid as text, nil when not found
+local function ClientXuid( clientNum )
+	local module = HostModule()
+	local clients = Engine[@"lobbygetsessionclients"]( module, Engine[@"lobbygetcontrollinglobbysession"]( module ) )
+	if type( clients ) ~= "table" or type( clients.sessionClients ) ~= "table" then
+		return nil
+	end
+	for _, client in ipairs( clients.sessionClients ) do
+		if client.clientNum == clientNum then
+			return tostring( client.xuid )
+		end
+	end
+	return nil
+end
+
+-- the zombies characters each player picked themselves (sent to the host), by xuid as text
+local Chosen = {}
+
+-- the host's own player to its forced zombies character, when the lobby has another
+local function ForceOwnCharacter()
+	local forced = OwnForced()
+	if forced <= 0 or Engine[@"isingame"]() or Engine[@"currentsessionmode"]() ~= Enum[@"emodes"][@"mode_zombies"] then
+		return
+	end
+	local module = HostModule()
+	local session = Engine[@"lobbygetcontrollinglobbysession"]( module )
+	if not Engine[@"islobbyhost"]( session ) then
+		return
+	end
+	local own = tostring( Engine[@"getxuid64"]( Engine[@"getprimarycontroller"]() ) )
+	local clients = Engine[@"lobbygetsessionclients"]( module, session )
+	if type( clients ) ~= "table" or type( clients.sessionClients ) ~= "table" then
+		return
+	end
+	for _, client in ipairs( clients.sessionClients ) do
+		local draft = client.characterDraft
+		if tostring( client.xuid ) == own and type( draft ) == "table" and draft.characterIndex ~= forced then
+			Engine[@"lobbyhostforceclientcharacterselection"]( session, client.xuid, { characterIndex = forced }, 0 )
+			Note( "own forced zombies character put on: " .. tostring( draft.characterIndex ) .. " -> " .. forced )
+		end
+	end
+end
+
+local function WrapCharacterSelection( selection )
+	if type( selection ) ~= "table" or type( selection.CharacterIsValid ) ~= "function" or selection.shieldForced then
+		return
+	end
+	local isValid = selection.CharacterIsValid
+	selection.CharacterIsValid = function ( clientNum, characterIndex )
+		if isValid( clientNum, characterIndex ) then
+			return true
+		end
+		if characterIndex == nil or characterIndex == selection.InvalidCharacterIndex or Engine[@"currentsessionmode"]() ~= Enum[@"emodes"][@"mode_zombies"] then
+			return false
+		end
+		--[[
+			Outside the cast only a character the player forced: the host's own player its forced one, another player the
+			one it sent itself (a leftover pick, Voyage's Scarlett on Tag der Toten, stayed for hosts and others alike).
+		]]
+		local xuid = ClientXuid( clientNum )
+		if xuid == OwnXuid() then
+			if OwnForced() ~= characterIndex then
+				return false
+			end
+		elseif xuid == nil or Chosen[xuid] ~= characterIndex then
+			return false
+		end
+		-- one of the cast (taken by another player): the game's rule
+		local map = type( selection.GetCurrentMap ) == "function" and selection.GetCurrentMap() or nil
+		if type( map ) == "table" and type( map.zmCharacters ) == "table" then
+			for _, cast in pairs( map.zmCharacters ) do
+				if cast.characterIndex == characterIndex then
+					return false
+				end
+			end
+		end
+		for _, hero in ipairs( Engine[@"getherolist"]( Enum[@"emodes"][@"mode_zombies"] ) or {} ) do
+			if hero.bodyIndex == characterIndex then
+				return true
+			end
+		end
+		return false
+	end
+	selection.shieldForced = true
+	Note( "forced zombies characters let through the character selection" )
+
+	--[[
+		The host's own forced character, put on by the host itself: a pick sent by the client side can land on the lobby
+		being left (going back and forward hosts a new game lobby) or be put back by InitializeLobby, and the ready-up
+		screen kept the map's cast character (seen in the log: "lobby pick 3 -> 104" sent, still 3 after). After every
+		InitializeLobby and every pick received, the host's own player gets the forced one.
+	]]
+	local initialize = selection.InitializeLobby
+	if type( initialize ) == "function" then
+		selection.InitializeLobby = function ( ... )
+			local result = initialize( ... )
+			ForceOwnCharacter()
+			return result
+		end
+	end
+	local received = selection.OnClientSelectionReceived
+	if type( received ) == "function" then
+		selection.OnClientSelectionReceived = function ( event, ... )
+			-- (kept before the check: CharacterIsValid lets it through outside the cast)
+			if type( event ) == "table" and not event.forced and event.xuid ~= nil and type( event.characterData ) == "table" then
+				Chosen[tostring( event.xuid )] = event.characterData.characterIndex
+				Note( "zombies pick received: " .. tostring( event.xuid ) .. " -> " .. tostring( event.characterData.characterIndex ) )
+			end
+			local result = received( event, ... )
+			ForceOwnCharacter()
+			return result
+		end
+	end
+end
+
 if type( Lobby ) ~= "table" then
 	Note( "no Lobby table here, nothing done" )
 elseif type( Lobby.TeamSelection ) == "table" and type( Lobby.TeamSelection.SwitchTeam ) == "function" then
 	-- there already: wrapped before the events file takes SwitchTeam for its handler
 	Wrap( Lobby.TeamSelection )
+	WrapCharacterSelection( Lobby.CharacterSelection )
 elseif type( setmetatable ) ~= "function" or type( getmetatable ) ~= "function" or type( rawset ) ~= "function" then
 	Note( "the team selection can't be waited for here, nothing done" )
 else
@@ -451,6 +591,7 @@ else
 			else
 				Note( "no team selection when the events were made, nothing done" )
 			end
+			WrapCharacterSelection( Lobby.CharacterSelection )
 		elseif getmetatable( lobby ) ~= watch then
 			-- the other watch is done: this one goes on alone
 			otherSet = nil

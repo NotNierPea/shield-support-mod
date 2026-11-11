@@ -1,0 +1,19 @@
+{
+    "name": "c_t8_jacket",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/jacket/jacket_body.gltf",
+    "skeleton": "../skeletons/jacket_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "jacket_accessories": "materials/jacket_accessories_mat.json",
+        "jacket_eye": "materials/jacket_eye_mat.json",
+        "jacket_gloves": "materials/jacket_gloves_mat.json",
+        "jacket_lower": "materials/jacket_lower_mat.json",
+        "jacket_mask": "materials/jacket_mask_mat.json",
+        "jacket_skin": "materials/jacket_skin_mat.json",
+        "jacket_upper": "materials/jacket_upper_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

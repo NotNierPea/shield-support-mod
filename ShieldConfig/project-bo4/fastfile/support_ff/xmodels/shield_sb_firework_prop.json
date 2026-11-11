@@ -1,0 +1,12 @@
+{
+ "name": "shield_sb_firework_prop",
+ "templateModel": "../templates/xmodel_rigid_fx.json",
+ "templateMesh": "../templates/xmodelmesh_rigid.json",
+ "gltf": "../models/sb_fireworks/firework_prop.gltf",
+ "scale": 1,
+ "materials": {
+  "shield_sb_firework_mat_q1": "materials/shield_sb_firework_mat_q1.json"
+ },
+ "stream": false,
+ "collision": "none"
+}

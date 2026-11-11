@@ -1756,7 +1756,7 @@
   },
   {
    "doubleSided": true,
-   "name": "kagan_skin",
+   "name": "kagan_67e18141",
    "pbrMetallicRoughness": {
     "baseColorFactor": [
      0.800000011920929,
@@ -1882,6 +1882,20 @@
   },
   {
    "doubleSided": true,
+   "name": "kagan_1feebda0",
+   "pbrMetallicRoughness": {
+    "baseColorFactor": [
+     0.800000011920929,
+     0.800000011920929,
+     0.800000011920929,
+     1
+    ],
+    "metallicFactor": 0,
+    "roughnessFactor": 0.5
+   }
+  },
+  {
+   "doubleSided": true,
    "name": "kagan_2c5e64bc",
    "pbrMetallicRoughness": {
     "baseColorFactor": [
@@ -1939,6 +1953,20 @@
   {
    "doubleSided": true,
    "name": "kagan_1842d358",
+   "pbrMetallicRoughness": {
+    "baseColorFactor": [
+     0.800000011920929,
+     0.800000011920929,
+     0.800000011920929,
+     1
+    ],
+    "metallicFactor": 0,
+    "roughnessFactor": 0.5
+   }
+  },
+  {
+   "doubleSided": true,
+   "name": "kagan_210d627e",
    "pbrMetallicRoughness": {
     "baseColorFactor": [
      0.800000011920929,
@@ -2980,7 +3008,7 @@
       "WEIGHTS_0": 59
      },
      "indices": 60,
-     "material": 15
+     "material": 16
     },
     {
      "attributes": {
@@ -2991,7 +3019,7 @@
       "WEIGHTS_0": 65
      },
      "indices": 66,
-     "material": 16
+     "material": 17
     }
    ]
   }

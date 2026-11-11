@@ -11,7 +11,8 @@
         "kagan_51b2aa34": "materials/kagan_51b2aa34_mat.json",
         "kagan_5a1fc430": "materials/kagan_5a1fc430_mat.json",
         "kagan_613e5e17": "materials/kagan_613e5e17_mat.json",
-        "kagan_7445742a": "materials/kagan_7445742a_mat.json"
+        "kagan_7445742a": "materials/kagan_7445742a_mat.json",
+        "kagan_7445742a_paint": "materials/kagan_7445742a_paint_mat.json"
     },
     "collision": "none",
     "skeletonPositions": "gltf",

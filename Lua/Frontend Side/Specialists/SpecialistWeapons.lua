@@ -30,6 +30,12 @@ local Weapons = {
 		displayName = @"wesker/weapons/samurai_edge",
 		description = @"wesker/weapons/samurai_edge_desc",
 		image = @"wesker_gun_icon"
+	},
+	[@"jacket_portrait"] = {
+		from = 13, -- Spectre (his Ripper)
+		displayName = @"jacket/weapons/the_punch",
+		description = @"jacket/weapons/the_punch_desc",
+		image = @"jacket_bat_icon"
 	}
 }
 

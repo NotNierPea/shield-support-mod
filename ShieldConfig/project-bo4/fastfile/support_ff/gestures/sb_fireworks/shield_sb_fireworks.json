@@ -1,0 +1,12 @@
+{
+ "name": "shield_sb_fireworks",
+ "type": "gesture",
+ "gesture": "ges_shield_sb_fireworks",
+ "gesture2": "ges_shield_sb_fireworks_2",
+ "bundle": {
+  "type": "#gesture",
+  "hash_5a31296c0c1b6029:hash_9e0e664a": "localized18#shield/gestures/sb_fireworks",
+  "hash_5bff4cc56c2092f0:hash_69902538": "image#shield_ges_sb_fireworks_icon",
+  "hash_6486837b8286880e:hash_6e1ba9a5": 1
+ }
+}

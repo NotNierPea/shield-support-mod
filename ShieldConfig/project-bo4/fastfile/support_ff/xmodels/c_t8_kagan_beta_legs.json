@@ -1,0 +1,21 @@
+{
+    "name": "c_t8_kagan_beta_legs",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/kagan/kagan_beta_legs.gltf",
+    "skeleton": "../skeletons/mp_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "kagan_1dba466b": "materials/kagan_1dba466b_mat.json",
+        "kagan_1ff3f04f": "materials/kagan_1ff3f04f_mat.json",
+        "kagan_22d7e5ac": "materials/kagan_22d7e5ac_mat.json",
+        "kagan_24ac163e": "materials/kagan_24ac163e_mat.json",
+        "kagan_26b0f63f": "materials/kagan_26b0f63f_mat.json",
+        "kagan_2951270f": "materials/kagan_2951270f_mat.json",
+        "kagan_2c844a13": "materials/kagan_2c844a13_mat.json",
+        "kagan_39e53203": "materials/kagan_39e53203_mat.json",
+        "kagan_3f8baea0": "materials/kagan_3f8baea0_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

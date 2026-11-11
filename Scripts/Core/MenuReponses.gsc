@@ -5,6 +5,7 @@ AddMenuReponses()
     self callback::function_d8abfc3d(#"menu_response", &SetSprayGesture);
     self callback::function_d8abfc3d(#"menu_response", &TryCallout);
     self callback::function_d8abfc3d(#"menu_response", &SetZombiesOutfit);
+    self callback::function_d8abfc3d(#"menu_response", &SetForcedZombiesCharacter);
     self callback::function_d8abfc3d(#"menu_response", &SetShieldCustomization);
     //ShieldLog("^2Added menu responses..");
 }
@@ -251,9 +252,32 @@ CalloutVoice(index, alt)
     self endon(#"death", #"disconnect");
 
     callout = CalloutVoiceName(index, alt);
-    character = CalloutVoiceCharacter();
-    if (!isdefined(callout) || !isdefined(character))
+    if (!isdefined(callout))
         return;
+
+    // the zombies copies of the MP / Blackout characters (ZombiesVox.gsc): their own lines (ZombiesVoxTable.gsc sgc_<callout>)
+    voice = self ZombiesVoxVoice();
+    if (isdefined(voice))
+    {
+        alias = ZombiesVoxAlias(voice, "sgc_" + (callout == "needrevive" ? "needhelp" : callout));
+        wait 0.25;
+        if (isdefined(alias) && isdefined(self) && isalive(self) && !self isplayerunderwater() && !(isdefined(self.isspeaking) && self.isspeaking))
+            self playsoundontag(alias, "J_Head");
+        return;
+    }
+
+    character = CalloutVoiceCharacter();
+    if (!isdefined(character))
+    {
+        // no Blackout callout lines (the Dead of the Night four): their crew callouts, build_crew_vox's vox_crew_<who>_sgc_<kind>
+        crew = CalloutCrewKey();
+        if (!isdefined(crew))
+            return;
+        wait 0.25;
+        if (isdefined(self) && isalive(self) && !self isplayerunderwater() && !(isdefined(self.isspeaking) && self.isspeaking))
+            self playsoundontag("vox_crew_" + crew + "_sgc_" + CalloutCrewKind(callout), "J_Head");
+        return;
+    }
 
     // Marlton, Russman and Stuhlinger have no "need revive" line
     if (callout == "needrevive" && (character == "marlton" || character == "russman" || character == "stuhlinger"))
@@ -312,6 +336,7 @@ CalloutVoiceCharacter()
         case #"prt_zm_bruno_dlc0": return "bruno";
         case #"prt_zm_diego":
         case #"prt_zm_diego_dlc0": return "diego";
+        case #"prt_zm_richtofen_whi_novials": return "richtofen";
         case #"prt_zm_misty": return "misty";
         case #"prt_zm_marlton": return "marlton";
         case #"prt_zm_russman": return "russman";
@@ -319,6 +344,33 @@ CalloutVoiceCharacter()
     }
 
     return undefined;
+}
+
+// the crew key of a zombies role with crew callouts only (Dead of the Night, roles 9-12), undefined for the rest
+CalloutCrewKey()
+{
+    switch (player_role::get())
+    {
+        case 9: return "mirela";
+        case 10: return "warwick";
+        case 11: return "gideon";
+        case 12: return "godfrey";
+    }
+
+    return undefined;
+}
+
+// a callout's crew line kind (build_crew_vox's sgc_ kinds: no thanks / need revive of their own)
+CalloutCrewKind(callout)
+{
+    switch (callout)
+    {
+        case "needhelp":
+        case "needrevive": return "help";
+        case "thanks": return "nicework";
+    }
+
+    return callout;
 }
 
 // the gesture tables of the callouts of CalloutWheel.lua, in its order (the callout_wheel bundles of multiplayer)

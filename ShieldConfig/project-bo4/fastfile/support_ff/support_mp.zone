@@ -1,8 +1,19 @@
-// support_mp.ff: loaded with mp_common (the support config's hook). Wesker's specialist weapon, a copy of Seraph's
-// Annihilator (its anims, effects and icons mp_common's, by name); its models, materials and sounds are in support.ff.
+// support_mp.ff: loaded with mp_common (the support config's hook): our characters' specialist weapons (their anims,
+// effects and icons mp_common's, by name); their models, materials and sounds are in support.ff.
 >game=bo4
 >name=support_mp
 >compression=zlib
 >compression.high=true
+
+// wesker weapon: begin
+// Wesker's specialist weapon, a copy of Seraph's Annihilator (build_wesker_weapon.py)
 weapon,weapons/wesker/wesker_samurai_edge_mp.json
 bgcache,weapons/wesker/bgcache.csv
+// wesker weapon: end
+
+// jacket weapon: begin
+// Jacket's specialist weapon: Spectre's Ripper and its thrown form as his bat (build_jacket_weapon.py)
+weapon,weapons/jacket/jacket_the_punch_mp.json
+weapon,weapons/jacket/jacket_the_punch_projectile_mp.json
+bgcache,weapons/jacket/bgcache.csv
+// jacket weapon: end

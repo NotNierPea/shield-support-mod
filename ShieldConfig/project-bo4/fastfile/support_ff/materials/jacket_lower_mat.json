@@ -1,0 +1,16 @@
+{
+    "name": "jacket_lower_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "jacket_lower.png",
+        "normalMap": "jacket_lower_n.png,linear",
+        "glossMap": "jacket_lower_g.png,bc4",
+        "aoMap": "jacket_lower_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            8
+        ]
+    }
+}

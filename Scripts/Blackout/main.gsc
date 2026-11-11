@@ -260,7 +260,8 @@ SetBotCharacterByIndex(index)
     if (!isDefined(self) || !isPlayer(self))
         return;
 
-    if (randomIntRange(1, 3) == 1)
+    // (one of our characters keeps its own role: the MP skins are the game's specialists)
+    if (index < ShieldStockRoleCount() && randomIntRange(1, 3) == 1)
     {
         //ShieldLog("^3Using mp skin for bot");
         skinData = GetBotSkinRandomWZ_FromMP();
@@ -314,7 +315,12 @@ AssignRandomCharacter()
     if (isDefined(self.bo_character_index))
         return;
 
-    idx = level.bo_bot_characters[randomint(level.bo_bot_characters.size)];
+    // half of them one of our characters (ShieldBotRoles: after Blackout's own roles)
+    ours = ShieldBotRoles();
+    if (ours.size > 0 && randomint(2) == 0)
+        idx = array::random(ours);
+    else
+        idx = level.bo_bot_characters[randomint(level.bo_bot_characters.size)];
     self.bo_character_index = idx;
 
     self SetBotCharacterByIndex(idx);

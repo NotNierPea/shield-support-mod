@@ -934,8 +934,8 @@
             null,
             null
         ],
-        "c60": ",hash_5c480e11c561ec99",
-        "c68": ",hash_44420de9d387e30e",
+        "c60": ",wesker_gun_hud_ready",
+        "c68": ",wesker_gun_hud_charging",
         "cb8": ",hash_6a107d428f3a7e1d",
         "cc0": "00000000",
         "cc8": [
@@ -964,8 +964,8 @@
         "d10": "00000000000000000000000000000000",
         "d18": "00",
         "d20": "00",
-        "d40": ",hash_2d5d971b8f5567d",
-        "d48": ",hash_3d5929c41e1436bc",
+        "d40": ",wesker_gun_hud_small",
+        "d48": ",wesker_gun_hud",
         "1440": null,
         "1444": null,
         "1488": null,
@@ -979,7 +979,7 @@
         "11ac": null,
         "11b0": null,
         "11b4": null,
-        "e90": ",hash_3573a2cae9a0f862",
+        "e90": ",wesker_gun_hud_line",
         "938": "000000000000803fcdcccc3d0000803fcdcc4c3e000000000000803f00000000",
         "950": "000000000000803fcdcccc3d0000803fcdcc4c3e000000000000803f00000000",
         "940": "000000000000803f62a1563d27c2663f371a003e3b01cd3ed3de803e4694f63da089003fa913503d0000803fcdcc4c3d",
@@ -1216,7 +1216,7 @@
             null,
             null
         ],
-        "1048": ",hash_3d5929c41e1436bc"
+        "1048": ",wesker_gun_hud"
     },
     "name": "#hash_3d722cecc274d4d9",
     "baseWeapon": "#hash_2fb1ea528d6a933b",
@@ -1293,13 +1293,13 @@
     "worldModel": [
         "#hash_a586ffb8aebeede4"
     ],
-    "gadgetIconAvailable": "#hash_dc480e11c561ec99",
-    "gadgetIconUnavailable": "#hash_c4420de9d387e30e",
+    "gadgetIconAvailable": "#hash_17ed3fa7571a0f5f",
+    "gadgetIconUnavailable": "#hash_7670829d79ccd937",
     "reticleSide": "#hash_6a107d428f3a7e1d",
-    "inventoryIconZm": "#hash_82d5d971b8f5567d",
-    "hudIcon": "#hash_3d5929c41e1436bc",
-    "image_e90": "#hash_b573a2cae9a0f862",
-    "image_1048": "#hash_3d5929c41e1436bc",
+    "inventoryIconZm": "#hash_7476f871b14b24ff",
+    "hudIcon": "#hash_86f067dc20b4807",
+    "image_e90": "#hash_476d043602337db2",
+    "image_1048": "#hash_86f067dc20b4807",
     "fireRumble": "#hash_d02b425f0b656027",
     "laser_e30": "#hash_fc2e84dccf5faaa6",
     "fx_bc8": "#hash_762e655f123759cd",

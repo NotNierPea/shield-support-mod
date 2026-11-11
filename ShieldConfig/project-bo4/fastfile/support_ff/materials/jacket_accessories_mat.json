@@ -1,0 +1,17 @@
+{
+    "name": "jacket_accessories_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "specColorMap": "jacket_accessories_s.png",
+        "colorMap": "jacket_accessories.png",
+        "normalMap": "jacket_accessories_n.png,linear",
+        "glossMap": "jacket_accessories_g.png,bc4",
+        "aoMap": "#hash_bfd1eb9d1e41b805"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            12
+        ]
+    }
+}

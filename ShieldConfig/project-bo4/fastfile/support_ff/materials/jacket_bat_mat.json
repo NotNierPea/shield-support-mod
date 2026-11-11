@@ -1,0 +1,16 @@
+{
+    "name": "jacket_bat_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "jacket_bat.png",
+        "normalMap": "jacket_bat_n.png,linear",
+        "glossMap": "jacket_bat_g.png,bc4",
+        "aoMap": "#hash_bfd1eb9d1e41b805"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            10
+        ]
+    }
+}

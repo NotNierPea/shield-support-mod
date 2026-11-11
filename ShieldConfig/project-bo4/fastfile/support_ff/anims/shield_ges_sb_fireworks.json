@@ -1,0 +1,144 @@
+{
+ "name": "shield_ges_sb_fireworks",
+ "gltf": "../models/sb_fireworks/sb_fireworks.gltf",
+ "animation": "shield_ges_sb_fireworks",
+ "skeleton": "../skeletons/mp_body.json",
+ "framerate": 30,
+ "scale": 1,
+ "loop": false,
+ "player": true,
+ "rootMotion": "tag_origin",
+ "extraJoints": {
+  "tag_sbfw_rocket_animate": "tag_origin"
+ },
+ "markup": [
+  {
+   "name": "blend time",
+   "flags": 1,
+   "value": "0.20000000298023224",
+   "tag": ""
+  },
+  {
+   "name": "hide weapon",
+   "flags": 1,
+   "value": "",
+   "tag": ""
+  },
+  {
+   "a": 0.0,
+   "b": 1.0,
+   "value": "0",
+   "tag": "0",
+   "name": "disable_fingers_left_hand"
+  },
+  {
+   "a": 0.0,
+   "b": 1.0,
+   "value": "0",
+   "tag": "0",
+   "name": "disable_fingers_right_hand"
+  },
+  {
+   "a": 0.0,
+   "b": 1.0,
+   "value": "0",
+   "tag": "0",
+   "name": "disable_ik_left_hand"
+  },
+  {
+   "a": 0.0,
+   "b": 1.0,
+   "value": "0",
+   "tag": "0",
+   "name": "disable_ik_right_hand"
+  },
+  {
+   "name": "attach player model",
+   "value": "shield_sb_firework_prop",
+   "tag": "tag_origin",
+   "a": 0.00556,
+   "b": 0.61667
+  }
+ ],
+ "notifies": [
+  {
+   "sound": "shield_sbfw_vo",
+   "tag": "j_head",
+   "time": 0.00556
+  },
+  {
+   "fx": "shield_sbfw/fuse",
+   "tag": "tag_sbfw_fuse_fx",
+   "time": 0.16667
+  },
+  {
+   "sound": "shield_sbfw_fuse",
+   "tag": "tag_weapon_right",
+   "time": 0.16667
+  },
+  {
+   "kind": "stop sound",
+   "asset": "shield_sbfw_fuse",
+   "time": 0.53333
+  },
+  {
+   "sound": "shield_sbfw_throw",
+   "tag": "tag_weapon_right",
+   "time": 0.53333
+  },
+  {
+   "sound": "shield_sbfw_whistle",
+   "time": 0.53333
+  },
+  {
+   "kind": "play unmanaged fx",
+   "asset": "shield_sbfw/burst",
+   "tag": "tag_sbfw_fuse_fx",
+   "time": 0.61667
+  },
+  {
+   "kind": "kill fx",
+   "asset": "shield_sbfw/fuse",
+   "tag": "tag_sbfw_fuse_fx",
+   "time": 0.61667
+  },
+  {
+   "sound": "shield_sbfw_explode",
+   "time": 0.61667
+  },
+  {
+   "sound": "shield_sbfw_crackle",
+   "time": 0.675
+  }
+ ],
+ "startupNotifies": [
+  {
+   "kind": "kill fx",
+   "asset": "shield_sbfw/fuse",
+   "tag": "tag_sbfw_fuse_fx"
+  },
+  {
+   "kind": "stop sound",
+   "asset": "shield_sbfw_fuse"
+  },
+  {
+   "kind": "stop sound",
+   "asset": "shield_sbfw_vo"
+  }
+ ],
+ "shutdownNotifies": [
+  {
+   "kind": "kill fx",
+   "asset": "shield_sbfw/fuse",
+   "tag": "tag_sbfw_fuse_fx"
+  },
+  {
+   "kind": "stop sound",
+   "asset": "shield_sbfw_fuse"
+  },
+  {
+   "kind": "stop sound",
+   "asset": "shield_sbfw_vo"
+  }
+ ]
+}

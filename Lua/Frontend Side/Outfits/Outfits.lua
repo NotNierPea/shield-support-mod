@@ -35,16 +35,19 @@ local function IsOurs( outfit )
 	return false
 end
 
--- (outfits, ours)
+-- (outfits, ours, with presets: a multiplayer / Blackout specialist's outfits on its zombies copy)
 local function CountOutfits( customization )
-	local outfits, ours = 0, 0
+	local outfits, ours, presets = 0, 0, 0
 	for _, outfit in ipairs( customization and customization.outfits or {} ) do
 		outfits = outfits + 1
 		if outfit.isValid and IsOurs( outfit ) then
 			ours = ours + 1
 		end
+		if outfit.isValid and outfit.presets and #outfit.presets > 0 then
+			presets = presets + 1
+		end
 	end
-	return outfits, ours
+	return outfits, ours, presets
 end
 
 -- the breadcrumb models are made for multiplayer's specialists: none for the others' outfit tab
@@ -62,14 +65,16 @@ local function Categories( controller, list )
 	local customizationMode = model.customizationMode and model.customizationMode:get() or mode
 	local customization = CoD.PlayerRoleUtility.GetCachedHeroCustomization( mode, characterIndex )
 	local categories = {}
-	local outfits, owned = CountOutfits( customization )
+	local outfits, owned, withPresets = CountOutfits( customization )
 
 	if not logged[mode .. ":" .. characterIndex] then
 		logged[mode .. ":" .. characterIndex] = true
-		Log( string.format( "mode %d (customization %d), character %d: %d outfits, %d ours", mode, customizationMode, characterIndex, outfits, owned ) )
+		Log( string.format( "mode %d (customization %d), character %d: %d outfits, %d ours, %d with presets", mode, customizationMode, characterIndex, outfits, owned, withPresets ) )
 	end
 
-	if customizationMode == Enum[@"emodes"][@"mode_multiplayer"] or owned > 0 then
+	-- (in zombies only the support zone's specialist copies have presets: shield-client takes the stock zombies ones off)
+	if customizationMode == Enum[@"emodes"][@"mode_multiplayer"] or owned > 0
+		or ( mode == Enum[@"emodes"][@"mode_zombies"] and characterIndex >= 30 and withPresets > 0 ) then
 		table.insert( categories, {
 			models = {
 				tabName = @"hash_63C743FD222BE966",
@@ -148,7 +153,8 @@ end
 ]]
 local GameIcons = {
 	[@"wesker_portrait"] = @"wesker_game_re5",
-	[@"kagan_portrait"] = @"kagan_game_bo7"
+	[@"kagan_portrait"] = @"kagan_game_bo7",
+	[@"jacket_portrait"] = @"jacket_game_pd3"
 }
 
 local function GameIconOf( model )

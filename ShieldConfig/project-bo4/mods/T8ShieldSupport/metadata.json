@@ -81,6 +81,14 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/ZMLobbyGestures",
+            "path": "Lua\\Frontend\\ZMLobbyGestures.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/DirectorPregameArena",
             "path": "Lua\\Frontend\\DirectorPregameArena.luac",
             "hooks_post": [
@@ -537,6 +545,14 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/ZMForcedCharacter",
+            "path": "Lua\\Frontend\\ZMForcedCharacter.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/SpecialistWeapons",
             "path": "Lua\\Frontend\\SpecialistWeapons.luac",
             "hooks_post": [
@@ -767,6 +783,15 @@
             "type": "luafile",
             "name": "ui/shield/GameCustomMapHud",
             "path": "Lua\\Game\\CustomMapHud.luac",
+            "hooks_post": [
+                "x64:46f417a74d9ab424",
+                "x64:57d27ab8e2f7a9d0"
+            ]
+        },
+        {
+            "type": "luafile",
+            "name": "ui/shield/GameInspectHud",
+            "path": "Lua\\Game\\InspectHud.luac",
             "hooks_post": [
                 "x64:46f417a74d9ab424",
                 "x64:57d27ab8e2f7a9d0"
@@ -2590,6 +2615,16 @@
         },
         {
             "type": "localizeentry",
+            "name": "shield/force_character",
+            "value": "Force Character"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/unforce_character",
+            "value": "Clear Forced Character"
+        },
+        {
+            "type": "localizeentry",
             "name": "hash_10757e50cc35560c",
             "value": "You already have the maximum number of 10 items. Choose an item to remove, it will be replaced with your selected item.",
             "fallback": true
@@ -2985,6 +3020,13 @@
         {
             "type": "eventstring",
             "name": "zm_outfit",
+            "mode": [
+                "zm"
+            ]
+        },
+        {
+            "type": "eventstring",
+            "name": "zm_character",
             "mode": [
                 "zm"
             ]
