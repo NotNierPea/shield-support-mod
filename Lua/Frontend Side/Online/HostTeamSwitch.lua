@@ -484,6 +484,86 @@ local function ForceOwnCharacter()
 	end
 end
 
+--[[
+	A splitscreen guest's xuid (shield-client splitscreen.cpp): the host's with the controller in the high and low bytes.
+	Bots have high bits too, so the middle has to be the host's ("x64:" + 16 digits).
+]]
+local function IsGuestXuid( xuid )
+	if type( string ) ~= "table" or type( string.sub ) ~= "function" then
+		return false
+	end
+	local text = tostring( xuid )
+	local own = tostring( Engine[@"getxuid64"]( Engine[@"getprimarycontroller"]() ) )
+	return #text == 20 and #own == 20 and text ~= own and string.sub( text, 1, 4 ) == "x64:" and string.sub( text, 5, 6 ) ~= "00"
+		and string.sub( text, 7, 18 ) == string.sub( own, 7, 18 )
+end
+
+--[[
+	A splitscreen guest (a local player of this host) has no pick of its own on PC: it stayed 0 or a copy of the host's,
+	its ready-up character then stood in the host's spot (the draft scene is the role's). The host gives it a cast
+	character nobody has.
+]]
+local GuestNoted = {}
+local function ForceGuestCharacters( selection )
+	if Engine[@"isingame"]() or Engine[@"currentsessionmode"]() ~= Enum[@"emodes"][@"mode_zombies"] then
+		return
+	end
+	local module = HostModule()
+	local session = Engine[@"lobbygetcontrollinglobbysession"]( module )
+	if not Engine[@"islobbyhost"]( session ) then
+		return
+	end
+	local clients = Engine[@"lobbygetsessionclients"]( module, session )
+	if type( clients ) ~= "table" or type( clients.sessionClients ) ~= "table" then
+		return
+	end
+	local map = type( selection.GetCurrentMap ) == "function" and selection.GetCurrentMap() or nil
+	if type( map ) ~= "table" or type( map.zmCharacters ) ~= "table" then
+		return
+	end
+
+	-- who has what (the host's forced one too: it may be between a reset and its own put on)
+	local taken, guests = {}, {}
+	local forced = OwnForced()
+	if forced > 0 then
+		taken[forced] = 1
+	end
+	for _, client in ipairs( clients.sessionClients ) do
+		local draft = client.characterDraft
+		local index = type( draft ) == "table" and draft.characterIndex or nil
+		if IsGuestXuid( client.xuid ) then
+			table.insert( guests, { xuid = client.xuid, index = index } )
+		elseif type( index ) == "number" and index > 0 then
+			taken[index] = ( taken[index] or 0 ) + 1
+		end
+	end
+
+	for _, guest in ipairs( guests ) do
+		local index = guest.index
+		if type( index ) ~= "number" or index <= 0 or index == selection.InvalidCharacterIndex or taken[index] then
+			local pick = nil
+			for _, cast in pairs( map.zmCharacters ) do
+				if type( cast ) == "table" and type( cast.characterIndex ) == "number" and not taken[cast.characterIndex] then
+					pick = cast.characterIndex
+					break
+				end
+			end
+			if pick then
+				Engine[@"lobbyhostforceclientcharacterselection"]( session, guest.xuid, { characterIndex = pick }, 0 )
+				Chosen[tostring( guest.xuid )] = pick
+				index = pick
+				if GuestNoted[tostring( guest.xuid )] ~= pick then
+					GuestNoted[tostring( guest.xuid )] = pick
+					Note( "splitscreen guest " .. tostring( guest.xuid ) .. " given its own zombies character: " .. tostring( guest.index ) .. " -> " .. pick )
+				end
+			end
+		end
+		if type( index ) == "number" and index > 0 then
+			taken[index] = 1
+		end
+	end
+end
+
 local function WrapCharacterSelection( selection )
 	if type( selection ) ~= "table" or type( selection.CharacterIsValid ) ~= "function" or selection.shieldForced then
 		return
@@ -538,6 +618,7 @@ local function WrapCharacterSelection( selection )
 		selection.InitializeLobby = function ( ... )
 			local result = initialize( ... )
 			ForceOwnCharacter()
+			ForceGuestCharacters( selection )
 			return result
 		end
 	end
@@ -549,8 +630,15 @@ local function WrapCharacterSelection( selection )
 				Chosen[tostring( event.xuid )] = event.characterData.characterIndex
 				Note( "zombies pick received: " .. tostring( event.xuid ) .. " -> " .. tostring( event.characterData.characterIndex ) )
 			end
+			-- a guest's own 0 (its side keeps sending one) would only take its character away again
+			if type( event ) == "table" and IsGuestXuid( event.xuid ) and type( event.characterData ) == "table" and
+				( event.characterData.characterIndex == nil or event.characterData.characterIndex <= 0 ) then
+				ForceGuestCharacters( selection )
+				return
+			end
 			local result = received( event, ... )
 			ForceOwnCharacter()
+			ForceGuestCharacters( selection )
 			return result
 		end
 	end

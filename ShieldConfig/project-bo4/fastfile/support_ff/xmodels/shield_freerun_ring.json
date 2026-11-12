@@ -1,0 +1,12 @@
+{
+    "name": "shield_freerun_ring",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../models/shield_freerun_ring.gltf",
+    "bone": "tag_origin",
+    "materials": {
+        "ring": "materials/shield_freerun_ring_mat.json"
+    },
+    "stream": false,
+    "collision": "none"
+}

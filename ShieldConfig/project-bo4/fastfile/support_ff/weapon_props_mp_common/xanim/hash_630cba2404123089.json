@@ -1,0 +1,69 @@
+{
+    "name": "#hash_630cba2404123089",
+    "header": "000000000000000008a671c7250200000000000000000000000000000000000000000000000000000000000000000000b0a671c72502000088a671c725020000000000000000000000000000000000000000000000000000c8a671c7250200000000000000000000c0a871c7250200008930120424ba0c63000000000000000040a771c72502000000000000000000001ea771c7250200007ca771c72502000000000000000000000c02000000000000000000000000000000000000000000000000f0419a99193f0000000000000000000000000000000000000000a200000000000000560000000f00000011000000000000001b00000000000000130002000900000001000200000001001c001f0001001f0032000000000000000000000006000000010000000000000000000000",
+    "numBones": 31,
+    "numframes": 50,
+    "lossless": true,
+    "branchName": "body",
+    "framerate": 30,
+    "frequency": 0.6,
+    "names": [
+        "j_clavicle_ri",
+        "tag_weapon_left",
+        "j_index_ri_1",
+        "j_mid_ri_1",
+        "j_pinkybase_ri",
+        "j_ringbase_ri",
+        "j_thumb_ri_1",
+        "j_index_ri_2",
+        "j_mid_ri_2",
+        "j_pinky_ri_1",
+        "j_ring_ri_1",
+        "j_thumb_ri_2",
+        "j_index_ri_3",
+        "j_mid_ri_3",
+        "j_pinky_ri_2",
+        "j_ring_ri_2",
+        "j_thumb_ri_3",
+        "j_pinky_ri_3",
+        "j_ring_ri_3",
+        "j_elbow_ri",
+        "j_elbow_bulge_ri",
+        "tag_weapon_right",
+        "j_shoulder_ri",
+        "j_wrist_ri",
+        "j_wristtwist1_ri",
+        "j_wristtwist2_ri",
+        "j_wristtwist3_ri",
+        "j_wristtwist4_ri",
+        "j_wristtwist5_ri",
+        "j_wristtwist_ri",
+        "j_wristtwist6_ri"
+    ],
+    "dataByte": "000d1e272e320010232d32002e32000b1f272e3132000c1e262d32002732002832002932002c32002f3200262f3200000c212a3215002c3132140102030405060708090a0b0c0d0e0f10111213161718191a1b1c1d1e",
+    "dataInt": "b8ebf73de0fdf03c83b380bf9f6d7e389534183886a5bd39157addbcfe81a2bfa6a280bfcfed6636de5d1d383d3c9a380000b031089c60bd00a081af",
+    "dataShort": "0500040002000600050002000200020002000200030065ca3f000000000004000300",
+    "randomDataByte": "7b16ff0036dc223a04f9252f7b16ff80344df95d5b99bec980344d",
+    "randomDataShort": "6777bcbc4525c0bcb316d0bc58e2d0bce3c4c7bc6777bcbc67773c3c585c433ce7e0513c35ae493c67773c3c5da6c1befcd72e3e55a6019efc272f3e5da6c1befcd72e3ec54e3f72f2bfc401594dbf41f2fbc20115433fddf01fb801b5427fe3f01bb9015d47bf96f1f7bd01514dbf1ff257c201c54e3f72f2bfc401bd82beb9f4bb9b3f3d847ebaf4afa03ff9887ec7f4b3b83fdd887ec8f4bfb93fd586febef41bae3fbd82beb9f4bb9b3f59be3e000000000035c53e000000000059be3e0000000000f1f33e000000000069f93e0000000000f1f33e00000000008d293f0000000000b12d3f00000000008d293f0000000000295f3f0000000000b1613f0000000000295f3f0000000000c5943f000000000089953f0000000000c5943f0000000000c1883e000000000019913e0000000000718b3e0000000000c1883e0000000000",
+    "notify": [
+        {
+            "raw": "00000000000000000000000000000000760200002c0200002c0200002d0200000000803f00000000",
+            "type": "end",
+            "param1": "",
+            "param2": "",
+            "param3": "self notify",
+            "time": 1
+        }
+    ],
+    "startupNotify": [],
+    "shutdownNotify": [],
+    "list30": [
+        {
+            "raw": "2e0200000000000000000000010000002c0200002c020000",
+            "str0": "none",
+            "str10": "",
+            "str14": ""
+        }
+    ],
+    "streamInfo": false
+}

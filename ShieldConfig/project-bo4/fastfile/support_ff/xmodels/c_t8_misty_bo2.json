@@ -1,0 +1,16 @@
+{
+    "name": "c_t8_misty_bo2",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/misty/misty_body.gltf",
+    "skeleton": "../skeletons/zm_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "misty_arm": "materials/misty_arm_mat.json",
+        "misty_body": "materials/misty_body_mat.json",
+        "misty_gear": "materials/misty_gear_mat.json",
+        "misty_glove": "materials/misty_glove_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

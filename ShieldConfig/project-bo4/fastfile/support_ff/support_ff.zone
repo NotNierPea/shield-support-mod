@@ -21,6 +21,7 @@ image,mod_manager_abom.png
 image,mod_manager_synergy.png
 image,mod_manager_timers.png
 image,mm_icon.png
+image,shield_freerun_tile.png
 image,mm_unknown_mod.png
 // the Mod Manager card's previews (ModManager.lua catalog "previews")
 image,mm_prev_zm_park_1.png
@@ -495,3 +496,40 @@ image,jacket_bat_hud_dark.png,nomips
 image,jacket_bat_hud_line.png,nomips
 image,jacket_bat_hud_small.png,nomips
 // jacket weapon: end
+
+// freerun: begin
+// freerun (the support mod's Freerun.gsc): mp_bully's race rings and sounds as shield_freerun_*, BO4 Custom
+// Maps/Bullworth (BO4)/tools/freerun_support.py writes these lines; the aliases are in support.all
+xmodel,xmodels/shield_freerun_ring.json
+xmodel,xmodels/shield_freerun_chev1.json
+xmodel,xmodels/shield_freerun_chev2.json
+xmodel,xmodels/shield_freerun_chev3.json
+xmodel,xmodels/shield_freerun_arrows.json
+xmodel,xmodels/shield_freerun_final.json
+xmodel,xmodels/shield_freerun_flash1.json
+xmodel,xmodels/shield_freerun_flash2.json
+xmodel,xmodels/shield_freerun_flags.json
+xmodel,xmodels/shield_freerun_beam.json
+xmodel,xmodels/shield_freerun_marker.json
+image,shield_freerun_waypoint_icon.png,nomips
+objective,scriptbundle/objective_shield_freerun_waypoint.json
+bgcache,freerun/bgcache.csv
+// freerun: end
+
+// misty: begin
+// Black Ops II's Misty, an outfit of Misty (zombies, Blackout; the config's "outfit_adds"). BO4 Custom Maps/
+// Misty (BO4)/tools/build_misty.py writes these lines and its files here: edit them there and run it again
+// her body on the zombies body skeleton, her head on stock Misty's (its face shapes, ponytail physics, war paint face), her first person arms and legs
+xmodel,xmodels/c_t8_misty_bo2.json
+xmodel,xmodels/c_t8_misty_bo2_head.json
+xmodel,xmodels/c_t8_misty_bo2_arms.json
+xmodel,xmodels/c_t8_misty_bo2_legs.json
+
+// her picture in the outfit list, her ZM HUD portrait, her scoreboard / party list icon (OutfitPortraits.lua, SprayGestureWheel.lua)
+image,misty_outfit.png,nomips
+image,misty_hud.png,nomips
+image,misty_portrait.png,nomips
+
+// its models cached (the frontend spawns them)
+bgcache,characters/misty/bgcache.csv
+// misty: end

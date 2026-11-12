@@ -285,6 +285,11 @@ end
 
 ---------------------------
 
+-- gametypes of ours the lists don't offer: freerun is started from its own menu (shield-client freerun.cpp)
+CoD.IsShieldHiddenGameType = function ( info )
+	return info ~= nil and ( info.name == "freerun" or info.groupName == "shield_freerun" )
+end
+
 -- MP Gamemodes, unused ones or whatever
 DataSources.GameTypeCategories = DataSourceHelpers.ListSetup( "GameTypeCategories", function ( f14_arg0, f14_arg1 )
 	local f14_local0 = {}
@@ -300,7 +305,7 @@ DataSources.GameTypeCategories = DataSourceHelpers.ListSetup( "GameTypeCategorie
 	for f14_local9, f14_local10 in pairs( CoD.GameTypeUtility.GameTypeTable ) do
 		--if f14_local10.groupName == "standard" then
 			local f14_local6 = f14_local10.baseGameType
-			local f14_local7 = CoD.IsBadGameMode_MP(f14_local6)
+			local f14_local7 = CoD.IsBadGameMode_MP(f14_local6) or CoD.IsShieldHiddenGameType(f14_local10)
 			if not f14_local7 then
 				if not f14_local0[f14_local6] then
 					f14_local1 = f14_local1 + 1

@@ -1,0 +1,17 @@
+{
+    "name": "misty_glove_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "glossMap": "misty_glove_g.png,bc4",
+        "normalMap": "misty_glove_n.png,linear",
+        "aoMap": "#hash_bfd1eb9d1e41b805",
+        "colorMap": "misty_glove.png",
+        "specColorMap": "misty_glove_s.png"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            8
+        ]
+    }
+}

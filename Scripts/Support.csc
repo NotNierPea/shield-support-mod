@@ -39,6 +39,13 @@ Init()
         clientfield::register("allplayers", "shield_custom_a", 1, 30, "int", &ShieldCustomChanged, 0, 0);
         clientfield::register("allplayers", "shield_custom_b", 1, 30, "int", &ShieldCustomChanged, 0, 0);
         clientfield::register("allplayers", "shield_custom_c", 1, 16, "int", &ShieldCustomChanged, 0, 0);
+        // freerun's (Freerun.csc), Support.gsc's order
+        FreerunRegisterFields();
+    }
+    else if(SessionModeIsZombiesGame())
+    {
+        // freerun's on zombies maps (Support.gsc's)
+        FreerunRegisterFields();
     }
 }
 
@@ -73,6 +80,11 @@ detour draft<scripts\mp_common\draft.csc>::function_93a4f3c5(localclientnum, dra
 */
 detour draft<scripts\core\gametypes\frontend_draft.csc>::function_93a4f3c5(localclientnum, draftcharacter, characterselected = 0)
 {
+    // update_team gives every local xuid local client 0's focused character (function_89e574c): the splitscreen guest
+    // showed the host's, in the host's scene and spot. The guest shows its own pick
+    if(isdefined(draftcharacter) && isdefined(draftcharacter.var_d781e2e4) && ZombiesIsGuestXuid(draftcharacter.var_d781e2e4.xuid))
+     draftcharacter.var_d781e2e4.focusedcharacterindex = undefined;
+
     result = [[ @draft<scripts\core\gametypes\frontend_draft.csc>::function_93a4f3c5 ]](localclientnum, draftcharacter, characterselected);
     if(!sessionmodeiszombiesgame() || !isdefined(draftcharacter) || !isdefined(draftcharacter.var_d781e2e4))
      return result;
@@ -86,10 +98,92 @@ detour draft<scripts\core\gametypes\frontend_draft.csc>::function_93a4f3c5(local
 
     foreach(other in level.draftcharacters)
     {
-        if(isdefined(other) && other !== draftcharacter && ZombiesTakeScene(other, spots))
+        // (one without a role keeps the spot for its own next update: updating it here is an "invalid session mode")
+        if(isdefined(other) && other !== draftcharacter && ZombiesTakeScene(other, spots) && ZombiesHasRole(other))
          other [[ @namespace_7da27482<scripts\core_common\character_customization.csc>::update ]](other.var_d781e2e4.params);
     }
+    ZombiesLogDraft();
+    ZombiesPublishSpots();
+    // and once the scenes have placed the models
+    level notify(#"shield_draft_log");
+    level thread ZombiesLogDraftSoon();
     return result;
+}
+
+ZombiesLogDraftSoon()
+{
+    level endon(#"shield_draft_log");
+    wait 1;
+    ZombiesLearnSpots();
+    // two seen in one place: the spots again, with what was learned
+    spots = ZombiesLobbyScenes(0);
+    if(isdefined(spots))
+    {
+        foreach(character in level.draftcharacters)
+        {
+            if(isdefined(character) && ZombiesTakeScene(character, spots) && ZombiesHasRole(character))
+             character [[ @namespace_7da27482<scripts\core_common\character_customization.csc>::update ]](character.var_d781e2e4.params);
+        }
+    }
+    ZombiesLogDraft();
+    ZombiesPublishSpots();
+}
+
+/*
+    Splitscreen lobby spots (diagnostics): every draft character's slot, xuid, focused index (the local player's
+    highlighted character, put on every local xuid), shown role, visibility, scene (its place in level.shield_zm_scenes,
+    -1 none, -2 not listed) and model position. Logged when any of it changes.
+*/
+ZombiesLogDraft()
+{
+    if(!isdefined(level.draftcharacters))
+     return;
+    line = "";
+    foreach(i, character in level.draftcharacters)
+    {
+        if(!isdefined(character) || !isdefined(character.var_d781e2e4))
+         continue;
+        data = character.var_d781e2e4;
+        shown = data.var_435f68bc;
+        type = (isdefined(shown) && isdefined(shown.charactertype)) ? shown.charactertype : -1;
+        scene = -1;
+        if(isdefined(data.params) && isdefined(data.params.scene))
+        {
+            scene = -2;
+            if(isdefined(level.shield_zm_scenes))
+            {
+                foreach(k, known in level.shield_zm_scenes)
+                {
+                    if(known === data.params.scene)
+                     scene = k;
+                }
+            }
+        }
+        visible = character [[ @namespace_7da27482<scripts\core_common\character_customization.csc>::is_visible ]]();
+        origin = isdefined(character.var_228f64da) ? character.var_228f64da.origin : (0, 0, 0);
+        line = line + " [" + i + " xuid " + (isdefined(data.xuid) ? data.xuid : 0) + " focus " + (isdefined(data.focusedcharacterindex) ? data.focusedcharacterindex : -1)
+            + " role " + type + " vis " + visible + " scene " + scene + " at " + origin + "]";
+    }
+    if(line !== level.shield_draft_log)
+    {
+        level.shield_draft_log = line;
+        ShieldLog("^3zm lobby draft:" + line);
+    }
+}
+
+// a splitscreen guest's xuid (shield-client splitscreen.cpp): the controller in the high byte, never set for a real one
+ZombiesIsGuestXuid(xuid)
+{
+    if(!isdefined(xuid) || xuid == 0)
+     return 0;
+    return ((xuid >> 56) & 255) != 0;
+}
+
+// whether a draft character shows a role (charactertype > 0)
+ZombiesHasRole(draftcharacter)
+{
+    shown = draftcharacter.var_d781e2e4.var_435f68bc;
+    return isdefined(shown) && isdefined(shown.charactertype) && shown.charactertype > 0;
 }
 
 // a draft character to its lobby spot (from ZombiesLobbyScenes); whether its scene changed
@@ -106,10 +200,60 @@ ZombiesTakeScene(draftcharacter, spots)
             if(data.params.scene === spot.scene)
              return 0;
             data.params.scene = spot.scene;
+            ShieldLog("^3zm lobby spot: draft slot " + (isdefined(data.var_fb564576) ? data.var_fb564576 : -1) + " xuid " + (isdefined(data.xuid) ? data.xuid : 0) + " moved");
             return 1;
         }
     }
     return 0;
+}
+
+/*
+    Splitscreen: the draft's updates come from each local client's own events (positiondraft_update), and the guest's ran
+    the update as local client 1: its xuid order and PositionDraftClients against local client 0's draft characters, the
+    guest's character stood in the host's spot with both name tags on it. The draft is local client 0's in the frontend.
+*/
+detour draft<scripts\core\gametypes\frontend_draft.csc>::update_team(localclientnum, characterselected = 0)
+{
+    if(localclientnum != 0)
+    {
+        ShieldLog("^3zm lobby: draft update of local client " + localclientnum + " run as local client 0");
+        localclientnum = 0;
+    }
+    return [[ @draft<scripts\core\gametypes\frontend_draft.csc>::update_team ]](localclientnum, characterselected);
+}
+
+/*
+    The lobby's 3D widgets (the select class one, the tags) follow LobbyClients.<n>.entNum, and LobbyClients.<n> is the
+    player frontend.csc put in LobbyClientPose.<n-1> (its own xuid list). frontend_draft gives draft character i
+    LobbyClients.<i+1> instead (its update_team's list, another order with a splitscreen guest or bots), and writes
+    entNum only once: a player's widget stood at whoever had their number (nobody's, the guest's or the host's spot).
+    A zombies draft character takes the LobbyClients entry of its own xuid, and its entNum is written every time.
+*/
+detour draft<scripts\core\gametypes\frontend_draft.csc>::function_e1f85a64(var_87c045d1, index, var_3f0e790b)
+{
+    data = isdefined(var_87c045d1) ? var_87c045d1.var_d781e2e4 : undefined;
+    if(!sessionmodeiszombiesgame() || !isdefined(data) || !isdefined(data.xuid) || data.xuid == 0)
+     return [[ @draft<scripts\core\gametypes\frontend_draft.csc>::function_e1f85a64 ]](var_87c045d1, index, var_3f0e790b);
+
+    poses = getuimodel(getglobaluimodel(), "LobbyClientPose");
+    if(isdefined(poses))
+    {
+        for(k = 0; k < 16; k++)
+        {
+            pose = getuimodel(poses, k);
+            if(isdefined(pose) && ZombiesSameXuid(getuimodelvalue(pose), data.xuid))
+            {
+                if(k != index)
+                 ShieldLog("^3zm lobby: draft slot " + index + " xuid " + data.xuid + " takes lobby client " + (k + 1));
+                index = k;
+                break;
+            }
+        }
+    }
+    result = [[ @draft<scripts\core\gametypes\frontend_draft.csc>::function_e1f85a64 ]](var_87c045d1, index, var_3f0e790b);
+    if(isdefined(data.var_90ba8f6f))
+     setuimodelvalue(data.var_90ba8f6f, var_87c045d1 [[ @namespace_7da27482<scripts\core_common\character_customization.csc>::function_47cb6b19 ]]());
+    return result;
 }
 
 // the scene of a zombies role (its draftscene, as frontend_draft.csc reads it), undefined without one
@@ -148,30 +292,45 @@ ZombiesLobbyScenes(localclientnum)
         if(!isdefined(character) || !isdefined(character.var_d781e2e4))
          continue;
         shown = character.var_d781e2e4.var_435f68bc;
-        if(!isdefined(shown) || !isdefined(shown.charactertype) || shown.charactertype <= 0)
-         continue;
         // (the class's method by its namespace: an empty slot's model is hidden)
         if(!(character [[ @namespace_7da27482<scripts\core_common\character_customization.csc>::is_visible ]]()))
          continue;
-        players[players.size] = {#character:character, #type:shown.charactertype};
+        type = (isdefined(shown) && isdefined(shown.charactertype) && shown.charactertype > 0) ? shown.charactertype : 0;
+        // a player's one without a role (a splitscreen guest before its pick) still takes a free spot, not the host's;
+        // an empty slot (no xuid, no session mode to update with) is left alone
+        if(type == 0)
+        {
+            data = character.var_d781e2e4;
+            if(!isdefined(data.xuid) || data.xuid == 0 || !isdefined(data.params) || !isdefined(data.params.sessionmode))
+             continue;
+        }
+        xuid = character.var_d781e2e4.xuid;
+        // (function_89e574c: a local player's xuid, as frontend_draft's update_team asks)
+        mine = isdefined(xuid) && xuid != 0 && function_89e574c(xuid);
+        players[players.size] = {#character:character, #type:type, #mine:mine};
     }
 
+    /*
+        (taken: the places the scenes stand their character at, not the scenes: the crews' scenes share 4 places.) This PC's
+        players keep their own first: the select class widget stays at a local player's own spot, a forced character moved
+        off it stood away from its widget. Then the game's characters, then ours.
+    */
     spots = [];
     taken = [];
-    foreach(ours in array(0, 1))
+    foreach(pass in array(0, 1, 2))
     {
         foreach(player in players)
         {
-            if((player.type >= 30) != ours)
+            if(pass == 0 ? !player.mine : (player.mine || (player.type >= 30) != (pass == 2)))
              continue;
-            scene = ZombiesRoleScene(player.type);
-            if(isdefined(scene) && isinarray(taken, scene))
+            scene = player.type > 0 ? ZombiesRoleScene(player.type) : undefined;
+            if(isdefined(scene) && isinarray(taken, ZombiesSceneSpot(scene)))
              scene = undefined;
             if(!isdefined(scene))
             {
                 foreach(free in level.shield_zm_scenes)
                 {
-                    if(!isinarray(taken, free))
+                    if(!isinarray(taken, ZombiesSceneSpot(free)))
                     {
                         scene = free;
                         break;
@@ -180,11 +339,160 @@ ZombiesLobbyScenes(localclientnum)
             }
             if(!isdefined(scene))
              continue;
-            taken[taken.size] = scene;
+            taken[taken.size] = ZombiesSceneSpot(scene);
             spots[spots.size] = {#character:player.character, #scene:scene};
         }
     }
     return spots;
+}
+
+/*
+    Where a draft scene stands its character: the scene bundle's align target (the crews' scenes use the same 4 places, a
+    bot's Bruno and the host's Scarlett IX stood in one), else the place it was seen putting one (ZombiesLearnSpots), else
+    the scene itself.
+*/
+ZombiesSceneSpot(scene)
+{
+    if(!isdefined(level.shield_scene_spots))
+     level.shield_scene_spots = [];
+    if(isdefined(level.shield_scene_spots[scene]))
+     return level.shield_scene_spots[scene];
+
+    spot = undefined;
+    bundle = getscriptbundle(scene);
+    if(isdefined(bundle))
+    {
+        if(isdefined(bundle.aligntarget))
+         spot = bundle.aligntarget;
+        if(!isdefined(spot) && isdefined(bundle.objects))
+        {
+            foreach(object in bundle.objects)
+            {
+                if(isdefined(object.aligntarget))
+                 spot = object.aligntarget;
+                if(!isdefined(spot) && isdefined(object.shots))
+                {
+                    foreach(shot in object.shots)
+                    {
+                        if(isdefined(shot.aligntarget))
+                        {
+                            spot = shot.aligntarget;
+                            break;
+                        }
+                    }
+                }
+                if(isdefined(spot))
+                 break;
+            }
+        }
+    }
+    if(isdefined(spot))
+    {
+        level.shield_scene_spots[scene] = spot;
+        // (a scene name or align target may be a hash: only its place in the list is printed)
+        ShieldLog("^3zm lobby: scene " + ZombiesSceneIndex(scene) + " has an align target");
+        return spot;
+    }
+    if(isdefined(level.shield_scene_seen) && isdefined(level.shield_scene_seen[scene]))
+     return level.shield_scene_seen[scene];
+    return scene;
+}
+
+/*
+    The select class widget stands in one of 4 columns, by the stock crew place of the local player's character
+    (CoD.ZombieUtility.OrderCharacterButtonZMList: niko / scar column 1, demp / brun 2...): a character moved to another
+    place, or one of ours, was in column 1. For each shown character (by its character index, unique in a lobby), the
+    stock role whose scene it plays goes in ShieldDraftSpotRole.<character>, and ShieldDraftSpotRole.changed counts the
+    changes: ZMForcedCharacter.lua orders the columns by them.
+*/
+ZombiesPublishSpots()
+{
+    if(!sessionmodeiszombiesgame() || !isdefined(level.draftcharacters))
+     return;
+    out = createuimodel(getglobaluimodel(), "ShieldDraftSpotRole");
+    changed = 0;
+    line = "";
+    foreach(character in level.draftcharacters)
+    {
+        data = isdefined(character) ? character.var_d781e2e4 : undefined;
+        if(!isdefined(data) || !ZombiesHasRole(character) || !isdefined(data.params) || !isdefined(data.params.scene))
+         continue;
+        type = data.var_435f68bc.charactertype;
+        role = ZombiesSceneRole(data.params.scene);
+        model = createuimodel(out, "" + type);
+        if(getuimodelvalue(model) !== role)
+        {
+            setuimodelvalue(model, role);
+            changed = 1;
+        }
+        line = line + " [character " + type + " at role " + role + "'s place]";
+    }
+    if(changed)
+    {
+        ShieldLog("^3zm lobby spots for the select class columns:" + line);
+        counter = createuimodel(out, "changed");
+        value = getuimodelvalue(counter);
+        setuimodelvalue(counter, (isdefined(value) ? value : 0) + 1);
+    }
+}
+
+// a LobbyClientPose value (a string of the xuid: the menus compare it with Engine.XUIDToString) against a draft xuid
+ZombiesSameXuid(value, xuid)
+{
+    if(!isdefined(value) || !isdefined(xuid) || xuid == 0)
+     return 0;
+    if(value === xuid)
+     return 1;
+    return isstring(value) && value == ("" + xuid);
+}
+
+// the stock role a scene belongs to (the first of the crews' list that plays it), 0 none
+ZombiesSceneRole(scene)
+{
+    foreach(index in array(13, 14, 15, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29))
+    {
+        if(ZombiesRoleScene(index) === scene)
+         return index;
+    }
+    return 0;
+}
+
+// a scene's place in level.shield_zm_scenes, -1 when not listed
+ZombiesSceneIndex(scene)
+{
+    if(isdefined(level.shield_zm_scenes))
+    {
+        foreach(k, known in level.shield_zm_scenes)
+        {
+            if(known === scene)
+             return k;
+        }
+    }
+    return -1;
+}
+
+// the place each shown draft character's scene put it (once settled): for scenes without an align target
+ZombiesLearnSpots()
+{
+    if(!isdefined(level.draftcharacters))
+     return;
+    if(!isdefined(level.shield_scene_seen))
+     level.shield_scene_seen = [];
+    foreach(character in level.draftcharacters)
+    {
+        if(!isdefined(character) || !isdefined(character.var_d781e2e4) || !isdefined(character.var_228f64da) || !ZombiesHasRole(character))
+         continue;
+        scene = character.var_d781e2e4.params.scene;
+        if(!isdefined(scene) || (isdefined(level.shield_scene_spots) && isdefined(level.shield_scene_spots[scene])))
+         continue;
+        origin = character.var_228f64da.origin;
+        place = "" + int(origin[0] / 8) + " " + int(origin[1] / 8);
+        if(level.shield_scene_seen[scene] !== place)
+        {
+            level.shield_scene_seen[scene] = place;
+            ShieldLog("^3zm lobby: scene " + ZombiesSceneIndex(scene) + " seen at " + place);
+        }
+    }
 }
 
 PatchDraftCharacter(draftcharacter)

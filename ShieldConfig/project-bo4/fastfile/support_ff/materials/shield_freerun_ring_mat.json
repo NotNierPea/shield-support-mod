@@ -1,0 +1,20 @@
+{
+    "name": "shield_freerun_ring_mat",
+    "template": "../templates/material_glow.json",
+    "textures": {
+        "colorMap": "shield_freerun_ring.png",
+        "emissiveMap": "shield_freerun_ring.png"
+    },
+    "values": {
+        "colorTint": [
+            1,
+            1,
+            1
+        ],
+        "emissiveTint1": [
+            1,
+            1,
+            1
+        ]
+    }
+}

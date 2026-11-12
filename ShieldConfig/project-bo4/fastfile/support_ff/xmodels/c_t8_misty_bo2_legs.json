@@ -1,0 +1,14 @@
+{
+    "name": "c_t8_misty_bo2_legs",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/misty/misty_legs.gltf",
+    "skeleton": "../skeletons/zm_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "misty_body": "materials/misty_body_mat.json",
+        "misty_gear": "materials/misty_gear_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

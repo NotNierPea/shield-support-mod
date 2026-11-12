@@ -31,6 +31,7 @@ autoexec InitSystem()
 
 PreZMChanges()
 {
+
     if (getDvarInt(#"shield_offline_perks", 1))
     {
         setDvar(#"hash_49EF5478510B5AF3", 0); // perk_zombshell
@@ -52,7 +53,11 @@ Init()
      thread MPChanges();
 
     if(SessionModeIsZombiesGame())
-     thread ZMChanges();
+    {
+        // freerun's HUD and music on zombies maps too (Support.csc's, same place)
+        FreerunRegisterFields();
+        thread ZMChanges();
+    }
 
     if(SessionModeIsMultiplayerGame() || sessionmodeiswarzonegame())
     {
@@ -65,6 +70,8 @@ Init()
             clientfield::register("allplayers", "shield_custom_b", 1, 30, "int");
             clientfield::register("allplayers", "shield_custom_c", 1, 16, "int");
             callback::on_connect(&ShieldCustomizationOnConnect);
+            // freerun's HUD and music, every match (Support.csc's after the same three)
+            FreerunRegisterFields();
         }
     }
 }
@@ -464,6 +471,9 @@ WZChanges()
 
 MPChanges()
 {
+    // a freerun match (Freerun.gsc): only when the client says so
+    level thread FreerunInit();
+
     // the skill of the bots, from the bot settings of the menu
     level BotSkillInit();
 
@@ -482,6 +492,8 @@ MPChanges()
 
 ZMChanges()
 {
+    // a freerun match (Freerun.gsc): only when the client says so
+    level thread FreerunInit();
     // for zm reactive camo fix
     callback::on_spawned(&ZMReactiveFix);
 

@@ -26,7 +26,9 @@ local OutfitPictures = {
 	[@"shield/outfits/support/zm/1/name"] = PEEKS,
 	[@"shield/outfits/support/zm/15/name"] = PEEKS,
 	[@"shield/outfits/support/wz/22/name"] = PEEKS,
-	[@"shield/outfits/support/wz/26/name"] = PEEKS
+	[@"shield/outfits/support/wz/26/name"] = PEEKS,
+	-- BO2 Misty on Misty
+	[@"shield/outfits/support/wz/49/name"] = { portrait = @"misty_hud", icon = @"misty_portrait" }
 }
 
 -- client number: { character, outfit }

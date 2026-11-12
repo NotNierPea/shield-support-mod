@@ -87,6 +87,13 @@ local function Wrap( name )
 			if not ok then
 				Log( "not watched: " .. tostring( err ) )
 			end
+			-- the other HUD parts of the mod (FreerunHud.lua), by name
+			for name, watch in pairs( CoD.ShieldHudWatchers or {} ) do
+				local done, failure = pcall( watch, menu, controller )
+				if not done then
+					Log( name .. " not watched: " .. tostring( failure ) )
+				end
+			end
 		end
 		return menu
 	end

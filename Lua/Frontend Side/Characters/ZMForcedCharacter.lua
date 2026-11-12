@@ -123,20 +123,96 @@ local function FreeCastCharacter( controller, taken )
 	return nil
 end
 
+--[[
+	A splitscreen guest's pick stayed 0 (nothing picks one for it on PC): its draft character had no role, so the lobby's
+	spots skipped it and it stood in the host's spot. A cast character nobody has, sent for its controller, at most every
+	RESEND_MS.
+]]
+local GuestSent = 0
+local GuestSeen = nil
+
+-- a splitscreen guest's xuid (shield-client splitscreen.cpp): the host's with the controller in the high and low bytes
+-- (bots have high bits too: the middle has to be the host's)
+local function IsGuestXuid( xuid )
+	local text = tostring( xuid )
+	local own = tostring( Engine[@"getxuid64"]( Engine[@"getprimarycontroller"]() ) )
+	return #text == 20 and #own == 20 and text ~= own and string.sub( text, 1, 4 ) == "x64:" and string.sub( text, 5, 6 ) ~= "00"
+		and string.sub( text, 7, 18 ) == string.sub( own, 7, 18 )
+end
+
+--[[
+	Found by its xuid (Engine.GetXUID64 of its controller isn't it on PC); a new pick when it has none or one somebody
+	else has (a copy of the host's, the forced one): same character, same draft scene, same spot. A host does it itself
+	(HostTeamSwitch.lua), this is for another host's lobby.
+]]
+local function PickForGuests()
+	local primary = Engine[@"getprimarycontroller"]()
+	local guest = primary == 0 and 1 or 0
+	local current, taken = nil, {}
+	local forced = Forced()
+	if forced > 0 then
+		taken[forced] = true
+	end
+	for _, client in pairs( CoD.LobbyUtility.GetClientList() or {} ) do
+		if client.clientNum then
+			local index = Engine[@"getcharacterindexforclientnum"]( primary, client.clientNum )
+			if IsGuestXuid( client.xuid ) then
+				current = index or 0
+			elseif index and index > 0 then
+				taken[index] = true
+			end
+		end
+	end
+	if current == nil then
+		return
+	end
+	if GuestSeen ~= current then
+		GuestSeen = current
+		Log( "splitscreen guest's character: " .. tostring( current ) )
+	end
+	local now = Engine[@"milliseconds"]()
+	if ( current <= 0 or taken[current] ) and now - GuestSent >= RESEND_MS then
+		local pick = FreeCastCharacter( guest, taken )
+		if pick then
+			GuestSent = now
+			Engine[@"sendcharacterdraftselection"]( guest, Engine[@"lobbygetcontrollinglobbysession"]( Enum[@"lobbymodule"][@"lobby_module_client"] ), pick )
+			Log( "splitscreen guest (controller " .. guest .. ") " .. tostring( current ) .. " -> " .. pick )
+		end
+	end
+end
+
 SendForcedPick = function ( controller, changed )
 	local forced = Forced()
 	if Engine[@"currentsessionmode"]() ~= ZOMBIES or not CoD.LobbyUtility or not CoD.LobbyUtility.GetClientList then
 		return
 	end
-	local current, taken = nil, {}
+	-- the forced character is this PC's player's: a splitscreen guest picks their own
+	if controller ~= Engine[@"getprimarycontroller"]() then
+		return
+	end
+	pcall( PickForGuests )
+	-- this controller's own entry: a splitscreen guest is local too, and its pick is taken like anyone else's
+	local mine = tostring( Engine[@"getxuid64"]( controller ) )
+	local current, taken, locals, onlyLocal = nil, {}, 0, nil
 	for _, client in pairs( CoD.LobbyUtility.GetClientList() or {} ) do
 		if client.clientNum then
 			local index = Engine[@"getcharacterindexforclientnum"]( controller, client.clientNum )
 			if client.isLocal == 1 then
+				locals = locals + 1
+				onlyLocal = index
+			end
+			if client.isLocal == 1 and tostring( client.xuid ) == mine then
 				current = index
 			elseif index then
 				taken[index] = true
 			end
+		end
+	end
+	-- no xuid match with one local player: that one (as before splitscreen)
+	if current == nil and locals == 1 then
+		current = onlyLocal
+		if current then
+			taken[current] = nil
 		end
 	end
 	if current == nil then
@@ -359,8 +435,121 @@ local function WrapTiles()
 	Log( "tiles wrapped" )
 end
 
+--[[
+	The select class widget stands in one of the 4 columns of DirectorLobbyPoseMembersZM, the one of the local player's
+	button in DirectorCharacterButtonZMList, ordered by the stock crews' places (OrderCharacterButtonZMList: niko / scar /
+	brig column 1, demp / brun / butl 2...). The lobby's spots are Support.csc's (ZombiesLobbyScenes): a character moved to
+	another place, or a forced one of ours, got a column it doesn't stand in (column 1, the left). Support.csc puts in
+	ShieldDraftSpotRole.<character> the stock role whose place that character stands at: the columns by them.
+]]
+local CrewColumns = {
+	{ "niko", "Unik", "mist", "scar", "brig" },
+	{ "demp", "Udem", "russ", "brun", "butl" },
+	{ "rich", "Uric", "stuh", "shaw", "guns" },
+	{ "take", "Utak", "marl", "dieg", "psyc" }
+}
+
+-- a lobby client's column: the crew place of the stock role whose place its character stands at (Support.csc)
+local function SpotColumn( controller, client )
+	local xuid = client and client.model and client.model.xuid and client.model.xuid:get()
+	local draft = xuid and CoD.ZombieUtility.GetPositionDraftClient( controller, xuid )
+	local character = draft and draft.characterIndex and draft.characterIndex:get()
+	if not character or character <= 0 then
+		return nil
+	end
+	local model = Engine[@"getmodel"]( Engine[@"getglobalmodel"](), "ShieldDraftSpotRole." .. character )
+	local role = model and model:get()
+	if not role or role <= 0 then
+		return nil
+	end
+	local bundle = Engine[@"getherobundleinfo"]( Enum[@"emodes"][@"mode_zombies"], role )
+	local name = bundle and bundle ~= 0 and bundle[@"chrname"]
+	for column, names in ipairs( CrewColumns ) do
+		for _, crewName in ipairs( names ) do
+			if crewName == name then
+				return column
+			end
+		end
+	end
+	return nil
+end
+
+local LastColumns = nil
+
+local function WrapCharacterColumns()
+	local utility = CoD.ZombieUtility
+	-- (a flag: UnlockAll.lua wraps the ordering too, on top of this one or under it)
+	if not utility or not utility.OrderCharacterButtonZMList or utility.shieldSpotColumnsWrapped then
+		return
+	end
+	utility.shieldSpotColumnsWrapped = true
+	local order = utility.OrderCharacterButtonZMList
+	utility.OrderCharacterButtonZMList = function ( model, controller, clients, ... )
+		local ok, result = pcall( function ()
+			local columns, placed, any = {}, {}, false
+			for index, client in ipairs( clients ) do
+				local column = SpotColumn( controller, client )
+				if column and not columns[column] then
+					columns[column] = client
+					placed[index] = true
+					any = true
+				end
+			end
+			if not any then
+				return nil
+			end
+			-- the rest in the free columns, in the lobby's order (as the game fills its own blanks)
+			local list, rest = {}, {}
+			for index, client in ipairs( clients ) do
+				if not placed[index] then
+					table.insert( rest, client )
+				end
+			end
+			for column = 1, #clients do
+				list[column] = columns[column] or table.remove( rest, 1 ) or 0
+			end
+			local text = ""
+			for column = 1, 4 do
+				text = text .. " " .. column .. ":" .. tostring( columns[column] ~= nil )
+			end
+			if text ~= LastColumns then
+				LastColumns = text
+				Log( "select class columns placed by spot:" .. text )
+			end
+			return list
+		end )
+		if ok and result then
+			return result
+		end
+		if not ok then
+			Log( "columns not ordered: " .. tostring( result ) )
+		end
+		return order( model, controller, clients, ... )
+	end
+
+	-- the list again when the spots change
+	if utility.SubscribeToLobbyClientInfo and utility.SubscribeToLobbyClientInfo ~= utility.shieldSpotSubscribe then
+		local subscribe = utility.SubscribeToLobbyClientInfo
+		utility.SubscribeToLobbyClientInfo = function ( menu, controller, ... )
+			local result = subscribe( menu, controller, ... )
+			pcall( function ()
+				if not menu._shieldSpotSubscription then
+					local changed = Engine[@"createmodel"]( Engine[@"createmodel"]( Engine[@"getglobalmodel"](), "ShieldDraftSpotRole" ), "changed" )
+					menu._shieldSpotSubscription = menu:subscribeToModel( changed, function ()
+						DataSourceHelperRecreate( controller, "DirectorCharacterButtonZMList" )
+					end, false )
+				end
+			end )
+			return result
+		end
+		utility.shieldSpotSubscribe = utility.SubscribeToLobbyClientInfo
+	end
+	Log( "select class columns by the lobby's spots" )
+end
+
 local function Wrap()
 	WrapStories()
+	WrapCharacterColumns()
 	WrapBreadcrumbs()
 	WrapOutfitBreadcrumbs()
 	WrapChildCountLink()
@@ -368,9 +557,11 @@ local function Wrap()
 	WrapDraftSubscribe()
 	WrapTiles()
 	local widget = CoD.StartMenu_Personalization_ZM
-	if not widget or widget.shieldNew == widget.new then
+	-- (a flag, not new itself: CharacterCategories.lua wraps new too, and each would wrap the other's again every require)
+	if not widget or widget.shieldForcedWrapped then
 		return
 	end
+	widget.shieldForcedWrapped = true
 	local gameNew = widget.new
 	widget.new = function ( menu, controller, ... )
 		local self = gameNew( menu, controller, ... )
@@ -431,7 +622,6 @@ local function Wrap()
 		end
 		return self
 	end
-	widget.shieldNew = widget.new
 	Log( "character list wrapped" )
 end
 

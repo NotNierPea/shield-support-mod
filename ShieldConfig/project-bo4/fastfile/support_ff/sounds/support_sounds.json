@@ -1852161,6 +1852161,72 @@
                 }
             ],
             "format": "flac"
+        },
+        {
+            "name": "shield_freerun_countbeep",
+            "file": "freerun/shield_freerun_countbeep.wav",
+            "type": "2d",
+            "VolMin": 100,
+            "VolMax": 100,
+            "loop": false,
+            "Storage": "loaded",
+            "Pauseable": true,
+            "format": "flac"
+        },
+        {
+            "name": "shield_freerun_gobeep",
+            "file": "freerun/shield_freerun_gobeep.wav",
+            "type": "2d",
+            "VolMin": 100,
+            "VolMax": 100,
+            "loop": false,
+            "Storage": "loaded",
+            "Pauseable": true,
+            "format": "flac"
+        },
+        {
+            "name": "shield_freerun_checkpoint",
+            "file": "freerun/shield_freerun_checkpoint.wav",
+            "type": "2d",
+            "VolMin": 100,
+            "VolMax": 100,
+            "loop": false,
+            "Storage": "loaded",
+            "Pauseable": true,
+            "format": "flac"
+        },
+        {
+            "name": "shield_freerun_music",
+            "file": "freerun/shield_freerun_music.wav",
+            "type": "2d",
+            "VolMin": 100,
+            "VolMax": 100,
+            "loop": false,
+            "Storage": "streamed",
+            "Pauseable": true,
+            "format": "flac"
+        },
+        {
+            "name": "shield_freerun_victory",
+            "file": "freerun/shield_freerun_victory.wav",
+            "type": "2d",
+            "VolMin": 100,
+            "VolMax": 100,
+            "loop": false,
+            "Storage": "streamed",
+            "Pauseable": true,
+            "format": "flac"
+        },
+        {
+            "name": "shield_freerun_failure",
+            "file": "freerun/shield_freerun_failure.wav",
+            "type": "2d",
+            "VolMin": 100,
+            "VolMax": 100,
+            "loop": false,
+            "Storage": "streamed",
+            "Pauseable": true,
+            "format": "flac"
         }
     ]
 }

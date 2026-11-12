@@ -1,0 +1,12 @@
+{
+    "name": "shield_freerun_chev2",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../models/shield_freerun_chev2.gltf",
+    "bone": "tag_origin",
+    "materials": {
+        "chev2": "materials/shield_freerun_chev2_mat.json"
+    },
+    "stream": false,
+    "collision": "none"
+}

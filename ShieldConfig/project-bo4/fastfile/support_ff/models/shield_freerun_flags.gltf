@@ -1,0 +1,109 @@
+{
+    "asset": {
+        "version": "2.0",
+        "generator": "zm_room tools/xbin.py"
+    },
+    "buffers": [
+        {
+            "uri": "shield_freerun_flags.bin",
+            "byteLength": 608
+        }
+    ],
+    "bufferViews": [
+        {
+            "buffer": 0,
+            "byteOffset": 0,
+            "byteLength": 192,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 192,
+            "byteLength": 192,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 384,
+            "byteLength": 128,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 512,
+            "byteLength": 96,
+            "target": 34963
+        }
+    ],
+    "accessors": [
+        {
+            "bufferView": 0,
+            "componentType": 5126,
+            "count": 16,
+            "type": "VEC3",
+            "min": [
+                0.0,
+                0,
+                -200.78699999999998
+            ],
+            "max": [
+                0.0,
+                102.362,
+                200.78699999999998
+            ]
+        },
+        {
+            "bufferView": 1,
+            "componentType": 5126,
+            "count": 16,
+            "type": "VEC3"
+        },
+        {
+            "bufferView": 2,
+            "componentType": 5126,
+            "count": 16,
+            "type": "VEC2"
+        },
+        {
+            "bufferView": 3,
+            "componentType": 5125,
+            "count": 24,
+            "type": "SCALAR"
+        }
+    ],
+    "nodes": [
+        {
+            "name": "mesh",
+            "mesh": 0
+        }
+    ],
+    "meshes": [
+        {
+            "name": "bully_race_flags",
+            "primitives": [
+                {
+                    "attributes": {
+                        "POSITION": 0,
+                        "NORMAL": 1,
+                        "TEXCOORD_0": 2
+                    },
+                    "indices": 3,
+                    "material": 0
+                }
+            ]
+        }
+    ],
+    "materials": [
+        {
+            "name": "flag"
+        }
+    ],
+    "scenes": [
+        {
+            "nodes": [
+                0
+            ]
+        }
+    ],
+    "scene": 0
+}

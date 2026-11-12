@@ -1,0 +1,184 @@
+{
+    "name": "#hash_3644a792262fa1e8",
+    "entries": [
+        {
+            "fx": [
+                "#hash_6e68fc37599a8e13",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "tag": "j_knee_ri",
+            "unk_6c": [
+                0,
+                1,
+                0
+            ]
+        },
+        {
+            "fx": [
+                "#hash_6e68fc37599a8e13",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "tag": "j_knee_le",
+            "unk_6c": [
+                0,
+                1,
+                0
+            ]
+        },
+        {
+            "fx": [
+                "#hash_6e68fc37599a8e13",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "tag": "j_shoulder_ri",
+            "unk_6c": [
+                0,
+                1,
+                0
+            ]
+        },
+        {
+            "fx": [
+                "#hash_6e68fc37599a8e13",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "tag": "j_shoulder_le",
+            "unk_6c": [
+                0,
+                1,
+                0
+            ]
+        },
+        {
+            "fx": [
+                "#hash_6e68fc37599a8e13",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "tag": "j_ankle_ri",
+            "unk_6c": [
+                0,
+                1,
+                0
+            ]
+        },
+        {
+            "fx": [
+                "#hash_6e68fc37599a8e13",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "tag": "j_ankle_le",
+            "unk_6c": [
+                0,
+                1,
+                0
+            ]
+        },
+        {
+            "fx": [
+                "#hash_da2c769c099c022",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "tag": "j_spineupper",
+            "unk_6c": [
+                0,
+                1,
+                0
+            ]
+        },
+        {
+            "fx": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "tag": null
+        }
+    ]
+}

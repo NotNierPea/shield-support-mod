@@ -1,0 +1,19 @@
+{
+    "name": "c_t8_misty_bo2_head",
+    "templateModel": "../templates/xmodel_head.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/misty/misty_head.gltf",
+    "skeleton": "../skeletons/misty_head.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "misty_cap": "materials/misty_cap_mat.json",
+        "misty_eye": "materials/misty_eye_mat.json",
+        "misty_hair": "materials/misty_hair_mat.json",
+        "misty_head": "materials/misty_head_mat.json",
+        "misty_head_paint": "materials/misty_head_paint_mat.json",
+        "misty_mouth": "materials/misty_mouth_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf",
+    "physConstraints": "#hash_baf4d5018b2118f"
+}

@@ -1,0 +1,169 @@
+{
+    "name": "#hash_3fe2084a70865212",
+    "header": "125286704a08e23f000000000000000084e5fc89a9010000a4e5fc89a9010000e4e5fc89a9010000f0e5fc89a901000028e6fc89a90100006047e989a9010000a0e6fc89a901000070e9fc89a901000000000000000000000000000000000000000000000000000000000000000000000000000000000000307f5f8ea9010000603cfedea9010000b0075bdfa9010000f0eb5f8ea901000030ec3ddfa9010000103f5f8ea901000090525adfa9010000203e678ea9010000a0e7fc89a901000018d61885a90100000800000093bc3b3dc286bb3c5d784c3c41d9f93b7998a03b7e13563bd54f0a3b4df1b63afd44d73e000080400000803f0000803e000080400000803f000000400000003f60a96cbe17bf2fc0614648c010caf34015bf2f40f240d03fc800000000000000000000000800000000000000000000009ce80a4100000000000020020707000801000000",
+    "boneNames": [
+        "tag_origin",
+        "tag_claw_bottom_base_animated",
+        "tag_claw_left_base_animated",
+        "tag_claw_right_base_animated",
+        "tag_fx",
+        "tag_claw_bottom_hook_animated",
+        "tag_claw_left_hook_animated",
+        "tag_claw_right_hook_animated"
+    ],
+    "boneNameIndices": [
+        {
+            "name": "tag_origin",
+            "index": 0
+        },
+        {
+            "name": "tag_fx",
+            "index": 4
+        },
+        {
+            "name": "tag_claw_bottom_base_animated",
+            "index": 1
+        },
+        {
+            "name": "tag_claw_left_base_animated",
+            "index": 2
+        },
+        {
+            "name": "tag_claw_right_base_animated",
+            "index": 3
+        },
+        {
+            "name": "tag_claw_bottom_hook_animated",
+            "index": 5
+        },
+        {
+            "name": "tag_claw_left_hook_animated",
+            "index": 6
+        },
+        {
+            "name": "tag_claw_right_hook_animated",
+            "index": 7
+        }
+    ],
+    "parentList": "01020304040404",
+    "quats": "030080e9fe010000bc08d074ba49f70fbc08508b454af78f010000000000000001000000000000001d0080feffe7ff3fe5ffbffeff1f0000",
+    "trans": "b87a75407ec282b46a0038bf8482754097ab1c3f58edaf3e9c797540d18c1cbf40caaf3e00000000000000000000000029e0393f00000000508606bfa8df393f000030b7308506bfa8df393f00003037208506bf00000000000000000000000000000000000000000000000000000000",
+    "partClassification": "0000000000000000",
+    "baseMat": "0000000000000000000000000000803f00000000000000000000000000000040000000001e67353f0000000093a2343fb87a75407ec282b46a0038bf00000040e8191d3fdc67b53ea16e1c3f66a2b43e8482754097ab1c3f58edaf3e00000040e8191dbfdc67b53ea16e1cbf66a2b43e9c797540d18c1cbf40caaf3e000000400000000000000000000000000000803f00000000000000000000000000000040000000001e67353f0000000093a2343fc4a653407ec282b40aa7b8bf000000403b1a1d3f0169b53ede6d1c3fc6a2b43eb3fa53406ed29e3f5078353f000000403b1a1dbf0169b53ede6d1cbfc6a2b43ecff153400bc39ebfc466353f00000040",
+    "boneInfo": "60a96cbef82d62bfaaba6fbf18c0bb404492653f8403283fcd5a3440000060b4a0f917bea67f2a41ff0000007e1b9abe7a900fbe300c7dbf7d4b893f20900f3eca10cf3e78c2bd3e000034b56eb682bebbd7633fff000000609998be24eb10be97606bbf8b60853f83b70e3e467acf3e9ae4bc3e004aadbaa8a183be3e25643fff000000006395becc410ebe3e3b6bbf0708843f3aeb103e60c1cf3eb42bbd3ec054ad3a8e5a83be3c25643fff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000ff0000005c71f8beef5226beecdda0bff838d83f200f313ef4da8b404aa82f3f000032b5f4d4c63f9b540a41ff000000d495f9bec7fc31be615fa2bf3456d73f70be2f3e2e9f8b40195f2e3f80b355bb0c8dc53f5d910a41ff000000424ef9bee00724be7e29a2bffa67d73fdb042f3e24a08b40a7822e3fe0be553bd49ec53f5c910a41ff000000",
+    "unkC0": "000000f70000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "meshes": [
+        "#hash_4b06031a725e708b",
+        "#hash_bb1471ec90e6c83",
+        "#hash_602292323452ef88",
+        "#hash_511bb8da3daf0574",
+        "#hash_18255ec50b42858b",
+        "#hash_48fb2135af97e895",
+        "#hash_56b510beb61158b5",
+        "#hash_7ea97cafa69562c5"
+    ],
+    "meshMaterials": [
+        {
+            "entry": "050000000000000060e8fc89a901000088e8fc89a9010000",
+            "materials": [
+                "#hash_25248655c5fe8f52",
+                "#hash_df66cea8ddd1aeb",
+                "#hash_1afabf903ba51870",
+                "#hash_aa2c3605b24788de",
+                "#hash_d83cfaf3056d9aac"
+            ],
+            "himipInvSqRadii": "000000000000000060f6013d0000000013c1a53f"
+        },
+        {
+            "entry": "050000000000000060e8fc89a90100009ce8fc89a9010000",
+            "materials": [
+                "#hash_25248655c5fe8f52",
+                "#hash_df66cea8ddd1aeb",
+                "#hash_1afabf903ba51870",
+                "#hash_aa2c3605b24788de",
+                "#hash_d83cfaf3056d9aac"
+            ],
+            "himipInvSqRadii": "000000000000000039121b3d00000000a2a6a53f"
+        },
+        {
+            "entry": "050000000000000060e8fc89a9010000b0e8fc89a9010000",
+            "materials": [
+                "#hash_25248655c5fe8f52",
+                "#hash_df66cea8ddd1aeb",
+                "#hash_1afabf903ba51870",
+                "#hash_aa2c3605b24788de",
+                "#hash_d83cfaf3056d9aac"
+            ],
+            "himipInvSqRadii": "0000000000000000dfe8203d00000000b58aa53f"
+        },
+        {
+            "entry": "0600000000000000c8e8fc89a9010000f8e8fc89a9010000",
+            "materials": [
+                "#hash_25248655c5fe8f52",
+                "#hash_df66cea8ddd1aeb",
+                "#hash_1afabf903ba51870",
+                "#hash_e9383b4c88c21a90",
+                "#hash_aa2c3605b24788de",
+                "#hash_d83cfaf3056d9aac"
+            ],
+            "himipInvSqRadii": "00000000000000006a58233d00000000000000005486a53f"
+        },
+        {
+            "entry": "0600000000000000c8e8fc89a901000010e9fc89a9010000",
+            "materials": [
+                "#hash_25248655c5fe8f52",
+                "#hash_df66cea8ddd1aeb",
+                "#hash_1afabf903ba51870",
+                "#hash_e9383b4c88c21a90",
+                "#hash_aa2c3605b24788de",
+                "#hash_d83cfaf3056d9aac"
+            ],
+            "himipInvSqRadii": "00000000000000008086243d00000000000000005486a53f"
+        },
+        {
+            "entry": "0600000000000000c8e8fc89a901000028e9fc89a9010000",
+            "materials": [
+                "#hash_25248655c5fe8f52",
+                "#hash_df66cea8ddd1aeb",
+                "#hash_1afabf903ba51870",
+                "#hash_e9383b4c88c21a90",
+                "#hash_aa2c3605b24788de",
+                "#hash_d83cfaf3056d9aac"
+            ],
+            "himipInvSqRadii": "00000000000000004c08253d00000000000000005486a53f"
+        },
+        {
+            "entry": "0600000000000000c8e8fc89a901000040e9fc89a9010000",
+            "materials": [
+                "#hash_25248655c5fe8f52",
+                "#hash_df66cea8ddd1aeb",
+                "#hash_1afabf903ba51870",
+                "#hash_e9383b4c88c21a90",
+                "#hash_aa2c3605b24788de",
+                "#hash_d83cfaf3056d9aac"
+            ],
+            "himipInvSqRadii": "00000000000000004e87253d00000000000000005486a53f"
+        },
+        {
+            "entry": "0600000000000000c8e8fc89a901000058e9fc89a9010000",
+            "materials": [
+                "#hash_25248655c5fe8f52",
+                "#hash_df66cea8ddd1aeb",
+                "#hash_1afabf903ba51870",
+                "#hash_e9383b4c88c21a90",
+                "#hash_aa2c3605b24788de",
+                "#hash_d83cfaf3056d9aac"
+            ],
+            "himipInvSqRadii": "0000000000000000c186253d00000000000000005286a53f"
+        }
+    ],
+    "numCollSurfs": 0,
+    "numCollmaps": 0,
+    "collSurfs": [],
+    "collmaps": [],
+    "submodels": [],
+    "lossless": true,
+    "numSubmodels": 0,
+    "numLods": 8,
+    "numBones": 8
+}

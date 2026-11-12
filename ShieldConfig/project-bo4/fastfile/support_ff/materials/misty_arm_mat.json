@@ -1,0 +1,17 @@
+{
+    "name": "misty_arm_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "glossMap": "misty_arm_g.png,bc4",
+        "normalMap": "misty_arm_n.png,linear",
+        "aoMap": "#hash_bfd1eb9d1e41b805",
+        "colorMap": "misty_arm.png",
+        "specColorMap": "misty_arm_s.png"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            8
+        ]
+    }
+}

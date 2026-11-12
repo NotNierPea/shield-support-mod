@@ -1,0 +1,17 @@
+{
+    "name": "misty_mouth_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "glossMap": "misty_mouth_g.png,bc4",
+        "normalMap": "misty_mouth_n.png,linear",
+        "aoMap": "#hash_bfd1eb9d1e41b805",
+        "colorMap": "misty_mouth.png",
+        "specColorMap": "misty_mouth_s.png"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            8
+        ]
+    }
+}

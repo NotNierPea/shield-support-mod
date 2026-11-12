@@ -167,6 +167,21 @@ DataSources.DirectorExtraHomeButtonsCustom = ListHelper_SetupDataSource( "Direct
 				actionParam = "ShieldLobbyServerBrowserOverlay"
 			}
 		} )
+		-- freerun: a map, a course and the grapple (Freerun.lua)
+		table.insert( f85_local0, {
+			models = {
+				subtitle = @"shield/freerun",
+				iconBackground = @"shield_freerun_tile",
+				iconBackgroundFocus = @"shield_freerun_tile",
+				showOnLeft = false,
+				small = false,
+				locked = false
+			},
+			properties = {
+				action = CoD.DirectorUtility.DirectorSelectOpenPopup,
+				actionParam = "ShieldFreerun"
+			}
+		} )
 		local f85_local6 = @"ui_icon_blackmarket_store_tile_default_01"
 		local f85_local7 = @"ui_icon_blackmarket_store_tile_focus_01"
 		if IsBooleanDvarSet( @"loot_enableblackmarket" ) then
@@ -1524,6 +1539,22 @@ CoD.DirectorSelectOverride = function()
 				properties = {
 					action = CoD.DirectorUtility.DirectorSelectOpenPopup,
 					actionParam = "ShieldLobbyServerBrowserOverlay"
+				}
+			} )
+
+			-- freerun (Freerun.lua), on the right as in the normal menu (the left holds 4)
+			table.insert( f85_local0, {
+				models = {
+					subtitle = @"shield/freerun",
+					iconBackground = @"blacktransparent",
+					iconBackgroundFocus = @"blacktransparent",
+					showOnLeft = false,
+					small = true,
+					locked = false
+				},
+				properties = {
+					action = CoD.DirectorUtility.DirectorSelectOpenPopup,
+					actionParam = "ShieldFreerun"
 				}
 			} )
 

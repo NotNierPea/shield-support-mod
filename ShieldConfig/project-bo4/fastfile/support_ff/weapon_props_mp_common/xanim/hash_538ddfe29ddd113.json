@@ -1,0 +1,67 @@
+{
+    "name": "#hash_538ddfe29ddd113",
+    "header": "0000000000000000c86aecc3250200000000000000000000000000000000000000000000000000000000000000000000c0812ec42502000098812ec425020000000000000000000000000000000000000000000000000000d8812ec4250200000000000000000000000000000000000013d1dd29fedd3805000000000000000058822ec4250200000000000000000000f8812ec425020000000000000000000000000000000000000c02000000000000000000000000000000000000000000000000f04100007041000000000000000000000000000000000000000000000000000000001f0000000c0000003000000000000000000000000000000012000000000002000b000000000004001b001f0001001f0002000000000000000000010006000000010000000000000000000000",
+    "numBones": 31,
+    "numframes": 2,
+    "lossless": true,
+    "branchName": "body",
+    "framerate": 30,
+    "frequency": 15,
+    "names": [
+        "j_clavicle_ri",
+        "j_index_ri_1",
+        "j_mid_ri_1",
+        "j_pinkybase_ri",
+        "j_ringbase_ri",
+        "j_thumb_ri_1",
+        "j_index_ri_2",
+        "j_mid_ri_2",
+        "j_pinky_ri_1",
+        "j_ring_ri_1",
+        "j_thumb_ri_2",
+        "j_index_ri_3",
+        "j_mid_ri_3",
+        "j_pinky_ri_2",
+        "j_ring_ri_2",
+        "j_thumb_ri_3",
+        "j_pinky_ri_3",
+        "j_ring_ri_3",
+        "j_elbow_ri",
+        "j_elbow_bulge_ri",
+        "tag_weapon_left",
+        "tag_weapon_right",
+        "j_shoulder_ri",
+        "j_wrist_ri",
+        "j_wristtwist1_ri",
+        "j_wristtwist2_ri",
+        "j_wristtwist3_ri",
+        "j_wristtwist4_ri",
+        "j_wristtwist5_ri",
+        "j_wristtwist6_ri",
+        "j_wristtwist_ri"
+    ],
+    "dataByte": "001314150102030405060708090a0b0c0d0e0f101112161718191a1b1c1d1e",
+    "dataInt": "80da1cc04588f9bf502ad2bffeff80b5fc04f8bd432e6036ec9d8ec1ae8fc3bfc8e3cac1fafc49c18278cfbf93b887c1",
+    "dataShort": "98c85bbdcfdddb3ccd0d80596b113200cd0d80596b11320001f30ba9c1a8db1315ccfee0e4d3723d19d33e00000000003d053f000000000065373f000000000089693f0000000000b19b3f0000000000d9cd3f0000000000f5a03e0000000000",
+    "notify": [
+        {
+            "raw": "000000000000000000000000000000002b0200002c0200002c0200002d0200000000803f00000000",
+            "type": "loop_end",
+            "param1": "",
+            "param2": "",
+            "param3": "self notify",
+            "time": 1
+        }
+    ],
+    "startupNotify": [],
+    "shutdownNotify": [],
+    "list30": [
+        {
+            "raw": "2e0200000000000000000000010000002c0200002c020000",
+            "str0": "none",
+            "str10": "",
+            "str14": ""
+        }
+    ],
+    "streamInfo": false
+}

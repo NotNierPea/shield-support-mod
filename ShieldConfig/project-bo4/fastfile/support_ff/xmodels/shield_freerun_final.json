@@ -1,0 +1,12 @@
+{
+    "name": "shield_freerun_final",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../models/shield_freerun_final.gltf",
+    "bone": "tag_origin",
+    "materials": {
+        "final0": "materials/shield_freerun_final0_mat.json"
+    },
+    "stream": false,
+    "collision": "none"
+}

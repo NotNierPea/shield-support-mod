@@ -161,6 +161,22 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/Freerun",
+            "path": "Lua\\Frontend\\Freerun.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
+            "name": "ui/shield/StateLoopWatch",
+            "path": "Lua\\Frontend\\StateLoopWatch.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/DirectorPublic",
             "path": "Lua\\Frontend\\DirectorPublic.luac",
             "hooks_post": [
@@ -331,6 +347,14 @@
             "type": "luafile",
             "name": "ui/shield/HostLobby",
             "path": "Lua\\Frontend\\HostLobby.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
+            "name": "ui/shield/Splitscreen",
+            "path": "Lua\\Frontend\\Splitscreen.luac",
             "hooks_post": [
                 "x64:4ed0bcba9d999e0f"
             ]
@@ -547,6 +571,14 @@
             "type": "luafile",
             "name": "ui/shield/ZMForcedCharacter",
             "path": "Lua\\Frontend\\ZMForcedCharacter.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
+            "name": "ui/shield/CharacterCategories",
+            "path": "Lua\\Frontend\\CharacterCategories.luac",
             "hooks_post": [
                 "x64:4ed0bcba9d999e0f"
             ]
@@ -790,8 +822,26 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/GameFreerunHud",
+            "path": "Lua\\Game\\FreerunHud.luac",
+            "hooks_post": [
+                "x64:46f417a74d9ab424",
+                "x64:57d27ab8e2f7a9d0"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/GameInspectHud",
             "path": "Lua\\Game\\InspectHud.luac",
+            "hooks_post": [
+                "x64:46f417a74d9ab424",
+                "x64:57d27ab8e2f7a9d0"
+            ]
+        },
+        {
+            "type": "luafile",
+            "name": "ui/shield/GameSplitscreenInput",
+            "path": "Lua\\Game\\SplitscreenInput.luac",
             "hooks_post": [
                 "x64:46f417a74d9ab424",
                 "x64:57d27ab8e2f7a9d0"
@@ -1555,6 +1605,26 @@
         },
         {
             "type": "localizeentry",
+            "name": "shield/splitscreen_signout_title",
+            "value": "Sign Out Player 2?"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/splitscreen_signout_desc",
+            "value": "Player 2 leaves the lobby and signs out. Everyone else stays."
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/splitscreen_signout",
+            "value": "Sign Out"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/splitscreen_cancel",
+            "value": "Cancel"
+        },
+        {
+            "type": "localizeentry",
             "name": "shield/random_music_toggle",
             "value": "Play Random Music"
         },
@@ -1922,6 +1992,31 @@
             "type": "localizeentry",
             "name": "shield/serverbrowser",
             "value": "Server Browser"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/freerun",
+            "value": "Freerun"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/freerun_race_starting",
+            "value": "RACE STARTING IN"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/gametype/freerun",
+            "value": "Freerun"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/gametype/freerun_caps",
+            "value": "FREERUN"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/gametype/freerun_desc",
+            "value": "Race the checkpoints of a course with the grapple. No damage, no time limit: just you and the clock."
         },
         {
             "type": "localizeentry",
@@ -2622,6 +2717,11 @@
             "type": "localizeentry",
             "name": "shield/unforce_character",
             "value": "Clear Forced Character"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/character_category_custom",
+            "value": "Custom"
         },
         {
             "type": "localizeentry",

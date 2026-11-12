@@ -231,7 +231,7 @@ local function GametypeRows( mode )
 	for _, info in pairs( CoD.GameTypeUtility.GameTypeTable ) do
 		local id = info.name
 
-		if IsPlainName( id ) then
+		if IsPlainName( id ) and not ( CoD.IsShieldHiddenGameType and CoD.IsShieldHiddenGameType( info ) ) then
 			local group = info.groupName
 			local fits = false
 

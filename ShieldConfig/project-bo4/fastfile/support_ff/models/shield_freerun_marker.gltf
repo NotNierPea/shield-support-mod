@@ -1,0 +1,109 @@
+{
+    "asset": {
+        "version": "2.0",
+        "generator": "zm_room tools/xbin.py"
+    },
+    "buffers": [
+        {
+            "uri": "shield_freerun_marker.bin",
+            "byteLength": 608
+        }
+    ],
+    "bufferViews": [
+        {
+            "buffer": 0,
+            "byteOffset": 0,
+            "byteLength": 192,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 192,
+            "byteLength": 192,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 384,
+            "byteLength": 128,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 512,
+            "byteLength": 96,
+            "target": 34963
+        }
+    ],
+    "accessors": [
+        {
+            "bufferView": 0,
+            "componentType": 5126,
+            "count": 16,
+            "type": "VEC3",
+            "min": [
+                -47.24399999999999,
+                0,
+                -47.24399999999999
+            ],
+            "max": [
+                47.24399999999999,
+                314.96,
+                47.24399999999999
+            ]
+        },
+        {
+            "bufferView": 1,
+            "componentType": 5126,
+            "count": 16,
+            "type": "VEC3"
+        },
+        {
+            "bufferView": 2,
+            "componentType": 5126,
+            "count": 16,
+            "type": "VEC2"
+        },
+        {
+            "bufferView": 3,
+            "componentType": 5125,
+            "count": 24,
+            "type": "SCALAR"
+        }
+    ],
+    "nodes": [
+        {
+            "name": "mesh",
+            "mesh": 0
+        }
+    ],
+    "meshes": [
+        {
+            "name": "bully_race_marker",
+            "primitives": [
+                {
+                    "attributes": {
+                        "POSITION": 0,
+                        "NORMAL": 1,
+                        "TEXCOORD_0": 2
+                    },
+                    "indices": 3,
+                    "material": 0
+                }
+            ]
+        }
+    ],
+    "materials": [
+        {
+            "name": "marker"
+        }
+    ],
+    "scenes": [
+        {
+            "nodes": [
+                0
+            ]
+        }
+    ],
+    "scene": 0
+}

@@ -1,0 +1,24 @@
+{
+    "name": "misty_head_mat",
+    "template": "../templates/material_skin.json",
+    "textures": {
+        "glossMap": "misty_head_g.png,bc4",
+        "normalMap": "#hash_8c3c2dcaa1919434",
+        "aoMap": "misty_head_o.png,bc4",
+        "colorMap": "misty_head.png",
+        "thicknessMap": "misty_head_o.png,bc4",
+        "unk_6dfcc8d5": "#hash_8c3c2dcaa1919434",
+        "unk_c408965c": "#hash_8c3c2dcaa1919434"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            8
+        ],
+        "colorTint": [
+            1,
+            1,
+            1
+        ]
+    }
+}

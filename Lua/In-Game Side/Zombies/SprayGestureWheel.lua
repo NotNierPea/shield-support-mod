@@ -123,6 +123,10 @@ local function SendForcedCharacter( controller )
 	if slot >= 0 and ( slot < 3 or ( slot >= 12 and slot < 33 ) ) then
 		forced = 0
 	end
+	-- the setting is this PC's player's: a splitscreen guest keeps their own pick
+	if controller ~= Engine[@"getprimarycontroller"]() then
+		forced = 0
+	end
 	CoD.BaseUtility.SendCustomMenuResponse( controller, MENU, "zm_character", forced )
 end
 
@@ -136,7 +140,9 @@ end
 local OUTFIT_NOTIFY = @"shield_outfit"
 local OutfitPictures = {
 	[@"shield/outfits/support/zm/1/name"] = { portrait = @"peaks_hud", icon = @"peaks_portrait" },
-	[@"shield/outfits/support/zm/15/name"] = { portrait = @"peaks_hud", icon = @"peaks_portrait" }
+	[@"shield/outfits/support/zm/15/name"] = { portrait = @"peaks_hud", icon = @"peaks_portrait" },
+	-- BO2 Misty on Misty
+	[@"shield/outfits/support/zm/26/name"] = { portrait = @"misty_hud", icon = @"misty_portrait" }
 }
 
 -- client number: { character, outfit }

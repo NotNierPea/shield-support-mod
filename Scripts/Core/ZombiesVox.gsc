@@ -220,6 +220,10 @@ SetZombiesVoxExerts(voice)
 */
 detour zm_audio<scripts\zm_common\zm_audio.gsc>::play_vo_internal(str_sound, e_to_player)
 {
+    // a freerun match (Freerun.gsc): the characters say nothing
+    if(isdefined(level.shield_freerun) && isplayer(self))
+     return;
+
     if(isdefined(self.shield_vox_voice) && isstring(str_sound))
     {
         self.str_vo_being_spoken = str_sound;

@@ -1,0 +1,17 @@
+{
+    "name": "misty_cap_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "glossMap": "misty_cap_g.png,bc4",
+        "normalMap": "misty_cap_n.png,linear",
+        "aoMap": "#hash_bfd1eb9d1e41b805",
+        "colorMap": "misty_cap.png",
+        "specColorMap": "misty_cap_s.png"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            8
+        ]
+    }
+}

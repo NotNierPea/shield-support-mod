@@ -38,7 +38,7 @@
                         "hash_13c8379c2b98a9c6": "WESKER - Frontal Assault",
                         "hash_16d4e2fc988858de": "Albert Wesker",
                         "hash_541919134fdff1": "Wesker's Bio",
-                        "hash_438e8b2f52f5538b": "Former S.T.A.R.S. captain and Umbrella researcher, reborn by the virus he carries…",
+                        "hash_438e8b2f52f5538b": "Former S.T.A.R.S. captain and Umbrella researcher, reborn by the virus he carries\u2026",
                         "hash_2299bc20d2a6cd8": "Albert Wesker was raised by Umbrella as one of the Wesker Children, a project to breed the next generation of humanity.\n\nAs captain of the S.T.A.R.S. Alpha Team he led his own men into the Arklay mansion as test subjects, and was killed by the Tyrant he set loose. The prototype virus he had injected brought him back stronger, faster and colder than any man.\n\nWorking in the shadows of Tricell, he now pursues Uroboros: a virus to winnow mankind down to the few he deems worthy. To him the battlefield is a test, and few pass it."
                     },
                     "outfits": [
@@ -111,7 +111,7 @@
                         "hash_13c8379c2b98a9c6": "WESKER - Frontal Assault",
                         "hash_16d4e2fc988858de": "Albert Wesker",
                         "hash_541919134fdff1": "Wesker's Bio",
-                        "hash_438e8b2f52f5538b": "Former S.T.A.R.S. captain and Umbrella researcher, reborn by the virus he carries…",
+                        "hash_438e8b2f52f5538b": "Former S.T.A.R.S. captain and Umbrella researcher, reborn by the virus he carries\u2026",
                         "hash_2299bc20d2a6cd8": "Albert Wesker was raised by Umbrella as one of the Wesker Children, a project to breed the next generation of humanity.\n\nAs captain of the S.T.A.R.S. Alpha Team he led his own men into the Arklay mansion as test subjects, and was killed by the Tyrant he set loose. The prototype virus he had injected brought him back stronger, faster and colder than any man.\n\nWorking in the shadows of Tricell, he now pursues Uroboros: a virus to winnow mankind down to the few he deems worthy. To him the battlefield is a test, and few pass it."
                     },
                     "outfits": [
@@ -2410,7 +2410,8 @@
                         "characterint7": 0,
                         "characterint8": 0
                     },
-                    "specialist_weapon": "jacket_the_punch"
+                    "specialist_weapon": "jacket_the_punch",
+                    "lend_war_paints": true
                 },
                 {
                     "name": "jacket",
@@ -2462,7 +2463,8 @@
                         "characterint6": 0,
                         "characterint7": 0,
                         "characterint8": 0
-                    }
+                    },
+                    "lend_war_paints": true
                 }
             ],
             "outfit_adds": [
@@ -2537,6 +2539,36 @@
                     "legs": "c_t8_mascot_legs",
                     "loot": "shield_mascot",
                     "clothes": "c_t8_wesker_head"
+                },
+                {
+                    "mode": "zm",
+                    "role": 26,
+                    "name": "Black Ops II",
+                    "default_name": "Default",
+                    "icon": "misty_outfit",
+                    "body": "c_t8_misty_bo2",
+                    "head": "c_t8_misty_bo2_head",
+                    "arms": "c_t8_misty_bo2_arms",
+                    "legs": "c_t8_misty_bo2_legs",
+                    "clothes": "c_t8_wesker_head",
+                    "war_paints": {
+                        "face": "misty_head_paint_mat"
+                    }
+                },
+                {
+                    "mode": "wz",
+                    "role": 49,
+                    "name": "Black Ops II",
+                    "default_name": "Default",
+                    "icon": "misty_outfit",
+                    "body": "c_t8_misty_bo2",
+                    "head": "c_t8_misty_bo2_head",
+                    "arms": "c_t8_misty_bo2_arms",
+                    "legs": "c_t8_misty_bo2_legs",
+                    "clothes": "c_t8_wesker_head",
+                    "war_paints": {
+                        "face": "misty_head_paint_mat"
+                    }
                 }
             ],
             "role_names": [
@@ -2610,6 +2642,10 @@
         },
         "support_mp": {
             "hook": "mp_common",
+            "type": "mode_common"
+        },
+        "support_zm": {
+            "hook": "zm_common",
             "type": "mode_common"
         }
     }
