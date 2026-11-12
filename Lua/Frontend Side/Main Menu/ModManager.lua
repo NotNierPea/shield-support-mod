@@ -127,6 +127,17 @@ local ModsCatalog = {
 		desc = "Adds a round timer to zombies.",
 		asset = "TimersMod",
 		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/TimersMod.zip"
+	},
+	{
+		folder = "zm_zodt8_day",
+		title = "VOD Day",
+		modes = { "zm" },
+		author = "peawhatever",
+		icon = "mod_manager_vod_day",
+		previews = { "mm_prev_vod_day_1" },
+		desc = "Voyage of Despair in broad daylight: sunshine, a blue sky and open sea instead of the night.",
+		asset = "zm_zodt8_day",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/zm_zodt8_day_1.0.0.zip"
 	}
 }
 
