@@ -8,6 +8,16 @@ CoD.ShieldInitLuaFile()
 
 ---------------------------
 
+--[[
+	A public match playlist (the Public Match / Featured tab) gets no Solo button. Told by the playlist, not the tab model:
+	that stays 1 (Featured) until the playlist menu is opened. Classic, Rush, Gauntlet and Tutorial exclude public lobbies.
+]]
+local function IsPublicOnlyPlaylist()
+	local id = Engine[@"getglobalmodel"]():create( "lobbyRoot.playlistId" ):get()
+	local info = id and Engine[@"getplaylistinfobyid"]( id )
+	return info ~= nil and not info.excludePublicLobby
+end
+
 -- Add public matches to Gauntlets, Rush, etc
 CoD.ZMLobbyButtonsContainer = InheritFrom( LUI.UIElement )
 CoD.ZMLobbyButtonsContainer.__defaultWidth = 425
@@ -165,7 +175,7 @@ CoD.ZMLobbyButtonsContainer.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3,
 		{
 			stateName = "PrivateMatchExcluded",
 			condition = function ( menu, element, event )
-				return AlwaysFalse()
+				return IsPublicOnlyPlaylist()
 			end
 		}
 	} )
@@ -191,6 +201,15 @@ CoD.ZMLobbyButtonsContainer.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3,
 			controller = f1_arg1,
 			modelValue = f19_arg0:get(),
 			modelName = "PrivateMatchExcluded"
+		} )
+	end, false )
+	self:subscribeToModel( Engine[@"getglobalmodel"]():create( "lobbyRoot.playlistId" ), function ( model )
+		f1_arg0:updateElementState( self, {
+			name = "model_validation",
+			menu = f1_arg0,
+			controller = f1_arg1,
+			modelValue = model:get(),
+			modelName = "lobbyRoot.playlistId"
 		} )
 	end, false )
 	LUI.OverrideFunction_CallOriginalFirst( self, "setState", function ( element, controller, f20_arg2, f20_arg3, f20_arg4 )

@@ -21,6 +21,7 @@ image,mod_manager_abom.png
 image,mod_manager_synergy.png
 image,mod_manager_timers.png
 image,mod_manager_vod_day.png
+image,mod_manager_tag_space.png
 image,mm_icon.png
 image,shield_freerun_tile.png
 image,mm_unknown_mod.png
@@ -28,6 +29,7 @@ image,mm_unknown_mod.png
 image,mm_prev_zm_park_1.png
 image,mm_prev_zm_room_1.png
 image,mm_prev_vod_day_1.png
+image,mm_prev_tag_space_1.png
 image,shield_public_banner.png
 image,loading_shield.png
 
@@ -475,11 +477,6 @@ scriptbundle,mpdialog_player/jacket
 bgcache,characters/jacket/bgcache.csv
 // jacket: end
 
-// zm vox: begin
-// the zombies copies of the MP specialists: their lines (vox_zmc_<specialist>_<line> in support.all; the
-// others play their crew lines, ZombiesVoxTable.gsc). BO4 Custom Maps/Core/tools/build_zm_vox.py writes these lines
-bgcache,characters/zm_vox/bgcache.csv
-// zm vox: end
 
 // jacket weapon: begin
 // Jacket's specialist weapon (MP): the bat's models (their material and images in them), name and icon; the weapons
@@ -535,3 +532,9 @@ image,misty_portrait.png,nomips
 // its models cached (the frontend spawns them)
 bgcache,characters/misty/bgcache.csv
 // misty: end
+
+// zm vox: begin
+// the zombies copies of the MP specialists: their lines (vox_zmc_<specialist>_<line> in support.all; the
+// others play their crew lines, ZombiesVoxTable.gsc). BO4 Custom Maps/Core/tools/build_zm_vox.py writes these lines
+bgcache,characters/zm_vox/bgcache.csv
+// zm vox: end

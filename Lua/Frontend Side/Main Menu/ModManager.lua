@@ -138,6 +138,17 @@ local ModsCatalog = {
 		desc = "Voyage of Despair in broad daylight: sunshine, a blue sky and open sea instead of the night.",
 		asset = "zm_zodt8_day",
 		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/zm_zodt8_day_1.0.0.zip"
+	},
+	{
+		folder = "zm_orange_night",
+		title = "Tag Space",
+		modes = { "zm" },
+		author = "peawhatever",
+		icon = "mod_manager_tag_space",
+		previews = { "mm_prev_tag_space_1" },
+		desc = "Tag der Toten at night, under the sky of Mars.",
+		asset = "zm_orange_night",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/zm_orange_night_1.0.0.zip"
 	}
 }
 

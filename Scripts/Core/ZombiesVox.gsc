@@ -268,3 +268,86 @@ detour zm_audio<scripts\zm_common\zm_audio.gsc>::play_vo_internal(str_sound, e_t
         waitframe(1);
     }
 }
+
+/*
+    Tag der Toten: after Stuhlinger's line, Richtofen's voice in his head (<suffix>_plr_5_<n>, to him only) when that take
+    exists. The crews' port (build_crew_vox PORT_MAPS) put Blood of the Dead's Richtofen takes in support.all under those
+    names, so he answered nearly every line with an unrelated one. Those takes, minus Tag's own, are left out here
+    (generated from en_zm_orange's bank and crew_vox_zm_escape: PORT_TAKES 4).
+*/
+TagPortedRichtofen()
+{
+    if(isdefined(level.shield_tag_ported_rich))
+     return level.shield_tag_ported_rich;
+
+    table = [];
+    table[#"hash_112938160e7b4685"] = array(0, 1, 2);
+    table[#"hash_1550216483f19c05"] = array(0, 1, 2, 3);
+    table[#"hash_177f84e5ae1e8fb0"] = array(0, 1, 2, 3);
+    table[#"hash_1aaf29f9cf9eef2d"] = array(0, 1, 2, 3);
+    table[#"hash_1ad536f33d26c1e"] = array(0, 1, 2);
+    table[#"hash_1af1cb6f41edb6aa"] = array(0, 1, 2);
+    table[#"hash_1efab4e86747e0f6"] = array(0, 1, 2, 3);
+    table[#"hash_21a1f69b7e5aaeb5"] = array(0, 1, 2, 3);
+    table[#"hash_27d522e5c7eeb98e"] = array(0, 1, 2, 3);
+    table[#"hash_2827e3552e08123a"] = array(0, 1, 2, 3);
+    table[#"hash_2993a1bebafd90da"] = array(0, 1, 2, 3);
+    table[#"hash_2bf1a19afc40c22"] = array(0, 1, 2, 3);
+    table[#"hash_2dd5b49e52028171"] = array(0, 1, 2, 3);
+    table[#"hash_3275aa90df6248e5"] = array(0, 1, 2, 3);
+    table[#"hash_3551fbc9b3f5944f"] = array(0, 1, 2, 3);
+    table[#"hash_3cf43f66b71287e5"] = array(0, 1, 2, 3);
+    table[#"hash_413d2b04ac7f26f5"] = array(0, 1, 2, 3);
+    table[#"hash_43bbef358d7a1d56"] = array(0, 1, 3);
+    table[#"hash_43d252dd310e2faa"] = array(0, 1, 2, 3);
+    table[#"hash_4786995ab050fb66"] = array(0, 1);
+    table[#"hash_4d495ea70e8796d2"] = array(0, 1, 2, 3);
+    table[#"hash_4e13db19dbbf2c1b"] = array(0, 1, 2, 3);
+    table[#"hash_502a3f3d1bfa0eb4"] = array(0, 1, 2, 3);
+    table[#"hash_590768598ed5de66"] = array(0, 1, 3);
+    table[#"hash_5a7e23f64d8bf2d0"] = array(1, 2, 3);
+    table[#"hash_5d2536424f8ba08f"] = array(0, 1, 2, 3);
+    table[#"hash_606bb418a1c0c4ab"] = array(0, 2, 3);
+    table[#"hash_60ee94b66b1e2a2c"] = array(0, 1, 2, 3);
+    table[#"hash_61ee7a1e5b4c68c7"] = array(0, 1, 2, 3);
+    table[#"hash_63607819569316e2"] = array(0, 1, 2, 3);
+    table[#"hash_64cec410aa8c7c07"] = array(0, 1, 2, 3);
+    table[#"hash_6a3bc88911e7d909"] = array(0, 1, 2, 3);
+    table[#"hash_6b40a7049f54fb5a"] = array(0, 1, 2, 3);
+    table[#"hash_6ca1deacc4f61926"] = array(0, 1, 2, 3);
+    table[#"hash_6ebb5fa1f7952f56"] = array(2, 3);
+    table[#"hash_6f4d706590e9b576"] = array(0, 1, 2, 3);
+    table[#"hash_6f559168aa8ea661"] = array(0, 1, 2, 3);
+    table[#"hash_71ef2a712e8d604e"] = array(0, 1, 2, 3);
+    table[#"hash_76e6219b46c03451"] = array(0, 1, 2);
+    table[#"hash_76f4575ce0e25a41"] = array(0, 1, 2);
+    table[#"hash_7ac52bd1c0323ee4"] = array(0, 1, 2, 3);
+    table[#"hash_7ca7854be193ea3a"] = array(0, 1, 2, 3);
+    table[#"hash_7de6d37e9ad03518"] = array(0, 1, 2, 3);
+    table[#"hash_7e030fccc2c5a121"] = array(0, 1, 2, 3);
+    table[#"hash_9106b6f37a4fff0"] = array(0, 1, 2);
+    table[#"hash_ba7882c4633fd2"] = array(0, 1, 2, 3);
+    table[#"hash_cddf5fea0108c90"] = array(0, 1, 2, 3);
+
+    level.shield_tag_ported_rich = [];
+    foreach(suffix, variants in table)
+    {
+        foreach(n in variants)
+         level.shield_tag_ported_rich[suffix + "_plr_5_" + n] = 1;
+    }
+    return level.shield_tag_ported_rich;
+}
+
+// zm_orange_util's line of a common / map table category for Stuhlinger: his take, then Richtofen's when Tag has one
+detour zm_orange_util<scripts\zm\zm_orange_util.gsc>::function_8123b826(str_category, var_39acfdda)
+{
+    self [[ @zm_audio<scripts\zm_common\zm_audio.gsc>::play_vo_internal ]](self.str_vo_being_spoken, undefined);
+    if(isdefined(self.var_fbbeefe6) && isdefined(level.sndplayervox[str_category]) && isdefined(level.sndplayervox[str_category][var_39acfdda]))
+    {
+        vox = level.sndplayervox[str_category][var_39acfdda];
+        str_alias = vox.suffix + "_plr_5_" + self.var_fbbeefe6;
+        if(!isdefined(TagPortedRichtofen()[str_alias]) && soundexists(str_alias))
+         self [[ @zm_audio<scripts\zm_common\zm_audio.gsc>::play_vo_internal ]](str_alias, self);
+    }
+    return 1;
+}

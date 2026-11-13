@@ -4,8 +4,18 @@
     shield_freerun_music: 0 none, 1 the race, 2 a new best, 3 finished.
 */
 
+// a freerun match's gametype (freerun.cpp's rows, known before the scripts on both sides): the fields only there,
+// so other matches keep their clientfield bits
+FreerunIsMatch()
+{
+    gametype = getdvarstring(#"g_gametype");
+    return gametype == "freerun" || gametype == "zfreerun";
+}
+
 FreerunRegisterFields()
 {
+    if(!FreerunIsMatch())
+     return;
     clientfield::register("toplayer", "shield_freerun_music", 1, 2, "int", &FreerunMusic, 0, 0);
     clientfield::register("clientuimodel", "hudItems.shieldFreerun.state", 1, 3, "int", undefined, 0, 0);
     clientfield::register("clientuimodel", "hudItems.shieldFreerun.count", 1, 3, "int", undefined, 0, 0);

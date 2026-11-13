@@ -18,8 +18,18 @@
     (checkpoint) / 1.5 s (restart), held 2 s in the editor (save).
 */
 
+// a freerun match's gametype (freerun.cpp's rows, known before the scripts on both sides): the fields only there,
+// so other matches keep their clientfield bits
+FreerunIsMatch()
+{
+    gametype = getdvarstring(#"g_gametype");
+    return gametype == "freerun" || gametype == "zfreerun";
+}
+
 FreerunRegisterFields()
 {
+    if(!FreerunIsMatch())
+     return;
     clientfield::register("toplayer", "shield_freerun_music", 1, 2, "int");
     clientfield::register_clientuimodel("hudItems.shieldFreerun.state", 1, 3, "int", 0);
     clientfield::register_clientuimodel("hudItems.shieldFreerun.count", 1, 3, "int", 0);
