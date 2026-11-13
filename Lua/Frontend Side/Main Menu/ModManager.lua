@@ -36,6 +36,54 @@ local MapsCatalog = {
 		previews = { "mm_prev_zm_room_1" },
 		desc = "First room challenge and first custom map for BO4 Zombies.\nAssets and stuff by:\nGenEnix - Freddy and the wiki for voicelines\nCrash Twinsanity - Cortex model and sounds\nHarryBo21 - SOe and DE Wonder Weapons\nWetEgg - Announcers/BO7 To BO3 SAT Sawblade Trap\nLogical and NSZ (NateSmithZombies) - More powerups",
 		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/zm_room_1.0.0.zip"
+	},
+	{
+		id = "zm_nacht",
+		asset = "zm_nacht",
+		title = "Nacht der Untoten",
+		modes = { "zm" },
+		author = "peawhatever",
+		base = "zm_office",
+		image = "zm_nacht_preview",
+		previews = { "mm_prev_zm_nacht_1" },
+		desc = "Your old classic BO3's Nacht survival map.",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/zm_nacht_1.0.0.zip"
+	},
+	{
+		id = "mp_room",
+		asset = "mp_room",
+		title = "First Room Challenge",
+		modes = { "mp" },
+		author = "peawhatever",
+		base = "mp_frenetic",
+		image = "mp_room_preview",
+		previews = { "mm_prev_mp_room_1" },
+		desc = "An empty ground battle.",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/mp_room_0.1.0.zip"
+	},
+	{
+		id = "wz_room",
+		asset = "wz_room",
+		title = "First Room Challenge",
+		modes = { "wz" },
+		author = "peawhatever",
+		base = "wz_open_skyscrapers",
+		image = "wz_room_preview",
+		previews = { "mm_prev_wz_room_1" },
+		desc = "An empty ground battle.",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/wz_room_0.1.0.zip"
+	},
+	{
+		id = "mp_bully",
+		asset = "mp_bully",
+		title = "Bullworth",
+		modes = { "mp" },
+		author = "peawhatever",
+		base = "mp_frenetic",
+		image = "mp_bully_preview",
+		previews = { "mm_prev_mp_bully_1" },
+		desc = "Mid-to-Big Map Battleground.",
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/mp_bully_0.1.0.zip"
 	}
 }
 
