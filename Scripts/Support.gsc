@@ -72,6 +72,8 @@ Init()
             callback::on_connect(&ShieldCustomizationOnConnect);
             // freerun's HUD and music, every match (Support.csc's after the same three)
             FreerunRegisterFields();
+            // the end of match podium (Podium.gsc, Support.csc's after freerun's)
+            PodiumRegisterFields();
         }
     }
 }
@@ -473,6 +475,8 @@ MPChanges()
 {
     // a freerun match (Freerun.gsc): only when the client says so
     level thread FreerunInit();
+    // a target range match (TargetRange.gsc), after freerun's: it reads freerun's dvars
+    level thread TargetRangeInit();
 
     // the skill of the bots, from the bot settings of the menu
     level BotSkillInit();

@@ -381,6 +381,52 @@ CoD.DirectorCommonSafeAreaBottomAndLeft.new = function ( f1_arg0, f1_arg1, f1_ar
 
 	ShieldOptionsButton.id = "ShieldOptionsButton"
 
+	-- target range (TargetRange.lua), multiplayer's online lobbies, over Shield Options
+	local TargetRangeButton = CoD.DirectorPreGameButtonOption.new( f1_arg0, f1_arg1, 0.034, 0.034, 0, 353, 0.30, 0.30, -127, -77 )
+	TargetRangeButton.DirectorSelectButtonMiniInternal.MiddleText:setText( "TARGET RANGE" )
+	TargetRangeButton.DirectorSelectButtonMiniInternal.MiddleTextFocus:setText( "TARGET RANGE" )
+
+	TargetRangeButton:mergeStateConditions( {
+		{
+			stateName = "Visible",
+			condition = function ( menu, element, event )
+				return IsMultiplayer() and CoD.ShieldTargetRange ~= nil and CoD.ShieldTargetRange.IsAvailable()
+			end
+		}
+	} )
+
+	TargetRangeButton:registerEventHandler( "gain_focus", function ( element, event )
+		local f26_local0 = nil
+		if element.gainFocus then
+			f26_local0 = element:gainFocus( event )
+		elseif element.super.gainFocus then
+			f26_local0 = element.super:gainFocus( event )
+		end
+		CoD.Menu.UpdateButtonShownState( element, f1_arg0, f1_arg1, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"] )
+		return f26_local0
+	end )
+
+	f1_arg0:AddButtonCallbackFunction( TargetRangeButton, f1_arg1, Enum[@"hash_3DD78803F918E9D"][@"hash_3755DA1E2E7C263F"], "ui_confirm", function ( element, menu, controller, model )
+		PlaySoundAlias( "uin_paint_image_flip_toggle" )
+		if CoD.ShieldTargetRange and CoD.ShieldTargetRange.IsAvailable() then
+			CoD.ShieldTargetRange.Start( controller )
+		end
+	end, function ( element, menu, controller )
+		if IsGamepad( controller ) then
+			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
+			return true
+		elseif IsMouseOrKeyboard( controller ) then
+			CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
+			return false
+		else
+			return false
+		end
+	end, false )
+	self:addElement( TargetRangeButton )
+	self.TargetRangeButton = TargetRangeButton
+
+	TargetRangeButton.id = "TargetRangeButton"
+
 	--shield option button 2xp zm
 	local ShieldOptionsButtonZM = CoD.DirectorPreGameButtonOption.new( f1_arg0, f1_arg1, 0.034, 0.034, 100, 353, 0.30, 0.30, -70, -20 )  
 	ShieldOptionsButtonZM.DirectorSelectButtonMiniInternal.MiddleText:setText( "SHIELD OPTIONS" )

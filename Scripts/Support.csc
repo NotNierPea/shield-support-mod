@@ -41,6 +41,8 @@ Init()
         clientfield::register("allplayers", "shield_custom_c", 1, 16, "int", &ShieldCustomChanged, 0, 0);
         // freerun's (Freerun.csc), Support.gsc's order
         FreerunRegisterFields();
+        // the end of match podium (Podium.csc), Support.gsc's order
+        PodiumRegisterFields();
     }
     else if(SessionModeIsZombiesGame())
     {

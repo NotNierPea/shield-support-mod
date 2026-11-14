@@ -7,6 +7,7 @@ AddMenuReponses()
     self callback::function_d8abfc3d(#"menu_response", &SetZombiesOutfit);
     self callback::function_d8abfc3d(#"menu_response", &SetForcedZombiesCharacter);
     self callback::function_d8abfc3d(#"menu_response", &SetShieldCustomization);
+    self callback::function_d8abfc3d(#"menu_response", &PodiumMenuResponse);
     //ShieldLog("^2Added menu responses..");
 }
 

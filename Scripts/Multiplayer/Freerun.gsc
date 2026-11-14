@@ -926,7 +926,7 @@ detour globallogic<scripts\mp_common\gametypes\globallogic.gsc>::matchstarttimer
 // no "eliminate other players" (the gametype's objective hint) in a freerun match
 detour globallogic<scripts\mp_common\gametypes\globallogic.gsc>::showobjectivenotificationuiforallplayers(missiontype, delay)
 {
-    if(isdefined(level.shield_freerun))
+    if(isdefined(level.shield_freerun) || isdefined(level.shield_targetrange))
      return;
     [[ @globallogic<scripts\mp_common\gametypes\globallogic.gsc>::showobjectivenotificationuiforallplayers ]](missiontype, delay);
 }
@@ -947,6 +947,19 @@ detour menus<scripts\mp_common\gametypes\menus.gsc>::on_menu_response(params)
         }
         return;
     }
+    // the target range's leave (TargetRange.gsc), the same straight way out
+    if(isdefined(level.shield_targetrange) && isdefined(params) && params.response === "endround")
+    {
+        if(!isdefined(level.shield_targetrange_leaving))
+        {
+            level.shield_targetrange_leaving = 1;
+            level thread TargetRangeLeave();
+        }
+        return;
+    }
+    // a target range's class / specialist changes apply at once (TargetRange.gsc)
+    if(isdefined(level.shield_targetrange))
+     self TargetRangeMenuResponse(params);
     self [[ @menus<scripts\mp_common\gametypes\menus.gsc>::on_menu_response ]](params);
 }
 

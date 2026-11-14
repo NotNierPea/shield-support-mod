@@ -169,6 +169,14 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/TargetRange",
+            "path": "Lua\\Frontend\\TargetRange.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/StateLoopWatch",
             "path": "Lua\\Frontend\\StateLoopWatch.luac",
             "hooks_post": [
@@ -824,6 +832,24 @@
             "type": "luafile",
             "name": "ui/shield/GameFreerunHud",
             "path": "Lua\\Game\\FreerunHud.luac",
+            "hooks_post": [
+                "x64:46f417a74d9ab424",
+                "x64:57d27ab8e2f7a9d0"
+            ]
+        },
+        {
+            "type": "luafile",
+            "name": "ui/shield/GameTargetRangeHud",
+            "path": "Lua\\Game\\TargetRangeHud.luac",
+            "hooks_post": [
+                "x64:46f417a74d9ab424",
+                "x64:57d27ab8e2f7a9d0"
+            ]
+        },
+        {
+            "type": "luafile",
+            "name": "ui/shield/GamePodiumHud",
+            "path": "Lua\\Game\\PodiumHud.luac",
             "hooks_post": [
                 "x64:46f417a74d9ab424",
                 "x64:57d27ab8e2f7a9d0"
@@ -2020,6 +2046,26 @@
         },
         {
             "type": "localizeentry",
+            "name": "shield/targetrange",
+            "value": "Target Range"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/gametype/targetrange",
+            "value": "Target Range"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/gametype/targetrange_caps",
+            "value": "TARGET RANGE"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/gametype/targetrange_desc",
+            "value": "Test your loadout on bots that stand still. No time limit, no score limit."
+        },
+        {
+            "type": "localizeentry",
             "name": "shield/servers",
             "value": "Servers"
         },
@@ -3138,6 +3184,34 @@
                 "zm",
                 "mp",
                 "wz"
+            ]
+        },
+        {
+            "type": "eventstring",
+            "name": "shield_podium",
+            "mode": [
+                "mp"
+            ]
+        },
+        {
+            "type": "eventstring",
+            "name": "podium_gesture",
+            "mode": [
+                "mp"
+            ]
+        },
+        {
+            "type": "eventstring",
+            "name": "shield_targetrange_hit",
+            "mode": [
+                "mp"
+            ]
+        },
+        {
+            "type": "eventstring",
+            "name": "shield_targetrange_kill",
+            "mode": [
+                "mp"
             ]
         }
     ],
