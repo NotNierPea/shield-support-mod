@@ -23,7 +23,8 @@ local MapsCatalog = {
 		image = "zm_park_preview",
 		previews = { "mm_prev_zm_park_1" },
 		desc ="Come on down to Giddy Park! We got rides, booths, and water features/bathrooms! Located between Dave Manor and that zombie HQ-we-shall-not-name, Giddy Park is a place to go nuts with your friends.",
-		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/zm_park.zip"
+		-- not out yet: shown, no download
+		soon = true
 	},
 	{
 		id = "zm_room",
@@ -365,7 +366,8 @@ local StatusLooks = {
 	restart = { text = "RESTART TO PLAY", r = 1, g = 0.8, b = 0.25 },
 	broken = { text = "CAN'T LOAD", r = 1, g = 0.4, b = 0.3 },
 	disabled = { text = "DISABLED", r = 1, g = 0.4, b = 0.3 },
-	manual = { text = "INSTALLED BY HAND", r = 0.75, g = 0.75, b = 0.75 }
+	manual = { text = "INSTALLED BY HAND", r = 0.75, g = 0.75, b = 0.75 },
+	soon = { text = "COMING SOON", r = 0.35, g = 0.75, b = 1 }
 }
 
 -- a map the client loaded its zones of this session: its pictures are there
@@ -439,7 +441,11 @@ local function MapRow( entry, installed )
 		previews = entry and entry.previews or {}
 	}
 
-	if installed == nil then
+	if installed == nil and entry ~= nil and entry.soon then
+		-- (a catalog entry not out yet: nothing to download, even when the release has a zip)
+		row.status = "soon"
+		row.link = nil
+	elseif installed == nil then
 		row.status = "get"
 	elseif installed.state == "manual" then
 		row.status = "manual"
@@ -899,7 +905,9 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 			return
 		end
 
-		if row.status == "update" then
+		if row.status == "soon" then
+			SetButtonWords( button, "COMING SOON" )
+		elseif row.status == "update" then
 			SetButtonWords( button, "UPDATE" )
 		elseif row.status == "get" then
 			SetButtonWords( button, "INSTALL" )
@@ -969,7 +977,7 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 		local installed = 0
 
 		for _, other in ipairs( ManagerRows ) do
-			if other.status ~= "get" then
+			if other.status ~= "get" and other.status ~= "soon" then
 				installed = installed + 1
 			end
 		end
@@ -1065,7 +1073,7 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 		ShowPrimaryButton( row )
 
 		if self.RemoveButton ~= nil then
-			local removable = row.status ~= "get" and row.status ~= "manual"
+			local removable = row.status ~= "get" and row.status ~= "manual" and row.status ~= "soon"
 			self.RemoveButton:setAlpha( removable and 1 or 0.45 )
 		end
 
@@ -1206,6 +1214,8 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 			ShowProgress()
 			Engine[@"exec"]( Engine[@"getprimarycontroller"](), "MM_cancel_download" )
 			return
+		elseif row.status == "soon" then
+			return Refuse( "Coming soon: it isn't out yet." )
 		elseif ModState.downloading ~= nil then
 			return Refuse( "Wait for the other download to finish first." )
 		elseif row.link == nil then
@@ -1229,7 +1239,7 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 	local RemoveButton = AddButton( "RemoveButton", "REMOVE", MM_CARD_HALF + 6, MM_CARD_RIGHT, 692, 740, function ()
 		local row = PickedRow()
 
-		if row == nil or row.status == "get" then
+		if row == nil or row.status == "get" or row.status == "soon" then
 			return Refuse( "It isn't installed." )
 		elseif row.status == "manual" then
 			return Refuse( "Installed by hand: remove its files yourself." )
