@@ -339,13 +339,25 @@ end
 	The engine gives some classes of LUI their own subscribeToModel (a list has its own, not the one of
 	LUI.UIElement): each class of LUI with one of its own gets the guard, with its own as the one it calls.
 ]]
-local SubscriptionIds = {}
-local SubscriptionClasses = {}
-local SubscriptionElements = setmetatable( {}, { __mode = "v" } )
--- the last ones only: the tables kept every subscription ever made, a big table's growth ran out of memory in the
--- middle of a subscribe (lua_panic "a value of type 0" at its line, the game frozen) after browsing the menus a while
-local SubscriptionsKept = 0
-local SUBSCRIPTIONS_KEPT_MAX = 4096
+--[[
+	A table that grows in the middle of a subscribe can run out of memory there (lua_panic "a value of type 0" at its
+	line, Sys_Error 0xA2E8EF8F): first when they kept every subscription, then when they were emptied every 4096 and
+	grew again (opening the Black Market). So they are made whole here, a slot for each id of the engine's pool of
+	subscriptions (30000, 0x18 bytes each from 0x14ED464B0), and a subscribe only writes into a slot that is there.
+]]
+local SUBSCRIPTION_POOL = 30000
+
+local function SubscriptionSlots( weak )
+	local slots = weak and setmetatable( {}, { __mode = "v" } ) or {}
+	for index = 0, SUBSCRIPTION_POOL, 1 do
+		slots[index] = false
+	end
+	return slots
+end
+
+local SubscriptionIds = SubscriptionSlots()
+local SubscriptionClasses = SubscriptionSlots()
+local SubscriptionElements = SubscriptionSlots( true )
 
 -- shared and held here, so the engine's weak reference never loses it
 local NoCallback = function () end
@@ -354,8 +366,8 @@ local NoModelCount = 0
 
 CoD.ShieldDeadSubscription = function ( id )
 	local element = SubscriptionElements[id]
-	CoD.EnhPrintInfo( "subscription " .. tostring( id ) .. " made by " .. tostring( SubscriptionIds[id] ) .. " (" .. tostring( SubscriptionClasses[id] ) ..
-		"), the element is " .. ( element ~= nil and "still at " .. ElementPath( element ) or "gone" ), "Model subscription" )
+	CoD.EnhPrintInfo( "subscription " .. tostring( id ) .. " made by " .. tostring( SubscriptionIds[id] or "unknown" ) .. " (" ..
+		tostring( SubscriptionClasses[id] or "unknown" ) .. "), the element is " .. ( element and "still at " .. ElementPath( element ) or "gone" ), "Model subscription" )
 end
 
 -- the guards made, so a class that takes its function from a guarded one is not guarded twice
@@ -385,14 +397,8 @@ local function GuardSubscriptions( class, className )
 
 		local id = subscribe( self, model, callback, ... )
 
-		if id ~= nil then
-			SubscriptionsKept = SubscriptionsKept + 1
-			if SubscriptionsKept > SUBSCRIPTIONS_KEPT_MAX then
-				SubscriptionsKept = 1
-				SubscriptionIds = {}
-				SubscriptionClasses = {}
-				SubscriptionElements = setmetatable( {}, { __mode = "v" } )
-			end
+		-- only an id that has its slot: anything else would make the table grow
+		if type( id ) == "number" and id >= 0 and id <= SUBSCRIPTION_POOL and id == math.floor( id ) then
 			SubscriptionIds[id] = self.id
 			SubscriptionClasses[id] = className
 			SubscriptionElements[id] = self

@@ -2,8 +2,8 @@ INT,STRING,INT,INT,STRING,STRING,STRING,STRING,INT,INT,STRING,INT,INT,STRING,STR
 90000001,sticker,9001,874,wanted_cred,shield_loot_wanted_card,Wanted,test123,500163,50,ultra,1000,0,,
 477423121,range_weapon,9002,0,ar_galil_t8,,Grav,Assault rifle from the 15 million matches Community Challenge.,500163,25,ultra,1000,0,,
 90000002,character,9003,0,shield_wesker,,Wesker,Albert Wesker from Resident Evil 5: a specialist in Multiplayer and a character in Blackout. Comes with his Samurai Edge.,500163,25,ultra,1000,3,,
-90000003,outfit,9004,0,shield_peeks,,Peeks,Peeks from Black Ops 6: an outfit for Scarlett in Zombies and Blackout.,500163,25,ultra,1000,3,,hash_7bc8bdc5b5d4f6a2
-90000004,outfit,9005,0,shield_wesker_red,,Wesker: Crimson,A crimson outfit for Albert Wesker in Multiplayer and Blackout.,500163,25,ultra,1000,3,shield_bodytype_support_wesker_mp,shield_bodytype_support_wesker_wz
-90000005,outfit,9006,0,shield_wesker_blue,,Wesker: Midnight,A midnight blue outfit for Albert Wesker in Multiplayer and Blackout.,500163,25,ultra,1000,3,shield_bodytype_support_wesker_mp,shield_bodytype_support_wesker_wz
-90000006,outfit,9007,0,shield_mascot,,School Mascot,Bully's Bullworth Academy mascot costume from Chapter IV: an outfit for Spectre in Multiplayer and Blackout.,500163,25,ultra,1000,3,hash_4c0746fa548d2220,hash_31de7ea677d54648
-90000007,outfit,9008,0,shield_kagan_speedrun,,Kagan: Speedrun,Emma Kagan's Speedrun skin from Black Ops 7: a hooded outfit for Kagan in Multiplayer and Blackout.,500163,25,ultra,1000,3,shield_bodytype_support_kagan_mp,shield_bodytype_support_kagan_wz
+90000003,outfit,9004,0,shield_peeks,,Peeks,Peeks from Black Ops 6: an outfit for Scarlett in Zombies and Blackout.,500163,25,epic,1000,3,,hash_7bc8bdc5b5d4f6a2
+90000004,outfit,9005,0,shield_wesker_red,,Wesker: Crimson,A crimson outfit for Albert Wesker in Multiplayer and Blackout.,500163,25,epic,1000,3,shield_bodytype_support_wesker_mp,shield_bodytype_support_wesker_wz
+90000005,outfit,9006,0,shield_wesker_blue,,Wesker: Midnight,A midnight blue outfit for Albert Wesker in Multiplayer and Blackout.,500163,25,epic,1000,3,shield_bodytype_support_wesker_mp,shield_bodytype_support_wesker_wz
+90000006,outfit,9007,0,shield_mascot,,School Mascot,Bully's Bullworth Academy mascot costume from Chapter IV: an outfit for Spectre in Multiplayer and Blackout.,500163,25,epic,1000,3,hash_4c0746fa548d2220,hash_31de7ea677d54648
+90000007,outfit,9008,0,shield_kagan_speedrun,,Kagan: Speedrun,Emma Kagan's Speedrun skin from Black Ops 7: a hooded outfit for Kagan in Multiplayer and Blackout.,500163,25,epic,1000,3,shield_bodytype_support_kagan_mp,shield_bodytype_support_kagan_wz

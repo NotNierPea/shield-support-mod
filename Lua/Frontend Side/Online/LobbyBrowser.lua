@@ -1,5 +1,5 @@
 --[[
-		.\hksc.exe ".\Lua\LobbyBrowser.Lua" -o "C:\Program Files (x86)\Call of Duty Black Ops 4\project-bo4\mods\T8ShieldSupport\Lua\LobbyBrowser.luac"
+		.\hksc.exe ".\Lua\Frontend Side\Online\LobbyBrowser.lua" -o "C:\Program Files (x86)\Call of Duty Black Ops 4\project-bo4\internals\T8ShieldSupport\Lua\Frontend\LobbyBrowser.luac"
 ]]
 
 ---------------------------
@@ -288,6 +288,26 @@ local function SetFillBar( fill, left, width, players, max )
 	fill:setLeftRight( 0, 0, left, left + math.max( width * ratio, 2 ) )
 end
 
+-- "45 ms", "~180 ms" when it went by the relay of the master server, "-" with no answer or from an older client
+local function PingLabel( ping, relayed )
+	if ping == nil or ping < 0 then
+		return "-"
+	end
+	return ( relayed and "~" or "" ) .. ping .. " ms"
+end
+
+-- green, yellow when it lags, red when it's hard to play on, grey with no answer
+local function PingColor( ping )
+	if ping == nil or ping < 0 then
+		return 0.42, 0.42, 0.42
+	elseif ping < 80 then
+		return 0.45, 0.9, 0.45
+	elseif ping < 150 then
+		return 1, 0.8, 0.25
+	end
+	return 1, 0.4, 0.3
+end
+
 -- "3 / 12", or the players alone
 local function PlayersLabel( players, max )
 	if max ~= nil and max > 0 then
@@ -338,6 +358,10 @@ DataSources.ShieldDWGameServers = DataSourceHelpers.ListSetup( "ShieldDWGameServ
 			local TryMaxClients = tonumber( ServerRowValue( ServerRoot, times_servers, "maxClients" ) ) or 0
 			local TryMode = ServerRowValue( ServerRoot, times_servers, "mode" )
 			local TryMods = ServerRowValue( ServerRoot, times_servers, "mods" )
+			-- these two too, the ping in ms (-1 no answer) and if it went by the relay
+			local TryPing = tonumber( ServerRowValue( ServerRoot, times_servers, "ping" ) ) or -1
+			local TryPingRelayValue = ServerRowValue( ServerRoot, times_servers, "pingRelay" )
+			local TryPingRelay = TryPingRelayValue == true or TryPingRelayValue == 1
 
 			if TryHostName == "" then
 				TryHostName = "None, nil?"
@@ -374,7 +398,9 @@ DataSources.ShieldDWGameServers = DataSourceHelpers.ListSetup( "ShieldDWGameServ
 						ConnectionIP = Engine[@"uint64tostring"](TryLobbyID),
 						MapStatus = TryGetMap,
 						GameTypeStatus = TryGetGameType,
-						Mode = Lobby.mode
+						Mode = Lobby.mode,
+						Ping = TryPing,
+						PingRelay = TryPingRelay
 					},
 					properties = {
 
@@ -689,7 +715,8 @@ CoD.ShieldDWGameServerRowList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg
 
 	-- the names of the columns, where the rows have them
 	Add( NewCaption( 127, 560, 56, "LOBBY" ) )
-	Add( NewCaption( 590, 880, 56, "HOST" ) )
+	Add( NewCaption( 590, 790, 56, "HOST" ) )
+	Add( NewCaption( 800, 885, 56, "PING", Enum[@"luialignment"][@"lui_alignment_right"] ) )
 	Add( NewCaption( 900, 1040, 56, "PLAYERS", Enum[@"luialignment"][@"lui_alignment_right"] ) )
 	Add( NewBox( 0, 1060, 78, 79, 1, 1, 1, 0.12 ) )
 
@@ -748,11 +775,18 @@ CoD.ShieldDWGameServerRowList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg
 
 	Add( NewBox( CARD_TEXT_LEFT, CARD_TEXT_RIGHT, 546, 547, 1, 1, 1, 0.1 ) )
 
-	Add( NewCaption( CARD_TEXT_LEFT, CARD_TEXT_RIGHT, 564, "MODS" ) )
+	Add( NewCaption( CARD_TEXT_LEFT, CARD_PLAYERS_LEFT - 20, 564, "MODS" ) )
 
-	local CardMods = Add( NewText( CARD_TEXT_LEFT, CARD_TEXT_RIGHT, 586, 22, "ttmussels_regular" ) )
+	local CardMods = Add( NewText( CARD_TEXT_LEFT, CARD_PLAYERS_LEFT - 20, 586, 22, "ttmussels_regular" ) )
 	CardMods:setRGB( 0.55, 0.55, 0.55 )
 	CardMods:setText( "-" )
+
+	-- the ping of the host, as the client timed it when the list came
+	Add( NewCaption( CARD_PLAYERS_LEFT, CARD_TEXT_RIGHT, 564, "PING" ) )
+
+	local CardPing = Add( NewText( CARD_PLAYERS_LEFT, CARD_TEXT_RIGHT, 584, 26, "0arame_mono_stencil" ) )
+	CardPing:setRGB( PingColor( nil ) )
+	CardPing:setText( "-" )
 
 	Add( NewCaption( CARD_TEXT_LEFT, CARD_TEXT_RIGHT, 646, "CLICK A LOBBY TO JOIN IT", Enum[@"luialignment"][@"lui_alignment_right"] ) )
 
@@ -796,9 +830,12 @@ CoD.ShieldDWGameServerRowList.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg
 		CardPlayers:setText( PlayersLabel( row.Players, row.MaxPlayers ) )
 		SetFillBar( CardFill, CARD_PLAYERS_LEFT, CARD_TEXT_RIGHT - CARD_PLAYERS_LEFT, row.Players, row.MaxPlayers )
 
+		CardPing:setRGB( PingColor( row.Ping ) )
+		CardPing:setText( PingLabel( row.Ping, row.PingRelay ) )
+
 		if row.HostMods ~= nil and row.HostMods ~= "" then
 			CardMods:setRGB( 1, 0.85, 0.2 )
-			CardMods:setText( row.HostMods )
+			CardMods:setText( ShortenText( row.HostMods, 34 ) )
 		else
 			CardMods:setRGB( 0.55, 0.55, 0.55 )
 			CardMods:setText( "None" )
@@ -1083,10 +1120,12 @@ CoD.ShieldGameServerRow.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_
 	Gametype:setRGB( 0.68, 0.68, 0.68 )
 	Gametype:setLetterSpacing( 1 )
 
-	local HostedBy = Add( NewText( 590, 890, 8, 22, "ttmussels_regular" ) )
+	local HostedBy = Add( NewText( 590, 790, 8, 22, "ttmussels_regular" ) )
 	HostedBy:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
 
-	local HostMods = Add( NewText( 590, 890, 37, 16, "ttmussels_regular" ) )
+	local HostMods = Add( NewText( 590, 790, 37, 16, "ttmussels_regular" ) )
+
+	local Ping = Add( NewText( 800, 885, 9, 24, "0arame_mono_stencil", Enum[@"luialignment"][@"lui_alignment_right"] ) )
 
 	local ClientCount = Add( NewText( 900, 1040, 9, 24, "0arame_mono_stencil", Enum[@"luialignment"][@"lui_alignment_right"] ) )
 	ClientCount:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
@@ -1126,6 +1165,8 @@ CoD.ShieldGameServerRow.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_
 		self.Players = CoD.ModelUtility.GetSelfModelPathValue( self, "Players" ) or 0
 		self.MaxPlayers = CoD.ModelUtility.GetSelfModelPathValue( self, "MaxPlayers" ) or 0
 		self.CurrentClientCount = CoD.ModelUtility.GetSelfModelPathValue( self, "ClientCount" )
+		self.Ping = CoD.ModelUtility.GetSelfModelPathValue( self, "Ping" ) or -1
+		self.PingRelay = CoD.ModelUtility.GetSelfModelPathValue( self, "PingRelay" ) == true
 
 		Accent:setRGB( color.r, color.g, color.b )
 		Tint:setRGB( color.r, color.g, color.b )
@@ -1148,13 +1189,16 @@ CoD.ShieldGameServerRow.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_
 
 		if self.HostMods ~= "" then
 			HostMods:setRGB( 1, 0.85, 0.2 )
-			HostMods:setText( "Mods: " .. ShortenText( self.HostMods, 36 ) )
+			HostMods:setText( "Mods: " .. ShortenText( self.HostMods, 24 ) )
 		else
 			HostMods:setRGB( 0.42, 0.42, 0.42 )
 			HostMods:setText( "No mods" )
 		end
 
 		ClientCount:setText( self.CurrentClientCount or "" )
+
+		Ping:setRGB( PingColor( self.Ping ) )
+		Ping:setText( PingLabel( self.Ping, self.PingRelay ) )
 
 		-- red when nobody else gets in
 		if self.MaxPlayers > 0 and self.Players >= self.MaxPlayers then

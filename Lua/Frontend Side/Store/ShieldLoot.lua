@@ -233,10 +233,28 @@ local function HookPriceTag()
 	Log( "price tag hooked" )
 end
 
+--[[
+	The Item History lists the inventory's items in two id ranges, 100000000-299999999 and 400000000-499999999
+	(ItemHistoryList): ours are 90000001 and up, so they were never in it. Its first range starts lower now, at the
+	start of ours. The two values are read by the Item History only, and no game item has an id between them.
+]]
+local ITEM_HISTORY_FIRST = "90000000"
+
+local function HookItemHistory()
+	local utility = CoD.BlackMarketUtility
+	if not utility or utility[@"hash_491EF6C1326C6875"] == ITEM_HISTORY_FIRST then
+		return
+	end
+
+	utility[@"hash_491EF6C1326C6875"] = ITEM_HISTORY_FIRST
+	Log( "item history starts at " .. ITEM_HISTORY_FIRST )
+end
+
 local function Install()
 	HookContrabandPrice()
 	HookContrabandSlot()
 	HookPriceTag()
+	HookItemHistory()
 end
 
 Install()
