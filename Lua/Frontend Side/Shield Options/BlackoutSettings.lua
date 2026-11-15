@@ -28,7 +28,9 @@ Engine[@"exec"](Engine[@"getprimarycontroller"](), "readjson shield_bots_wz_diff
 
 ---------------------------
 
--- the game's Blackout maps: the map setting's first three are Blackout (0), Alcatraz (1) and Alcatraz at night (2)
+-- the game's Blackout maps: the map setting's first ones are Blackout (0), Alcatraz (1), Alcatraz at night (2) and the
+-- Blackout ALT Map (3, wz_open_skyscrapers_alt: the client converts its old fastfiles, use_wz_alt in ReloadOverrides.lua)
+local WZ_ALT_VALUE = 3
 local StockWZMaps = { wz_open_skyscrapers = true, wz_open_skyscrapers_alt = true, wz_escape = true, wz_escape_alt = true }
 
 -- the map setting's value of the first Blackout map of ours, the next ones after it
@@ -68,6 +70,8 @@ CoD.ShieldWZMapSetting = function ( map )
 		return 1
 	elseif map == "wz_escape_alt" then
 		return 2
+	elseif map == "wz_open_skyscrapers_alt" then
+		return WZ_ALT_VALUE
 	end
 
 	for i, custom in ipairs( CoD.ShieldWZCustomMaps() ) do
@@ -100,7 +104,8 @@ end
 -- previous is the setting before (the dvar's without)
 CoD.ShieldSetWZMap = function ( controller, setting, previous )
 	local custom = setting >= WZ_CUSTOM_VALUE and CoD.ShieldWZCustomMaps()[setting - WZ_CUSTOM_VALUE + 1]
-	local wasCustom = ( previous or Engine[@"getdvarint"]( "shield_wz_map" ) ) >= WZ_CUSTOM_VALUE
+	local was = previous or Engine[@"getdvarint"]( "shield_wz_map" )
+	local wasCustom = was >= WZ_CUSTOM_VALUE or was == WZ_ALT_VALUE
 
 	if setting >= WZ_CUSTOM_VALUE and not custom then
 		setting = 0
@@ -108,6 +113,7 @@ CoD.ShieldSetWZMap = function ( controller, setting, previous )
 
 	Engine[@"exec"]( controller, "set use_wz_escape " .. ( setting == 1 and 1 or 0 ) )
 	Engine[@"exec"]( controller, "set use_wz_escape_alt " .. ( setting == 2 and 1 or 0 ) )
+	Engine[@"exec"]( controller, "set use_wz_alt " .. ( setting == WZ_ALT_VALUE and 1 or 0 ) )
 
 	if custom then
 		Engine[@"exec"]( controller, "set shield_wz_custom_map " .. custom.id )
@@ -119,6 +125,8 @@ CoD.ShieldSetWZMap = function ( controller, setting, previous )
 	if Engine[@"currentsessionmode"]() == Enum[@"emodes"][@"mode_warzone"] then
 		if custom then
 			SetMap( controller, Engine[@"converttoxhash"]( custom.id ), false )
+		elseif setting == WZ_ALT_VALUE then
+			SetMap( controller, @"wz_open_skyscrapers_alt", false )
 		elseif wasCustom then
 			SetMap( controller, @"wz_open_skyscrapers", false )
 		end
@@ -243,6 +251,10 @@ DataSources.OptionalSettingsDataBlackout = DataSourceHelpers.ListSetup( "Optiona
 		{
 			option = Engine[@"hash_4F9F1239CFD921FE"]( @"shield/use_wz_alts_other_night" ),
 			value = 2
+		},
+		{
+			option = "Blackout ALT Map",
+			value = WZ_ALT_VALUE
 		}
 	}
 

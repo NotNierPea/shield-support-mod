@@ -635,6 +635,10 @@ detour stats<scripts\core_common\player\player_stats.gsc>::function_f94325d3()
     if (isbot(player))
         return false;
 
+    // a target range records nothing (TargetRange.gsc)
+    if (isdefined(level.shield_targetrange))
+        return false;
+
     if (isdefined(level.disablestattracking) && level.disablestattracking) {
         ShieldLog("^3return false called, but return true anyways...");
 

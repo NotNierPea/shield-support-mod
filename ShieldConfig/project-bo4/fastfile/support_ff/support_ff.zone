@@ -40,6 +40,16 @@ image,loading_shield.png
 // custom camos (camo index 399 and up)
 weaponcamo,tables/weaponcamo/shield_camos.json
 stringtable,gamedata/shield/custom_camos.csv
+
+// mastercrafts: begin (build_mastercraft.py writes this)
+// our Mastercrafts: the variant list (shield-client custom_camos.cpp adds them to the weapons), their riders
+// (the Strife's Ferris wheel), pictures
+stringtable,gamedata/shield/custom_mastercrafts.csv
+image,shield_mc_ferris_color.png
+image,shield_mc_strife_ferris.png
+xmodel,xmodels/shield_mc_ferris_view.json
+xmodel,xmodels/shield_mc_ferris_world.json
+// mastercrafts: end
 image,shield_camo_circuit_prev.png
 image,shield_camo_digital_prev.png
 
@@ -375,81 +385,6 @@ localizelist,gestures/sb_fireworks/strings.json
 bgcache,gestures/sb_fireworks/bgcache.csv
 // sb fireworks: end
 
-// crew vox: begin
-// the zombies crews as MP specialists, the DOTN crew as Blackout characters (the config's crew_* characters):
-// their battle chatter, their zombies lines and exerts in support.all (vox_crew_*). BO4 Custom Maps/Core/tools/
-// build_crew_vox.py writes these lines
-scriptbundle,mpdialog_player/crew_scarlett
-scriptbundle,mpdialog_player/crew_bruno
-scriptbundle,mpdialog_player/crew_diego
-scriptbundle,mpdialog_player/crew_stanton
-scriptbundle,mpdialog_player/crew_scarlett_ix
-scriptbundle,mpdialog_player/crew_bruno_ix
-scriptbundle,mpdialog_player/crew_diego_ix
-scriptbundle,mpdialog_player/crew_stanton_ix
-scriptbundle,mpdialog_player/crew_richtofen
-scriptbundle,mpdialog_player/crew_dempsey
-scriptbundle,mpdialog_player/crew_nikolai
-scriptbundle,mpdialog_player/crew_takeo
-scriptbundle,mpdialog_player/crew_richtofen_u
-scriptbundle,mpdialog_player/crew_dempsey_u
-scriptbundle,mpdialog_player/crew_nikolai_u
-scriptbundle,mpdialog_player/crew_takeo_u
-scriptbundle,mpdialog_player/crew_mirela
-scriptbundle,mpdialog_player/crew_mirela_wz
-scriptbundle,mpdialog_player/crew_warwick
-scriptbundle,mpdialog_player/crew_warwick_wz
-scriptbundle,mpdialog_player/crew_gideon
-scriptbundle,mpdialog_player/crew_gideon_wz
-scriptbundle,mpdialog_player/crew_godfrey
-scriptbundle,mpdialog_player/crew_godfrey_wz
-scriptbundle,mpdialog_player/crew_russman
-scriptbundle,mpdialog_player/crew_misty
-scriptbundle,mpdialog_player/crew_marlton
-scriptbundle,mpdialog_player/crew_stuhlinger
-scriptbundle,mpdialog_player/crew_bo_reznov
-scriptbundle,mpdialog_player/crew_bo_mason
-scriptbundle,mpdialog_player/crew_bo_woods
-scriptbundle,mpdialog_player/crew_bo_menendez
-scriptbundle,mpdialog_player/crew_bo_hudson
-scriptbundle,mpdialog_player/crew_bo_weaver
-scriptbundle,mpdialog_player/crew_bo_price
-scriptbundle,mpdialog_player/crew_bo_david_mason
-scriptbundle,mpdialog_player/crew_bo_sarah_hall
-scriptbundle,mpdialog_player/crew_bo_sergei
-scriptbundle,mpdialog_player/crew_bo_replacer
-scriptbundle,mpdialog_player/crew_bo_liquidator
-scriptbundle,mpdialog_player/crew_bo_uncle_frank
-scriptbundle,mpdialog_player/crew_bo_ladies_man
-scriptbundle,mpdialog_player/crew_bo_vacation_hudson
-scriptbundle,mpdialog_player/crew_bo_shadows
-scriptbundle,mpdialog_player/crew_bo_ranger
-scriptbundle,mpdialog_player/crew_bo_frogman
-scriptbundle,mpdialog_player/crew_bo_airborne
-scriptbundle,mpdialog_player/crew_bo_seal
-scriptbundle,mpdialog_player/crew_bo_battle_hardened
-scriptbundle,mpdialog_player/crew_bo_merc_m1
-scriptbundle,mpdialog_player/crew_bo_merc_m2
-scriptbundle,mpdialog_player/crew_bo_merc_m3
-scriptbundle,mpdialog_player/crew_bo_merc_m4
-scriptbundle,mpdialog_player/crew_bo_merc_f1
-scriptbundle,mpdialog_player/crew_bo_merc_f2
-scriptbundle,mpdialog_player/crew_bo_merc_f3
-scriptbundle,mpdialog_player/crew_bo_merc_f4
-scriptbundle,mpdialog_player/crew_bo_brutus
-scriptbundle,mpdialog_player/crew_bo_trejo
-scriptbundle,mpdialog_player/crew_bo_tedd
-scriptbundle,mpdialog_player/crew_bo_silverback
-scriptbundle,mpdialog_player/crew_bo_yuri
-scriptbundle,mpdialog_player/crew_bo_shadow_man
-scriptbundle,mpdialog_player/crew_bo_john_doe
-scriptbundle,mpdialog_player/crew_bo_jane_doe
-scriptbundle,mpdialog_player/crew_bo_blackjack
-// their subtitles (the takes name entries of en_<map>: shield-client custom_subtitles answers them from this table)
-stringtable,gamedata/shield/subtitles.csv
-// their lines cached (the player entity plays them)
-bgcache,characters/crew/bgcache.csv
-// crew vox: end
 
 // jacket: begin
 // Payday 3's Jacket, a specialist of multiplayer, a Blackout and a zombies character (shield-client makes his roles
@@ -542,3 +477,79 @@ bgcache,characters/misty/bgcache.csv
 // others play their crew lines, ZombiesVoxTable.gsc). BO4 Custom Maps/Core/tools/build_zm_vox.py writes these lines
 bgcache,characters/zm_vox/bgcache.csv
 // zm vox: end
+
+// crew vox: begin
+// the zombies crews as MP specialists, the DOTN crew as Blackout characters (the config's crew_* characters):
+// their battle chatter, their zombies lines and exerts in support.all (vox_crew_*). BO4 Custom Maps/Core/tools/
+// build_crew_vox.py writes these lines
+scriptbundle,mpdialog_player/crew_scarlett
+scriptbundle,mpdialog_player/crew_bruno
+scriptbundle,mpdialog_player/crew_diego
+scriptbundle,mpdialog_player/crew_stanton
+scriptbundle,mpdialog_player/crew_scarlett_ix
+scriptbundle,mpdialog_player/crew_bruno_ix
+scriptbundle,mpdialog_player/crew_diego_ix
+scriptbundle,mpdialog_player/crew_stanton_ix
+scriptbundle,mpdialog_player/crew_richtofen
+scriptbundle,mpdialog_player/crew_dempsey
+scriptbundle,mpdialog_player/crew_nikolai
+scriptbundle,mpdialog_player/crew_takeo
+scriptbundle,mpdialog_player/crew_richtofen_u
+scriptbundle,mpdialog_player/crew_dempsey_u
+scriptbundle,mpdialog_player/crew_nikolai_u
+scriptbundle,mpdialog_player/crew_takeo_u
+scriptbundle,mpdialog_player/crew_mirela
+scriptbundle,mpdialog_player/crew_mirela_wz
+scriptbundle,mpdialog_player/crew_warwick
+scriptbundle,mpdialog_player/crew_warwick_wz
+scriptbundle,mpdialog_player/crew_gideon
+scriptbundle,mpdialog_player/crew_gideon_wz
+scriptbundle,mpdialog_player/crew_godfrey
+scriptbundle,mpdialog_player/crew_godfrey_wz
+scriptbundle,mpdialog_player/crew_russman
+scriptbundle,mpdialog_player/crew_misty
+scriptbundle,mpdialog_player/crew_marlton
+scriptbundle,mpdialog_player/crew_stuhlinger
+scriptbundle,mpdialog_player/crew_bo_reznov
+scriptbundle,mpdialog_player/crew_bo_mason
+scriptbundle,mpdialog_player/crew_bo_woods
+scriptbundle,mpdialog_player/crew_bo_menendez
+scriptbundle,mpdialog_player/crew_bo_hudson
+scriptbundle,mpdialog_player/crew_bo_weaver
+scriptbundle,mpdialog_player/crew_bo_price
+scriptbundle,mpdialog_player/crew_bo_david_mason
+scriptbundle,mpdialog_player/crew_bo_sarah_hall
+scriptbundle,mpdialog_player/crew_bo_sergei
+scriptbundle,mpdialog_player/crew_bo_replacer
+scriptbundle,mpdialog_player/crew_bo_liquidator
+scriptbundle,mpdialog_player/crew_bo_uncle_frank
+scriptbundle,mpdialog_player/crew_bo_ladies_man
+scriptbundle,mpdialog_player/crew_bo_vacation_hudson
+scriptbundle,mpdialog_player/crew_bo_shadows
+scriptbundle,mpdialog_player/crew_bo_ranger
+scriptbundle,mpdialog_player/crew_bo_frogman
+scriptbundle,mpdialog_player/crew_bo_airborne
+scriptbundle,mpdialog_player/crew_bo_seal
+scriptbundle,mpdialog_player/crew_bo_battle_hardened
+scriptbundle,mpdialog_player/crew_bo_merc_m1
+scriptbundle,mpdialog_player/crew_bo_merc_m2
+scriptbundle,mpdialog_player/crew_bo_merc_m3
+scriptbundle,mpdialog_player/crew_bo_merc_m4
+scriptbundle,mpdialog_player/crew_bo_merc_f1
+scriptbundle,mpdialog_player/crew_bo_merc_f2
+scriptbundle,mpdialog_player/crew_bo_merc_f3
+scriptbundle,mpdialog_player/crew_bo_merc_f4
+scriptbundle,mpdialog_player/crew_bo_brutus
+scriptbundle,mpdialog_player/crew_bo_trejo
+scriptbundle,mpdialog_player/crew_bo_tedd
+scriptbundle,mpdialog_player/crew_bo_silverback
+scriptbundle,mpdialog_player/crew_bo_yuri
+scriptbundle,mpdialog_player/crew_bo_shadow_man
+scriptbundle,mpdialog_player/crew_bo_john_doe
+scriptbundle,mpdialog_player/crew_bo_jane_doe
+scriptbundle,mpdialog_player/crew_bo_blackjack
+// their subtitles (the takes name entries of en_<map>: shield-client custom_subtitles answers them from this table)
+stringtable,gamedata/shield/subtitles.csv
+// their lines cached (the player entity plays them)
+bgcache,characters/crew/bgcache.csv
+// crew vox: end

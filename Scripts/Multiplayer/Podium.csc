@@ -35,9 +35,9 @@ PodiumGesture2(localclientnum, oldval, newval, bnewent, binitialsnap, fieldname,
 
 /*
     A pick of the place's player (Podium.gsc PodiumGesture: (item + 1) * 2 + toggle). A gesture plays the character's lobby
-    gesture (as frontend_draft.csc; play_gesture stops the idle and plays it again after). A spray plays the spray can
-    gesture of a match (PodiumSpray): the lobby's spray animation (get_gesture(-1)) isn't loaded in a match, the engine
-    played its stand-in (a dance) instead.
+    gesture (as frontend_draft.csc; play_gesture stops the idle and plays it again after). A spray plays the lobby's spray
+    animation (get_gesture(-1)): core_frontend's, copied into support_mp.ff (a match has neither; the match's spray can
+    gesture is a player anim whose torso came out turned 90 degrees from the legs).
 */
 PodiumGesture(localclientnum, place, value, binitialsnap)
 {
@@ -50,11 +50,7 @@ PodiumGesture(localclientnum, place, value, binitialsnap)
     character = podium.byplace[place];
     item = int(value / 2) - 1;
     if(!isgesture(item))
-    {
-        ShieldLog("[podium] " + (place + 1) + ": item " + item + " (spray)");
-        character thread PodiumSpray(character);
-        return;
-    }
+     item = -1;
 
     gesture = character [[ @namespace_7da27482<scripts\core_common\character_customization.csc>::get_gesture ]](item);
     if(!isdefined(gesture) || !isdefined(gesture.animation))
@@ -64,32 +60,9 @@ PodiumGesture(localclientnum, place, value, binitialsnap)
     }
 
     // (no hash in the text: a hash in a string is a script error)
-    ShieldLog("[podium] " + (place + 1) + ": item " + item + " (gesture)");
+    ShieldLog("[podium] " + (place + 1) + ": item " + item + (item < 0 ? " (spray)" : " (gesture)"));
     character notify(#"cancel_gesture");
     character thread [[ @namespace_7da27482<scripts\core_common\character_customization.csc>::play_gesture ]](item, 0, 1, 0);
-}
-
-/*
-    The spray can gesture of mp_common's spray table (gesture hash_2b7bf0994d95c434: its third person anims, 0xC0 for
-    male bodies, 0x108 for female ones; the can comes with the anim's "attach player model" markup), then the idle again
-*/
-PodiumSpray(character)
-{
-    character notify(#"cancel_gesture");
-    character endon(#"cancel_gesture", #"deleted");
-
-    body = character.var_228f64da;
-    data = character [[ @namespace_7da27482<scripts\core_common\character_customization.csc>::function_82e05d64 ]]();
-    if(!isdefined(body) || !isdefined(data))
-     return;
-
-    sprayanim = #"hash_4a8ac6c20248d6cb";
-    if(isdefined(data.shield_gender) && data.shield_gender == #"female")
-     sprayanim = #"hash_18d469e682773b84";
-
-    character [[ @namespace_7da27482<scripts\core_common\character_customization.csc>::function_39a68bf2 ]](1, 1);
-    body [[ @animation<scripts\core_common\animation_shared.csc>::play ]](sprayanim, body);
-    character [[ @namespace_7da27482<scripts\core_common\character_customization.csc>::function_ef064067 ]](data.params, 1);
 }
 
 PodiumChanged(localclientnum, oldval, newval, bnewent, binitialsnap, fieldname, bwastimejump)

@@ -206,3 +206,94 @@ CoD.ShieldHudWatchers.targetrange = function ( menu, controller )
 		Log( "not watched: " .. tostring( err ) )
 	end
 end
+
+---------------------------
+-- the loading screen's gametype in the game's own UI too (TargetRange.lua does the frontend's): Target Range, not the
+-- lobby's last playlist; set again when this file loads (the screen may be up already)
+
+local function TargetRangeName( getValue, ... )
+	local ok, name = pcall( getValue, "targetrange", "nameRef", ... )
+	if ok and name ~= nil and name ~= "" and name ~= 0 then
+		return name
+	end
+	return nil
+end
+
+if CoD.GameTypeUtility and CoD.GameTypeUtility.GetLocalizedGameTypeValue and CoD.GameTypeUtility.GetLocalizedGameTypeValue ~= CoD.ShieldTargetRangeNameWrapper then
+	local getValue = CoD.GameTypeUtility.GetLocalizedGameTypeValue
+	CoD.GameTypeUtility.GetLocalizedGameTypeValue = function ( gametype, field, ... )
+		if field == "nameRef" and gametype ~= "targetrange" and IsTargetRange() then
+			local name = TargetRangeName( getValue, ... )
+			if name then
+				return name
+			end
+		end
+		return getValue( gametype, field, ... )
+	end
+	CoD.ShieldTargetRangeNameWrapper = CoD.GameTypeUtility.GetLocalizedGameTypeValue
+end
+
+local function SetLoadingName( model )
+	local name = CoD.GameTypeUtility and CoD.GameTypeUtility.GetLocalizedGameTypeValue( "targetrange", "nameRef", "" )
+	if model and name and name ~= "" then
+		Engine[@"setmodelvalue"]( Engine[@"createmodel"]( model, "gameType" ), name )
+	end
+end
+
+-- the loading screen's gametype icon, the lobby's too: targetrange's (free for all's), dm's without the row
+if CoD.GetLoadingScreenGameTypeIconName and CoD.GetLoadingScreenGameTypeIconName ~= CoD.ShieldTargetRangeIconWrapper then
+	local getIcon = CoD.GetLoadingScreenGameTypeIconName
+	CoD.GetLoadingScreenGameTypeIconName = function ( ... )
+		if IsTargetRange() then
+			for _, gametype in ipairs( { "targetrange", "dm" } ) do
+				local ok, info = pcall( Engine[@"getgametypeinfo"], gametype )
+				if ok and info and info.image then
+					return info.image
+				end
+			end
+		end
+		return getIcon( ... )
+	end
+	CoD.ShieldTargetRangeIconWrapper = CoD.GetLoadingScreenGameTypeIconName
+end
+
+if DataSources.LoadingScreenTeamInfo and DataSources.LoadingScreenTeamInfo.getModel ~= CoD.ShieldTargetRangeLoadingWrapper then
+	local getModel = DataSources.LoadingScreenTeamInfo.getModel
+	DataSources.LoadingScreenTeamInfo.getModel = function ( controller, ... )
+		local model = getModel( controller, ... )
+		if model and IsTargetRange() then
+			pcall( SetLoadingName, model )
+		end
+		return model
+	end
+	CoD.ShieldTargetRangeLoadingWrapper = DataSources.LoadingScreenTeamInfo.getModel
+end
+
+if IsTargetRange() and DataSources.LoadingScreenTeamInfo then
+	pcall( function ()
+		DataSources.LoadingScreenTeamInfo.getModel( Engine[@"getprimarycontroller"]() )
+	end )
+end
+
+---------------------------
+-- (every match) the HUD's number compares on a global data source's model throw when the model has no value yet:
+-- CurrentWeapon.currentShotCharge after a loadout given mid-life (the target range's class change) gave UI Error
+-- 69505 / 90428 "operator < ... number < nil" in ContextNotificationContainer and CancelChargeShot. No value = false
+
+for _, name in ipairs( { "IsGlobalDataSourceModelValueGreaterThan", "IsGlobalDataSourceModelValueGreaterThanOrEqualTo",
+		"IsGlobalDataSourceModelValueLessThan", "IsGlobalDataSourceModelValueLessThanOrEqualTo" } ) do
+	local original = CoD.ModelUtility and CoD.ModelUtility[name]
+	local guards = CoD.ShieldModelCompareGuards or {}
+	CoD.ShieldModelCompareGuards = guards
+	if type( original ) == "function" and original ~= guards[name] then
+		local guarded = function ( ... )
+			local ok, result = pcall( original, ... )
+			if ok then
+				return result
+			end
+			return false
+		end
+		CoD.ModelUtility[name] = guarded
+		guards[name] = guarded
+	end
+end

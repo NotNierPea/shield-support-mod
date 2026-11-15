@@ -75,6 +75,18 @@ local function InstallLocks()
 		return game( controller, mode, characterIndex, ... )
 	end
 	utility.ShieldLocks = utility.IsRoleBMLocked
+	-- (the game hides a black market character it finds no sale of: ours are always sold, shown locked instead)
+	if utility.IsRoleBMUnavailable and utility.ShieldUnavailable ~= utility.IsRoleBMUnavailable then
+		local gameUnavailable = utility.IsRoleBMUnavailable
+		utility.IsRoleBMUnavailable = function ( controller, mode, characterIndex, ... )
+			local ok, loot = pcall( LockOf, mode, characterIndex )
+			if ok and loot then
+				return false
+			end
+			return gameUnavailable( controller, mode, characterIndex, ... )
+		end
+		utility.ShieldUnavailable = utility.IsRoleBMUnavailable
+	end
 end
 
 local function Install()

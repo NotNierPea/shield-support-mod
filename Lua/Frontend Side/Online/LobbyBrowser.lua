@@ -126,7 +126,7 @@ end
 -- the maps of blackout have no name in the table of maps
 local BlackoutMapNames = {
 	wz_open_skyscrapers = "Blackout",
-	wz_open_skyscrapers_alt = "Blackout",
+	wz_open_skyscrapers_alt = "Blackout ALT Map",
 	wz_escape = "Alcatraz",
 	wz_escape_alt = "Alcatraz"
 }

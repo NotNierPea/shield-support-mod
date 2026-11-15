@@ -186,6 +186,7 @@ local ModsCatalog = {
 		previews = { "mm_prev_vod_day_1" },
 		desc = "Voyage of Despair in broad daylight: sunshine, a blue sky and open sea instead of the night.",
 		asset = "zm_zodt8_day",
+		restart = true,
 		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/zm_zodt8_day_1.0.0.zip"
 	},
 	{
@@ -197,6 +198,7 @@ local ModsCatalog = {
 		previews = { "mm_prev_tag_space_1" },
 		desc = "Tag der Toten at night, under the sky of Mars.",
 		asset = "zm_orange_night",
+		restart = true,
 		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/zm_orange_night_1.0.0.zip"
 	}
 }
@@ -224,6 +226,10 @@ local ModState = {
 	-- the key of the row whose zip is downloading (its button is the cancel), nil while none is
 	downloading = nil
 }
+
+-- mods with zones (catalog "restart": the client loads zone mods at start) installed or toggled this session, by folder:
+-- in CoD, so a reload of the menus keeps it and only a restart of the game clears it
+CoD.ShieldModRestart = CoD.ShieldModRestart or {}
 
 -- the rows of the tab, built again when the client tells something
 local ManagerRows = {}
@@ -272,6 +278,9 @@ CoD.Shield.DownloadedModCallback = function(event_name, event_table)
 		message = event_table.message
 	end
 
+	if event_name == "mod_download_complete" and ModState.downloading ~= nil then
+		CoD.ShieldModRestart[ModState.downloading] = true
+	end
 	ModState.status = "Idle"
 	ModState.downloading = nil
 	ShowManagerStatus()
@@ -497,6 +506,8 @@ local function ModRow( entry, installed )
 		row.status = "get"
 	elseif NeedsUpdate( row.version, row.installedVersion ) then
 		row.status = "update"
+	elseif installed.enabled and entry ~= nil and entry.restart and CoD.ShieldModRestart[row.key] then
+		row.status = "restart"
 	elseif installed.enabled then
 		row.status = "installed"
 	else
@@ -1266,6 +1277,7 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 		end
 
 		PlaySoundAlias( "uin_paint_image_flip_toggle" )
+		CoD.ShieldModRestart[row.key] = true
 		CoD.EnhPrintInfo( "Toggling Mod -> " .. row.target )
 		Engine[@"exec"]( Engine[@"getprimarycontroller"](), "MM_toggle_mod " .. row.target )
 	end )

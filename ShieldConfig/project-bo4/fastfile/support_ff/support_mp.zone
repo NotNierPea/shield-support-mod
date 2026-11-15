@@ -17,3 +17,11 @@ weapon,weapons/jacket/jacket_the_punch_mp.json
 weapon,weapons/jacket/jacket_the_punch_projectile_mp.json
 bgcache,weapons/jacket/bgcache.csv
 // jacket weapon: end
+
+// podium spray: begin
+// the lobby's spray anims (core_frontend's, character_customization get_gesture(-1)) for the end of match podium's
+// characters (Podium.csc PodiumSpray); the can model is mp_common's, the spray effect core_common's
+xanim,anims/podium/file_233be4ac797ac20.json
+xanim,anims/podium/file_108a8b0f7d2f377d.json
+bgcache,anims/podium/bgcache.csv
+// podium spray: end

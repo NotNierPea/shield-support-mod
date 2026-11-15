@@ -1,0 +1,12 @@
+{
+    "name": "shield_mc_ferris_world",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../models/mastercraft/ferris_world.gltf",
+    "hitboxes": "mesh",
+    "materials": {
+        "ferriswheel": "materials/shield_mc_ferris_mat.json"
+    },
+    "stream": false,
+    "collision": "none"
+}

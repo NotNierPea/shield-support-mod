@@ -240,3 +240,67 @@ end
 TargetRange.IsAvailable = function ()
 	return not IsLobbyNetworkModeLAN() and not CoDShared.IsInTheaterLobby()
 end
+
+---------------------------
+-- the loading screen's gametype is the lobby's (the multiplayer menu's last playlist: TDM, Control...); a target range
+-- load says Target Range. Loading = Start set dvar shield_targetrange (cleared when the frontend loads again), or
+-- g_gametype is ours. As Freerun.lua's loading wrappers; without the targetrange row the lobby's name stays
+
+local function TargetRangeLoading()
+	local gametype = DvarString( Dvar[@"g_gametype"] )
+	return DvarInt( @"shield_targetrange" ) == 1 or gametype == "targetrange"
+end
+
+local function TargetRangeName( getValue, ... )
+	local ok, name = pcall( getValue, "targetrange", "nameRef", ... )
+	if ok and name ~= nil and name ~= "" and name ~= 0 then
+		return name
+	end
+	return nil
+end
+
+if CoD.GameTypeUtility and CoD.GameTypeUtility.GetLocalizedGameTypeValue and CoD.GameTypeUtility.GetLocalizedGameTypeValue ~= CoD.ShieldTargetRangeNameWrapper then
+	local getValue = CoD.GameTypeUtility.GetLocalizedGameTypeValue
+	CoD.GameTypeUtility.GetLocalizedGameTypeValue = function ( gametype, field, ... )
+		if field == "nameRef" and gametype ~= "targetrange" and TargetRangeLoading() then
+			local name = TargetRangeName( getValue, ... )
+			if name then
+				return name
+			end
+		end
+		return getValue( gametype, field, ... )
+	end
+	CoD.ShieldTargetRangeNameWrapper = CoD.GameTypeUtility.GetLocalizedGameTypeValue
+end
+
+-- the loading screen's gametype icon, the lobby's too: targetrange's (free for all's), dm's without the row
+if CoD.GetLoadingScreenGameTypeIconName and CoD.GetLoadingScreenGameTypeIconName ~= CoD.ShieldTargetRangeIconWrapper then
+	local getIcon = CoD.GetLoadingScreenGameTypeIconName
+	CoD.GetLoadingScreenGameTypeIconName = function ( ... )
+		if TargetRangeLoading() then
+			for _, gametype in ipairs( { "targetrange", "dm" } ) do
+				local ok, info = pcall( Engine[@"getgametypeinfo"], gametype )
+				if ok and info and info.image then
+					return info.image
+				end
+			end
+		end
+		return getIcon( ... )
+	end
+	CoD.ShieldTargetRangeIconWrapper = CoD.GetLoadingScreenGameTypeIconName
+end
+
+if DataSources.LoadingScreenTeamInfo and DataSources.LoadingScreenTeamInfo.getModel ~= CoD.ShieldTargetRangeLoadingWrapper then
+	local getModel = DataSources.LoadingScreenTeamInfo.getModel
+	DataSources.LoadingScreenTeamInfo.getModel = function ( controller, ... )
+		local model = getModel( controller, ... )
+		if model and TargetRangeLoading() then
+			local name = CoD.GameTypeUtility and CoD.GameTypeUtility.GetLocalizedGameTypeValue( "targetrange", "nameRef", "" )
+			if name and name ~= "" then
+				Engine[@"setmodelvalue"]( Engine[@"createmodel"]( model, "gameType" ), name )
+			end
+		end
+		return model
+	end
+	CoD.ShieldTargetRangeLoadingWrapper = DataSources.LoadingScreenTeamInfo.getModel
+end

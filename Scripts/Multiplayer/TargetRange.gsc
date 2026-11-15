@@ -48,6 +48,14 @@ TargetRangeInit()
     setgametypesetting(#"scorelimit", 0);
     // no announcer (the leader dialog's own switch; the detours below catch what skips it)
     setgametypesetting(#"allowannouncer", 0);
+    // no specialist change cooldown (draft::start_cooldown's seconds)
+    setgametypesetting(#"hash_2b88c6ac064e9c59", 0);
+    // no death screen: respawn at once, no killcam
+    setgametypesetting(#"playerforcerespawn", 1);
+    setgametypesetting(#"allowkillcam", 0);
+    // no spawn selection screen (userspawnselection)
+    setgametypesetting(#"spawnselectenabled", 0);
+    TargetRangeNoProgress();
 
     callback::on_start_gametype(&TargetRangeStartGametype);
     callback::on_spawned(&TargetRangeOnSpawned);
@@ -85,10 +93,25 @@ TargetRangeStartGametype()
     level.timelimit = 0;
     level.scorelimit = 0;
     level.allowannouncer = 0;
+    level.playerforcerespawn = 1;
+    level.killcam = 0;
+    level.spawnselectenabled = 0;
+    TargetRangeNoProgress();
     // no battle chatter (kills, enemies spotted, abilities, the start conversation): the detours below catch the rest
     level.allowbattlechatter[#"bc"] = 0;
     level.allowspecialistdialog = 0;
     level.playstartconversation = 0;
+}
+
+// no XP, stats, challenges or contracts from a target range (globallogic sets these up between init and the start)
+TargetRangeNoProgress()
+{
+    level.rankedmatch = 0;
+    level.disablestattracking = 1;
+    level.disablechallenges = 1;
+    level.contractsenabled = 0;
+    // scoreevents::shouldaddrankxp's own switch: no rank or weapon XP
+    level.var_4f654f3a = 1;
 }
 
 TargetRangeNoLimit()
@@ -104,6 +127,7 @@ TargetRangeKeepRules()
         level.var_fa5cacde = 1;
         level.gettimelimit = &TargetRangeNoLimit;
         level.allowannouncer = 0;
+        TargetRangeNoProgress();
         TargetRangeKickStrangers();
         wait(1);
     }

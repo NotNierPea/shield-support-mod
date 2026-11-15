@@ -361,6 +361,67 @@ local STOCK_ROLES = {
 	[Enum[@"emodes"][@"mode_warzone"]] = 76
 }
 
+--[[
+	Every outfit, preset and part count of every character was linked with a subscription of its own (AddChildCountLink):
+	with all our characters and outfits that ran the engine's subscription pool (30000) out going to Blackout's menu, and
+	the next subscribe was a lua_panic "a value of type 0". Links made inside updateAllSpecialistOutfitItems are kept
+	without one (QuietLinks): the game force-updates those counts bottom up itself, and SetSpecialistOutfitItemAsOld
+	(an item seen) recounts the character's tree here.
+]]
+local QuietLinks = false
+
+local function LinkQuietly( controller, parent, child, condition )
+	local root = CoD.BreadcrumbUtility.GetRoot( controller )
+	local links = root and root.__breadCrumbChildLinks
+	if not links then
+		return false
+	end
+	local list = links[parent]
+	if not list then
+		list = {}
+		links[parent] = list
+	end
+	for _, link in ipairs( list ) do
+		if link.model == child then
+			return true
+		end
+	end
+	table.insert( list, { model = child, condition = condition } )
+	return true
+end
+
+-- a count's children counted again, deepest first (the quiet links don't tell their parents)
+local function Recount( root, model, depth )
+	local list = root.__breadCrumbChildLinks and root.__breadCrumbChildLinks[model]
+	if not list or depth > 12 then
+		return
+	end
+	for _, link in ipairs( list ) do
+		Recount( root, link.model, depth + 1 )
+	end
+	CoD.BreadcrumbUtility.BreadcrumbParentUpdateFn( root, model )
+end
+
+local function WrapOutfitSeen()
+	local utility = CoD.BreadcrumbUtility
+	if not utility or not utility.SetSpecialistOutfitItemAsOld or utility.SetSpecialistOutfitItemAsOld == utility.shieldOutfitSeen then
+		return
+	end
+	local gameSeen = utility.SetSpecialistOutfitItemAsOld
+	utility.SetSpecialistOutfitItemAsOld = function ( menu, element, controller, ... )
+		local result = gameSeen( menu, element, controller, ... )
+		pcall( function ()
+			local characterIndex = CoD.SafeGetModelValue( menu:getModel(), "characterIndex" )
+			if characterIndex then
+				local character = DataSources.SpecialistOutfitBreadcrumbs.getBreadcrumbModelForCharacter( controller, Engine[@"currentsessionmode"](), characterIndex )
+				Recount( utility.GetRoot( controller ), character:create( "breadcrumbCount" ), 0 )
+			end
+		end )
+		return result
+	end
+	utility.shieldOutfitSeen = utility.SetSpecialistOutfitItemAsOld
+end
+
 local function WrapOutfitBreadcrumbs()
 	local source = DataSources.SpecialistOutfitBreadcrumbs
 	if not source or not source.updateAllSpecialistOutfitItems or source.updateAllSpecialistOutfitItems == source.shieldUpdate then
@@ -372,7 +433,9 @@ local function WrapOutfitBreadcrumbs()
 		if stock and characterIndex and characterIndex >= stock then
 			return
 		end
+		QuietLinks = true
 		local ok, err = pcall( gameUpdate, task, controller, mode, characterIndex, ... )
+		QuietLinks = false
 		if not ok then
 			Log( "outfit breadcrumbs of character " .. tostring( characterIndex ) .. " not made: " .. tostring( err ) )
 		end
@@ -395,6 +458,9 @@ local function WrapChildCountLink()
 			if skipped == 1 or skipped % 500 == 0 then
 				Log( "breadcrumb links without a model skipped: " .. skipped .. " (UI model pool full?)" )
 			end
+			return
+		end
+		if QuietLinks and LinkQuietly( controller, parent, child, ... ) then
 			return
 		end
 		return gameLink( controller, parent, child, ... )
@@ -552,6 +618,7 @@ local function Wrap()
 	WrapCharacterColumns()
 	WrapBreadcrumbs()
 	WrapOutfitBreadcrumbs()
+	WrapOutfitSeen()
 	WrapChildCountLink()
 	WrapDraftModels()
 	WrapDraftSubscribe()

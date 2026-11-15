@@ -96,7 +96,8 @@ PodiumStat(player, field)
 PodiumShow()
 {
     level clientfield::set("shield_podium", PodiumValue(2));
-    time = getdvarint(#"shield_podium_time", 8);
+    time = getdvarint(#"shield_podium_time", 11);
+    PodiumMusic();
 
     /*
         The HUD's cards: count + 4 * seconds shown, then per place the client number + 128 * (deaths + 1000 * kills)
@@ -128,6 +129,21 @@ PodiumShow()
     ShieldLog("[podium] showing for " + time + " s");
     wait(time);
     level.shield_podium_live = undefined;
+}
+
+/*
+    The music: shield_podium_music, a music state ("" none); by default the Play of the Match theme of the match's
+    music set (potm_shared function_d1cb3471: potm_main_01..07, in every MP match)
+*/
+PodiumMusic()
+{
+    state = getdvarstring(#"shield_podium_music", "potm_main");
+    if(state == "")
+     return;
+    if(state == "potm_main")
+     state += isdefined(game.musicset) ? game.musicset : "_01";
+    [[ @music<scripts\core_common\music_shared.gsc>::setmusicstate ]](state);
+    ShieldLog("[podium] music " + state);
 }
 
 // a pick of one of the three (podium_gesture, the item index of the sprays and gestures list)

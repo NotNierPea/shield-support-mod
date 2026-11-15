@@ -1601,6 +1601,11 @@
         },
         {
             "type": "localizeentry",
+            "name": "shield/mastercraft/strife_ferris",
+            "value": "Ferris Wheel"
+        },
+        {
+            "type": "localizeentry",
             "name": "hash_65ac0bdfc731aeda",
             "value": "Welcome to Shield Client, Connecting!"
         },

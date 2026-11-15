@@ -58,7 +58,7 @@ local HostDefaultGametypes = {
 -- the maps of blackout have no name in the table of maps
 local HostBlackoutMaps = {
 	wz_open_skyscrapers = "Blackout",
-	wz_open_skyscrapers_alt = "Blackout (Alternate)",
+	wz_open_skyscrapers_alt = "Blackout ALT Map",
 	wz_escape = "Alcatraz",
 	wz_escape_alt = "Alcatraz (Night)"
 }
