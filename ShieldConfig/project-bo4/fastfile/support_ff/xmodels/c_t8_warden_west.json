@@ -1,0 +1,32 @@
+{
+    "name": "c_t8_warden_west",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/warden/warden_west_body.gltf",
+    "skeleton": "../skeletons/warden_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "warden_west_badge": "materials/warden_west_badge_mat.json",
+        "warden_west_bandolier": "materials/warden_west_bandolier_mat.json",
+        "warden_west_belts": "materials/warden_west_belts_mat.json",
+        "warden_west_boots": "materials/warden_west_boots_mat.json",
+        "warden_west_brass": "materials/warden_west_brass_mat.json",
+        "warden_west_button": "materials/warden_west_button_mat.json",
+        "warden_west_cowboy_belt": "materials/warden_west_cowboy_belt_mat.json",
+        "warden_west_feathers": "materials/warden_west_feathers_mat.json",
+        "warden_west_fringe": "materials/warden_west_fringe_mat.json",
+        "warden_west_gloves": "materials/warden_west_gloves_mat.json",
+        "warden_west_holster": "materials/warden_west_holster_mat.json",
+        "warden_west_jacket": "materials/warden_west_jacket_mat.json",
+        "warden_west_leather": "materials/warden_west_leather_mat.json",
+        "warden_west_pants": "materials/warden_west_pants_mat.json",
+        "warden_west_poncho": "materials/warden_west_poncho_mat.json",
+        "warden_west_rag": "materials/warden_west_rag_mat.json",
+        "warden_west_sash": "materials/warden_west_sash_mat.json",
+        "warden_west_shirt": "materials/warden_west_shirt_mat.json",
+        "warden_west_strap": "materials/warden_west_strap_mat.json",
+        "warden_west_trim": "materials/warden_west_trim_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

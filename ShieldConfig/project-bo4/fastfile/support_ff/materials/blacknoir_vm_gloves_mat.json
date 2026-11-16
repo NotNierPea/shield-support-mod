@@ -1,0 +1,16 @@
+{
+    "name": "blacknoir_vm_gloves_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "blacknoir_vm_gloves.png",
+        "glossMap": "blacknoir_vm_gloves_g.png,bc4",
+        "normalMap": "blacknoir_vm_gloves_n.png,linear",
+        "aoMap": "blacknoir_vm_gloves_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            10
+        ]
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "name": "c_t8_warden_west_head",
+    "templateModel": "../templates/xmodel_head.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/warden/warden_west_head.gltf",
+    "skeleton": "../skeletons/ruin_head.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "warden_eyes": "materials/warden_eyes_mat.json",
+        "warden_mouth": "materials/warden_mouth_mat.json",
+        "warden_west_face": "materials/warden_west_face_mat.json",
+        "warden_west_face_paint": "materials/warden_west_face_paint_mat.json",
+        "warden_west_lashes": "materials/warden_west_lashes_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

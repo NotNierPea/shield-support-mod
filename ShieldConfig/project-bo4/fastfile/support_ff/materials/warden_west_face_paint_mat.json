@@ -1,0 +1,23 @@
+{
+    "name": "warden_west_face_paint_mat",
+    "template": "../templates/material_skin_ruin.json",
+    "textures": {
+        "colorMap": "warden_west_face_paint.png",
+        "normalMap": "warden_west_face_paint_n.png,linear",
+        "glossMap": "warden_west_face_paint_g.png,bc4",
+        "aoMap": "warden_west_face_paint_o.png,bc4",
+        "unk_6dfcc8d5": "#hash_8c3c2dcaa1919434",
+        "unk_c408965c": "#hash_8c3c2dcaa1919434"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            17
+        ],
+        "colorTint": [
+            1,
+            1,
+            1
+        ]
+    }
+}

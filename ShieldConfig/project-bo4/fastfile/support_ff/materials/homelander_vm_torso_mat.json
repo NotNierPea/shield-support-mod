@@ -1,0 +1,16 @@
+{
+    "name": "homelander_vm_torso_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "homelander_vm_torso.png",
+        "glossMap": "homelander_vm_torso_g.png,bc4",
+        "normalMap": "homelander_vm_torso_n.png,linear",
+        "aoMap": "homelander_vm_torso_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            8
+        ]
+    }
+}

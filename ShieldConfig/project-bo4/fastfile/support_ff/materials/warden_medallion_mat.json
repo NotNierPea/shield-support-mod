@@ -1,0 +1,16 @@
+{
+    "name": "warden_medallion_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_medallion.png",
+        "glossMap": "warden_medallion_g.png,bc4",
+        "normalMap": "warden_medallion_n.png,linear",
+        "aoMap": "warden_medallion_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            13
+        ]
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "name": "warden_west_brass_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_west_brass.png",
+        "glossMap": "warden_west_brass_g.png,bc4",
+        "normalMap": "warden_west_brass_n.png,linear",
+        "aoMap": "warden_west_brass_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            13
+        ]
+    }
+}

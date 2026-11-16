@@ -1,0 +1,16 @@
+{
+    "name": "c_t8_blacknoir_arms",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/blacknoir/blacknoir_arms.gltf",
+    "skeleton": "../skeletons/zm_viewarms.json",
+    "hitboxes": "mesh",
+    "materials": {
+        "blacknoir_vm_forearms": "materials/blacknoir_vm_forearms_mat.json",
+        "blacknoir_vm_gloves": "materials/blacknoir_vm_gloves_mat.json",
+        "blacknoir_vm_shoulders": "materials/blacknoir_vm_shoulders_mat.json",
+        "blacknoir_vm_suit": "materials/blacknoir_vm_suit_mat.json",
+        "blacknoir_vm_torso": "materials/blacknoir_vm_torso_mat.json"
+    },
+    "collision": "none"
+}

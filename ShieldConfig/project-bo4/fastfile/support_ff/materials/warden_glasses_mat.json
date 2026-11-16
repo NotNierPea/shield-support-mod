@@ -1,0 +1,16 @@
+{
+    "name": "warden_glasses_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_glasses.png",
+        "glossMap": "warden_glasses_g.png,bc4",
+        "normalMap": "warden_glasses_n.png,linear",
+        "aoMap": "warden_glasses_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            13
+        ]
+    }
+}

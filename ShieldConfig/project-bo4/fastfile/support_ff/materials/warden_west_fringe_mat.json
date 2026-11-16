@@ -1,0 +1,17 @@
+{
+    "name": "warden_west_fringe_mat",
+    "template": "../templates/material_clip.json",
+    "textures": {
+        "colorMap": "warden_west_fringe.png",
+        "glossMap": "warden_west_fringe_g.png,bc4",
+        "normalMap": "warden_west_fringe_n.png,linear",
+        "aoMap": "warden_west_fringe_o.png,bc4",
+        "specColorMap": "#hash_26c8688ba5b9e6b2"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            6
+        ]
+    }
+}

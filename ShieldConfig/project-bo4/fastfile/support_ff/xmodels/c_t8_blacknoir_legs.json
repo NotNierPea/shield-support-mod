@@ -1,0 +1,22 @@
+{
+    "name": "c_t8_blacknoir_legs",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/blacknoir/blacknoir_legs.gltf",
+    "skeleton": "../skeletons/blacknoir_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "blacknoir_back_knife": "materials/blacknoir_back_knife_mat.json",
+        "blacknoir_back_plate": "materials/blacknoir_back_plate_mat.json",
+        "blacknoir_boots": "materials/blacknoir_boots_mat.json",
+        "blacknoir_groin": "materials/blacknoir_groin_mat.json",
+        "blacknoir_knee_pads": "materials/blacknoir_knee_pads_mat.json",
+        "blacknoir_legs": "materials/blacknoir_legs_mat.json",
+        "blacknoir_sheath": "materials/blacknoir_sheath_mat.json",
+        "blacknoir_suit": "materials/blacknoir_suit_mat.json",
+        "blacknoir_thigh_pads": "materials/blacknoir_thigh_pads_mat.json",
+        "blacknoir_torso": "materials/blacknoir_torso_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

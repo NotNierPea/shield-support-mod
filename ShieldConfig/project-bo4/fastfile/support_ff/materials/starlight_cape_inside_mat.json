@@ -1,0 +1,16 @@
+{
+    "name": "starlight_cape_inside_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "starlight_cape_inside.png",
+        "glossMap": "starlight_cape_inside_g.png,bc4",
+        "normalMap": "starlight_cape_inside_n.png,linear",
+        "aoMap": "starlight_cape_inside_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            6
+        ]
+    }
+}

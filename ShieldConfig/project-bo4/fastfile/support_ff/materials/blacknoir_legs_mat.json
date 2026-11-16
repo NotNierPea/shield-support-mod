@@ -1,0 +1,16 @@
+{
+    "name": "blacknoir_legs_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "blacknoir_legs.png",
+        "glossMap": "blacknoir_legs_g.png,bc4",
+        "normalMap": "blacknoir_legs_n.png,linear",
+        "aoMap": "blacknoir_legs_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            10
+        ]
+    }
+}

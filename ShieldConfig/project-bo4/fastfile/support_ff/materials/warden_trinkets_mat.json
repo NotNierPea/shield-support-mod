@@ -1,0 +1,16 @@
+{
+    "name": "warden_trinkets_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_trinkets.png",
+        "glossMap": "warden_trinkets_g.png,bc4",
+        "normalMap": "warden_trinkets_n.png,linear",
+        "aoMap": "warden_trinkets_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            13
+        ]
+    }
+}

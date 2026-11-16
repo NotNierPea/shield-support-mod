@@ -1,0 +1,18 @@
+{
+    "name": "c_t8_homelander_legs",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/homelander/homelander_legs.gltf",
+    "skeleton": "../skeletons/homelander_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "homelander_belt": "materials/homelander_belt_mat.json",
+        "homelander_boots": "materials/homelander_boots_mat.json",
+        "homelander_cape": "materials/homelander_cape_mat.json",
+        "homelander_knees": "materials/homelander_knees_mat.json",
+        "homelander_legs": "materials/homelander_legs_mat.json",
+        "homelander_torso": "materials/homelander_torso_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

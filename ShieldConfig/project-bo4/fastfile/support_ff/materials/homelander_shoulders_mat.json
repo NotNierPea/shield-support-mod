@@ -1,0 +1,17 @@
+{
+    "name": "homelander_shoulders_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "homelander_shoulders.png",
+        "glossMap": "homelander_shoulders_g.png,bc4",
+        "normalMap": "homelander_shoulders_n.png,linear",
+        "aoMap": "homelander_shoulders_o.png,bc4",
+        "specColorMap": "homelander_shoulders_s.png"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            12
+        ]
+    }
+}

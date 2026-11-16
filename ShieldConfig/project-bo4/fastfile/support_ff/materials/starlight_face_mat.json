@@ -1,0 +1,24 @@
+{
+    "name": "starlight_face_mat",
+    "template": "../templates/material_skin.json",
+    "textures": {
+        "colorMap": "starlight_face.png",
+        "thicknessMap": "starlight_face_t.png,bc4",
+        "unk_6dfcc8d5": "#hash_8c3c2dcaa1919434",
+        "unk_c408965c": "#hash_8c3c2dcaa1919434",
+        "normalMap": "starlight_face_n.png,linear",
+        "glossMap": "starlight_face_g.png,bc4",
+        "aoMap": "starlight_face_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            17
+        ],
+        "colorTint": [
+            1,
+            1,
+            1
+        ]
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "name": "c_t8_homelander_head",
+    "templateModel": "../templates/xmodel_head.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/homelander/homelander_head.gltf",
+    "skeleton": "../skeletons/ruin_head.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "homelander_brows": "materials/homelander_brows_mat.json",
+        "homelander_eyes": "materials/homelander_eyes_mat.json",
+        "homelander_face": "materials/homelander_face_mat.json",
+        "homelander_face_paint": "materials/homelander_face_paint_mat.json",
+        "homelander_hair": "materials/homelander_hair_mat.json",
+        "homelander_hair_under": "materials/homelander_hair_under_mat.json",
+        "homelander_lashes": "materials/homelander_lashes_mat.json",
+        "homelander_mouth": "materials/homelander_mouth_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

@@ -1,0 +1,18 @@
+{
+    "name": "c_t8_starlight_legs",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/starlight/starlight_legs.gltf",
+    "skeleton": "../skeletons/starlight_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "starlight_boots": "materials/starlight_boots_mat.json",
+        "starlight_cape": "materials/starlight_cape_mat.json",
+        "starlight_cape_inside": "materials/starlight_cape_inside_mat.json",
+        "starlight_gold": "materials/starlight_gold_mat.json",
+        "starlight_legs": "materials/starlight_legs_mat.json",
+        "starlight_suit": "materials/starlight_suit_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

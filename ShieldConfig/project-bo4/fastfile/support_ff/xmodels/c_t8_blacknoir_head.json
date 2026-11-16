@@ -1,0 +1,17 @@
+{
+    "name": "c_t8_blacknoir_head",
+    "templateModel": "../templates/xmodel_head.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/blacknoir/blacknoir_head.gltf",
+    "skeleton": "../skeletons/spectre_head.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "blacknoir_balaclava": "materials/blacknoir_balaclava_mat.json",
+        "blacknoir_head_gear": "materials/blacknoir_head_gear_mat.json",
+        "blacknoir_lens": "materials/blacknoir_lens_mat.json",
+        "blacknoir_mask": "materials/blacknoir_mask_mat.json",
+        "blacknoir_mask_paint": "materials/blacknoir_mask_paint_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

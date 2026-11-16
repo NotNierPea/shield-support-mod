@@ -1,0 +1,16 @@
+{
+    "name": "starlight_vm_arms_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "starlight_vm_arms.png",
+        "glossMap": "starlight_vm_arms_g.png,bc4",
+        "normalMap": "starlight_vm_arms_n.png,linear",
+        "aoMap": "starlight_vm_arms_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            8
+        ]
+    }
+}

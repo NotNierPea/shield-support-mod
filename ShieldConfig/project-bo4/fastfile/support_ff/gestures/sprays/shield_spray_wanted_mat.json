@@ -1,0 +1,7 @@
+{
+ "name": "shield_spray_wanted_mat",
+ "template": "../../templates/material_spray.json",
+ "textures": {
+  "colorMap": "#wanted_cred"
+ }
+}

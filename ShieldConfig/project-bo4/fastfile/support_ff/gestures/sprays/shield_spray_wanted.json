@@ -1,0 +1,11 @@
+{
+ "name": "shield_spray_wanted",
+ "type": "tag",
+ "material": "shield_spray_wanted_mat",
+ "bundle": {
+  "type": "#tag",
+  "hash_5a31296c0c1b6029:hash_9e0e664a": "localized18#shield/sprays/shield_spray_wanted",
+  "hash_5bff4cc56c2092f0:hash_69902538": "image#wanted_cred",
+  "hash_6486837b8286880e:hash_6e1ba9a5": 1
+ }
+}

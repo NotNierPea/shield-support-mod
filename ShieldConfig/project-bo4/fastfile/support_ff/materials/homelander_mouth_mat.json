@@ -1,0 +1,16 @@
+{
+    "name": "homelander_mouth_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "homelander_mouth.png",
+        "glossMap": "homelander_mouth_g.png,bc4",
+        "normalMap": "homelander_mouth_n.png,linear",
+        "aoMap": "homelander_mouth_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            10
+        ]
+    }
+}

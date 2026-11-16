@@ -1,0 +1,16 @@
+{
+    "name": "warden_west_vm_sleeves_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_west_vm_sleeves.png",
+        "glossMap": "warden_west_vm_sleeves_g.png,bc4",
+        "normalMap": "warden_west_vm_sleeves_n.png,linear",
+        "aoMap": "warden_west_vm_sleeves_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            6
+        ]
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "name": "homelander_knees_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "homelander_knees.png",
+        "glossMap": "homelander_knees_g.png,bc4",
+        "normalMap": "homelander_knees_n.png,linear",
+        "aoMap": "homelander_knees_o.png,bc4",
+        "specColorMap": "homelander_knees_s.png"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            12
+        ]
+    }
+}

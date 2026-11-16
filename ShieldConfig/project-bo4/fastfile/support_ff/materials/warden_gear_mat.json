@@ -1,0 +1,16 @@
+{
+    "name": "warden_gear_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_gear.png",
+        "glossMap": "warden_gear_g.png,bc4",
+        "normalMap": "warden_gear_n.png,linear",
+        "aoMap": "warden_gear_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            9
+        ]
+    }
+}

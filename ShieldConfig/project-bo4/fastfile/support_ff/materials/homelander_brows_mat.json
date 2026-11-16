@@ -1,0 +1,17 @@
+{
+    "name": "homelander_brows_mat",
+    "template": "../templates/material_clip.json",
+    "textures": {
+        "colorMap": "homelander_brows.png",
+        "glossMap": "homelander_brows_g.png,bc4",
+        "normalMap": "homelander_brows_n.png,linear",
+        "aoMap": "homelander_brows_o.png,bc4",
+        "specColorMap": "#hash_26c8688ba5b9e6b2"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            2
+        ]
+    }
+}

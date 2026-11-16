@@ -1,0 +1,16 @@
+{
+    "name": "starlight_collar_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "starlight_collar.png",
+        "glossMap": "starlight_collar_g.png,bc4",
+        "normalMap": "starlight_collar_n.png,linear",
+        "aoMap": "starlight_collar_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            8
+        ]
+    }
+}

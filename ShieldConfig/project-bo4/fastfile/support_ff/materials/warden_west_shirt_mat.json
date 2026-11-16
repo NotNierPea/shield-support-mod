@@ -1,0 +1,16 @@
+{
+    "name": "warden_west_shirt_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_west_shirt.png",
+        "glossMap": "warden_west_shirt_g.png,bc4",
+        "normalMap": "warden_west_shirt_n.png,linear",
+        "aoMap": "warden_west_shirt_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            6
+        ]
+    }
+}

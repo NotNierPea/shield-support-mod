@@ -1,0 +1,20 @@
+{
+    "name": "c_t8_warden_head",
+    "templateModel": "../templates/xmodel_head.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/warden/warden_head.gltf",
+    "skeleton": "../skeletons/ruin_head.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "warden_eyes": "materials/warden_eyes_mat.json",
+        "warden_face": "materials/warden_face_mat.json",
+        "warden_face_paint": "materials/warden_face_paint_mat.json",
+        "warden_glasses": "materials/warden_glasses_mat.json",
+        "warden_hat": "materials/warden_hat_mat.json",
+        "warden_hat_badge": "materials/warden_hat_badge_mat.json",
+        "warden_lenses": "materials/warden_lenses_mat.json",
+        "warden_mouth": "materials/warden_mouth_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

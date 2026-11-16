@@ -9,7 +9,7 @@ CoD.ShieldInitLuaFile()
 ---------------------------
 
 --[[
-	Target Range: a button of the multiplayer lobby (over Shield Options, PreGameButtons.lua) that goes straight into
+	Target Range: a button of the multiplayer lobby (right above Custom Games, PreGameButtons.lua) that goes straight into
 	a free for all on the Firing Range, alone with bots that stand still (TargetRange.gsc). The player's class, no draft.
 
 	The launch: shield-client's targetrange_start when the client has it (dvar shield_targetrange_client 1: gametype
@@ -236,7 +236,7 @@ TargetRange.Start = function ( controller )
 	end
 end
 
--- the button over Shield Options (PreGameButtons.lua): multiplayer's online lobbies, not a film
+-- the button above Custom Games (PreGameButtons.lua): multiplayer's online lobbies, not a film
 TargetRange.IsAvailable = function ()
 	return not IsLobbyNetworkModeLAN() and not CoDShared.IsInTheaterLobby()
 end

@@ -1,0 +1,17 @@
+{
+    "name": "homelander_gloves_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "homelander_gloves.png",
+        "glossMap": "homelander_gloves_g.png,bc4",
+        "normalMap": "homelander_gloves_n.png,linear",
+        "aoMap": "homelander_gloves_o.png,bc4",
+        "specColorMap": "homelander_gloves_s.png"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            9
+        ]
+    }
+}

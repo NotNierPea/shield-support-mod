@@ -1,0 +1,16 @@
+{
+    "name": "warden_vm_gear_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_vm_gear.png",
+        "glossMap": "warden_vm_gear_g.png,bc4",
+        "normalMap": "warden_vm_gear_n.png,linear",
+        "aoMap": "warden_vm_gear_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            9
+        ]
+    }
+}

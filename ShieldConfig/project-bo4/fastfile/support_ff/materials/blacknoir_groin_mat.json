@@ -1,0 +1,16 @@
+{
+    "name": "blacknoir_groin_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "blacknoir_groin.png",
+        "glossMap": "blacknoir_groin_g.png,bc4",
+        "normalMap": "blacknoir_groin_n.png,linear",
+        "aoMap": "blacknoir_groin_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            10
+        ]
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "name": "warden_pants_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_pants.png",
+        "glossMap": "warden_pants_g.png,bc4",
+        "normalMap": "warden_pants_n.png,linear",
+        "aoMap": "warden_pants_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            6
+        ]
+    }
+}

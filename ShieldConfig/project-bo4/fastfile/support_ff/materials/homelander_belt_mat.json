@@ -1,0 +1,17 @@
+{
+    "name": "homelander_belt_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "homelander_belt.png",
+        "glossMap": "homelander_belt_g.png,bc4",
+        "normalMap": "homelander_belt_n.png,linear",
+        "aoMap": "homelander_belt_o.png,bc4",
+        "specColorMap": "homelander_belt_s.png"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            12
+        ]
+    }
+}

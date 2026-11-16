@@ -1,0 +1,16 @@
+{
+    "name": "warden_holster_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_holster.png",
+        "glossMap": "warden_holster_g.png,bc4",
+        "normalMap": "warden_holster_n.png,linear",
+        "aoMap": "warden_holster_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            9
+        ]
+    }
+}

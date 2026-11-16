@@ -1,0 +1,17 @@
+{
+    "name": "warden_fur_mat",
+    "template": "../templates/material_clip.json",
+    "textures": {
+        "colorMap": "warden_fur.png",
+        "glossMap": "warden_fur_g.png,bc4",
+        "normalMap": "warden_fur_n.png,linear",
+        "aoMap": "warden_fur_o.png,bc4",
+        "specColorMap": "#hash_26c8688ba5b9e6b2"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            3
+        ]
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "name": "starlight_suit_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "starlight_suit.png",
+        "glossMap": "starlight_suit_g.png,bc4",
+        "normalMap": "starlight_suit_n.png,linear",
+        "aoMap": "starlight_suit_o.png,bc4",
+        "specColorMap": "starlight_suit_s.png"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            9
+        ]
+    }
+}

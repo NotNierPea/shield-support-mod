@@ -1,0 +1,16 @@
+{
+    "name": "blacknoir_sheath_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "blacknoir_sheath.png",
+        "glossMap": "blacknoir_sheath_g.png,bc4",
+        "normalMap": "blacknoir_sheath_n.png,linear",
+        "aoMap": "blacknoir_sheath_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            10
+        ]
+    }
+}

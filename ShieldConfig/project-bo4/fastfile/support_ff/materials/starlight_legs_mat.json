@@ -1,0 +1,16 @@
+{
+    "name": "starlight_legs_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "starlight_legs.png",
+        "glossMap": "starlight_legs_g.png,bc4",
+        "normalMap": "starlight_legs_n.png,linear",
+        "aoMap": "starlight_legs_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            9
+        ]
+    }
+}

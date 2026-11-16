@@ -1,0 +1,16 @@
+{
+    "name": "warden_hat_badge_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_hat_badge.png",
+        "glossMap": "warden_hat_badge_g.png,bc4",
+        "normalMap": "warden_hat_badge_n.png,linear",
+        "aoMap": "warden_hat_badge_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            13
+        ]
+    }
+}

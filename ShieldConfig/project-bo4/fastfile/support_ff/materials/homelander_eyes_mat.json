@@ -1,0 +1,16 @@
+{
+    "name": "homelander_eyes_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "homelander_eyes.png",
+        "glossMap": "homelander_eyes_g.png,bc4",
+        "normalMap": "homelander_eyes_n.png,linear",
+        "aoMap": "homelander_eyes_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            14
+        ]
+    }
+}

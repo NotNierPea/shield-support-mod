@@ -1,0 +1,24 @@
+{
+    "name": "homelander_face_mat",
+    "template": "../templates/material_skin_ruin.json",
+    "textures": {
+        "colorMap": "homelander_face.png",
+        "thicknessMap": "homelander_face_t.png,bc4",
+        "unk_6dfcc8d5": "#hash_8c3c2dcaa1919434",
+        "unk_c408965c": "#hash_8c3c2dcaa1919434",
+        "normalMap": "homelander_face_n.png,linear",
+        "glossMap": "homelander_face_g.png,bc4",
+        "aoMap": "homelander_face_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            17
+        ],
+        "colorTint": [
+            1,
+            1,
+            1
+        ]
+    }
+}

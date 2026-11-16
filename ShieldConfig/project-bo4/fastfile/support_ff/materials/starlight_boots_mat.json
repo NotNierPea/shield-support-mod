@@ -1,0 +1,17 @@
+{
+    "name": "starlight_boots_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "starlight_boots.png",
+        "glossMap": "starlight_boots_g.png,bc4",
+        "normalMap": "starlight_boots_n.png,linear",
+        "aoMap": "starlight_boots_o.png,bc4",
+        "specColorMap": "starlight_boots_s.png"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            10
+        ]
+    }
+}

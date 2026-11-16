@@ -1,0 +1,16 @@
+{
+    "name": "homelander_legs_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "homelander_legs.png",
+        "glossMap": "homelander_legs_g.png,bc4",
+        "normalMap": "homelander_legs_n.png,linear",
+        "aoMap": "homelander_legs_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            8
+        ]
+    }
+}

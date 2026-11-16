@@ -1,0 +1,16 @@
+{
+    "name": "starlight_mouth_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "starlight_mouth.png",
+        "glossMap": "starlight_mouth_g.png,bc4",
+        "normalMap": "starlight_mouth_n.png,linear",
+        "aoMap": "starlight_mouth_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            10
+        ]
+    }
+}

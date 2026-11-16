@@ -1,0 +1,16 @@
+{
+    "name": "warden_eyes_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_eyes.png",
+        "glossMap": "warden_eyes_g.png,bc4",
+        "normalMap": "warden_eyes_n.png,linear",
+        "aoMap": "warden_eyes_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            14
+        ]
+    }
+}

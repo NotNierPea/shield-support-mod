@@ -1,0 +1,16 @@
+{
+    "name": "starlight_eyes_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "starlight_eyes.png",
+        "glossMap": "starlight_eyes_g.png,bc4",
+        "normalMap": "starlight_eyes_n.png,linear",
+        "aoMap": "starlight_eyes_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            14
+        ]
+    }
+}

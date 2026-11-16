@@ -1,0 +1,17 @@
+{
+    "name": "starlight_gold_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "starlight_gold.png",
+        "glossMap": "starlight_gold_g.png,bc4",
+        "normalMap": "starlight_gold_n.png,linear",
+        "aoMap": "starlight_gold_o.png,bc4",
+        "specColorMap": "starlight_gold_s.png"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            13
+        ]
+    }
+}

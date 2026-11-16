@@ -1,0 +1,17 @@
+{
+    "name": "starlight_vm_sleeves_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "starlight_vm_sleeves.png",
+        "glossMap": "starlight_vm_sleeves_g.png,bc4",
+        "normalMap": "starlight_vm_sleeves_n.png,linear",
+        "aoMap": "starlight_vm_sleeves_o.png,bc4",
+        "specColorMap": "starlight_vm_sleeves_s.png"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            9
+        ]
+    }
+}

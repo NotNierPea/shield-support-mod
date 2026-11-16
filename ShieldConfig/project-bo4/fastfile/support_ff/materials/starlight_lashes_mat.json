@@ -1,0 +1,17 @@
+{
+    "name": "starlight_lashes_mat",
+    "template": "../templates/material_clip.json",
+    "textures": {
+        "colorMap": "starlight_lashes.png",
+        "glossMap": "starlight_lashes_g.png,bc4",
+        "normalMap": "starlight_lashes_n.png,linear",
+        "aoMap": "starlight_lashes_o.png,bc4",
+        "specColorMap": "#hash_26c8688ba5b9e6b2"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            2
+        ]
+    }
+}

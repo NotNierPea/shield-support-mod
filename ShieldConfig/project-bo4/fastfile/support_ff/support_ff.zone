@@ -6,6 +6,9 @@
 >name=support        // fastfile name
 >compression=zlib      // compression type, by default no compression is used
 >compression.high=true // use high compression
+// the models' textures stream from support.xpak (UI pictures, effects and the waypoint stay resident): ~500 MB of
+// resident character textures left Blackout's level memory too small (Out of Memory at SV_SpawnServer)
+>image.stream.models=true
 
 // images, the file will be searched in the images directory. the file extension will be removed
 image,wanted_cred.png
@@ -22,6 +25,7 @@ image,mod_manager_synergy.png
 image,mod_manager_timers.png
 image,mod_manager_vod_day.png
 image,mod_manager_tag_space.png
+image,mod_manager_blackout_night.png
 image,mm_icon.png
 image,shield_freerun_tile.png
 image,mm_unknown_mod.png
@@ -30,6 +34,7 @@ image,mm_prev_zm_park_1.png
 image,mm_prev_zm_room_1.png
 image,mm_prev_vod_day_1.png
 image,mm_prev_tag_space_1.png
+image,mm_prev_blackout_night_1.png
 image,mm_prev_mp_room_1.png
 image,mm_prev_wz_room_1.png
 image,mm_prev_mp_bully_1.png
@@ -473,11 +478,6 @@ image,misty_portrait.png,nomips
 bgcache,characters/misty/bgcache.csv
 // misty: end
 
-// zm vox: begin
-// the zombies copies of the MP specialists: their lines (vox_zmc_<specialist>_<line> in support.all; the
-// others play their crew lines, ZombiesVoxTable.gsc). BO4 Custom Maps/Core/tools/build_zm_vox.py writes these lines
-bgcache,characters/zm_vox/bgcache.csv
-// zm vox: end
 
 // crew vox: begin
 // the zombies crews as MP specialists, the DOTN crew as Blackout characters (the config's crew_* characters):
@@ -554,3 +554,150 @@ stringtable,gamedata/shield/subtitles.csv
 // their lines cached (the player entity plays them)
 bgcache,characters/crew/bgcache.csv
 // crew vox: end
+
+// homelander: begin
+// Homelander (MWII's operator, carried into BO7), a specialist of multiplayer and a Blackout character (shield-client
+// makes his roles from the config's characters). BO4 Custom Maps/Homelander (BO4)/tools/build_homelander.py writes
+// these lines and his files here: edit them there and run it again
+// his cape's physics (a constraint per cape bone), his body (cape bones, tag_stowed_back), his head on Ruin's head rig
+// (face shapes, war paint face), his first person arms (MWII's view model) and legs
+physconstraints,physconstraints/shield_homelander_cape.json
+xmodel,xmodels/c_t8_homelander.json
+xmodel,xmodels/c_t8_homelander_head.json
+xmodel,xmodels/c_t8_homelander_arms.json
+xmodel,xmodels/c_t8_homelander_legs.json
+
+// his pictures (the config's portrait, icon, images and bundle values name them), his game's icon (Outfits.lua)
+image,homelander_icon.png,nomips
+image,homelander_portrait.png,nomips
+image,homelander_render.png,nomips
+image,homelander_action.png,nomips
+image,homelander_bio_header.png,nomips
+image,homelander_card.png,nomips
+image,homelander_story.png,nomips
+image,homelander_emblem.png,nomips
+image,homelander_outfit_default.png,nomips
+image,homelander_game_mw3.png,nomips
+
+// his battle chatter: the bundle his body type names (getmpdialogname "homelander"); its lines are in support.all
+// (sounds/support_sounds.json, the aliases vox_homelander_*), their subtitles in gamedata/shield/subtitles.csv
+scriptbundle,mpdialog_player/homelander
+
+// his models cached (the frontend spawns them), his lines (the player entity plays them)
+bgcache,characters/homelander/bgcache.csv
+// homelander: end
+
+// starlight: begin
+// Starlight (MWII's operator, carried into BO7), a specialist of multiplayer and a Blackout character (shield-client
+// makes her roles from the config's characters). BO4 Custom Maps/Starlight (BO4)/tools/build_starlight.py writes
+// these lines and her files here: edit them there and run it again
+// her cape's physics (a constraint per cape bone), her body (cape bones, tag_stowed_back), her head on Battery's head rig
+// with Scarlett IX's braid bones (face shapes, war paint face, hair physics), her first person arms (MWII's view model) and legs
+physconstraints,physconstraints/shield_starlight_cape.json
+xmodel,xmodels/c_t8_starlight.json
+xmodel,xmodels/c_t8_starlight_head.json
+xmodel,xmodels/c_t8_starlight_arms.json
+xmodel,xmodels/c_t8_starlight_legs.json
+
+// her pictures (the config's portrait, icon, images and bundle values name them), her game's icon (Outfits.lua)
+image,starlight_icon.png,nomips
+image,starlight_portrait.png,nomips
+image,starlight_render.png,nomips
+image,starlight_action.png,nomips
+image,starlight_bio_header.png,nomips
+image,starlight_card.png,nomips
+image,starlight_story.png,nomips
+image,starlight_emblem.png,nomips
+image,starlight_outfit_default.png,nomips
+image,starlight_game_mw3.png,nomips
+
+// her battle chatter: the bundle her body type names (getmpdialogname "starlight"); its lines are in support.all
+// (sounds/support_sounds.json, the aliases vox_starlight_*), their subtitles in gamedata/shield/subtitles.csv
+scriptbundle,mpdialog_player/starlight
+
+// her models cached (the frontend spawns them), her lines (the player entity plays them)
+bgcache,characters/starlight/bgcache.csv
+// starlight: end
+
+
+// blacknoir: begin
+// Black Noir (MWII's operator, carried into BO7), a specialist of multiplayer and a Blackout character (shield-client
+// makes his roles from the config's characters). BO4 Custom Maps/Black Noir (BO4)/tools/build_blacknoir.py writes
+// these lines and his files here: edit them there and run it again
+// his body (tag_stowed_back), his masked head on Spectre's head rig (war paint mask), his first person arms (MWII's
+// view model) and legs
+xmodel,xmodels/c_t8_blacknoir.json
+xmodel,xmodels/c_t8_blacknoir_head.json
+xmodel,xmodels/c_t8_blacknoir_arms.json
+xmodel,xmodels/c_t8_blacknoir_legs.json
+
+// his pictures (the config's portrait, icon, images and bundle values name them), his game's icon (Outfits.lua)
+image,blacknoir_icon.png,nomips
+image,blacknoir_portrait.png,nomips
+image,blacknoir_render.png,nomips
+image,blacknoir_action.png,nomips
+image,blacknoir_bio_header.png,nomips
+image,blacknoir_card.png,nomips
+image,blacknoir_story.png,nomips
+image,blacknoir_emblem.png,nomips
+image,blacknoir_outfit_default.png,nomips
+image,blacknoir_game_mw3.png,nomips
+
+// his dialog bundle (getmpdialogname "blacknoir"): Spectre's exerts, no chatter
+scriptbundle,mpdialog_player/blacknoir
+
+// his models cached (the frontend spawns them)
+bgcache,characters/blacknoir/bgcache.csv
+// blacknoir: end
+
+
+// sprays: begin
+// our wheel sprays (a tag item, its material: a copy of the stock spray material with our picture), after the
+// rocket gesture in the wheel list (sb fireworks block). BO4 Custom Maps/Fireworks Gesture (BO4)/tools/build_sprays.py
+// writes this block: edit it there
+material,gestures/sprays/shield_spray_wanted_mat.json
+sprayorgestureitem,gestures/sprays/shield_spray_wanted.json
+localizelist,gestures/sprays/strings.json
+// sprays: end
+
+// warden: begin
+// The Warden (BO7 zombies' villain), a specialist of multiplayer and a Blackout character (shield-client makes his
+// roles from the config's characters). BO4 Custom Maps/The Warden (BO4)/tools/build_warden.py writes these lines and
+// his files here: edit them there and run it again
+// his two outfits (default, western): body (tag_stowed_back), head on Ruin's head rig (face shapes; war paint face on
+// the default one), first person arms (BO7's view models) and legs
+xmodel,xmodels/c_t8_warden.json
+xmodel,xmodels/c_t8_warden_head.json
+xmodel,xmodels/c_t8_warden_arms.json
+xmodel,xmodels/c_t8_warden_legs.json
+xmodel,xmodels/c_t8_warden_west.json
+xmodel,xmodels/c_t8_warden_west_head.json
+xmodel,xmodels/c_t8_warden_west_arms.json
+xmodel,xmodels/c_t8_warden_west_legs.json
+
+// his pictures (the config's portrait, icon, images and bundle values name them), his game's icon (Outfits.lua)
+image,warden_icon.png,nomips
+image,warden_portrait.png,nomips
+image,warden_render.png,nomips
+image,warden_action.png,nomips
+image,warden_bio_header.png,nomips
+image,warden_card.png,nomips
+image,warden_story.png,nomips
+image,warden_emblem.png,nomips
+image,warden_outfit_default.png,nomips
+image,warden_outfit_western.png,nomips
+image,warden_game_bo7.png,nomips
+
+// his battle chatter: the bundle his body type names (getmpdialogname "warden"); its lines are in support.all
+// (sounds/support_sounds.json, the aliases vox_warden_*), their subtitles in gamedata/shield/subtitles.csv
+scriptbundle,mpdialog_player/warden
+
+// his models cached (the frontend spawns them), his lines (the player entity plays them)
+bgcache,characters/warden/bgcache.csv
+// warden: end
+
+// zm vox: begin
+// the zombies copies of the MP specialists: their lines (vox_zmc_<specialist>_<line> in support.all; the
+// others play their crew lines, ZombiesVoxTable.gsc). BO4 Custom Maps/Core/tools/build_zm_vox.py writes these lines
+bgcache,characters/zm_vox/bgcache.csv
+// zm vox: end

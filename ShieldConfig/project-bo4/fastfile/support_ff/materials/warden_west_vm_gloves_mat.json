@@ -1,0 +1,16 @@
+{
+    "name": "warden_west_vm_gloves_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_west_vm_gloves.png",
+        "glossMap": "warden_west_vm_gloves_g.png,bc4",
+        "normalMap": "warden_west_vm_gloves_n.png,linear",
+        "aoMap": "warden_west_vm_gloves_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            14
+        ]
+    }
+}

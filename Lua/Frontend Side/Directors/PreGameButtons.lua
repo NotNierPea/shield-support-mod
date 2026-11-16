@@ -381,8 +381,10 @@ CoD.DirectorCommonSafeAreaBottomAndLeft.new = function ( f1_arg0, f1_arg1, f1_ar
 
 	ShieldOptionsButton.id = "ShieldOptionsButton"
 
-	-- target range (TargetRange.lua), multiplayer's online lobbies, over Shield Options
-	local TargetRangeButton = CoD.DirectorPreGameButtonOption.new( f1_arg0, f1_arg1, 0.034, 0.034, 0, 353, 0.30, 0.30, -127, -77 )
+	-- target range (TargetRange.lua), multiplayer's online lobbies, right above Custom Games (the MP lobby's, stock
+	-- DirectorPregame: 514..896 from the middle, 430..384 over the bottom; this one as wide and tall, 10 over it).
+	-- It must stay inside this widget (its lobby places it 512 tall over the bottom): the mouse misses a button outside it
+	local TargetRangeButton = CoD.DirectorPreGameButtonOption.new( f1_arg0, f1_arg1, 0.5, 0.5, 514, 896, 1, 1, -486, -440 )
 	TargetRangeButton.DirectorSelectButtonMiniInternal.MiddleText:setText( "TARGET RANGE" )
 	TargetRangeButton.DirectorSelectButtonMiniInternal.MiddleTextFocus:setText( "TARGET RANGE" )
 

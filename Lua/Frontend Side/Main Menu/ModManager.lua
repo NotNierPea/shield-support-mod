@@ -200,6 +200,18 @@ local ModsCatalog = {
 		asset = "zm_orange_night",
 		restart = true,
 		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/zm_orange_night_1.0.0.zip"
+	},
+	{
+		folder = "wz_open_skyscrapers_night",
+		title = "Blackout Night",
+		modes = { "wz" },
+		author = "peawhatever",
+		icon = "mod_manager_blackout_night",
+		previews = { "mm_prev_blackout_night_1" },
+		desc = "Blackout at night, under the sky of Mars.",
+		asset = "wz_open_skyscrapers_night",
+		restart = true,
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/wz_open_skyscrapers_night_1.0.0.zip"
 	}
 }
 

@@ -1,0 +1,16 @@
+{
+    "name": "warden_west_leather_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_west_leather.png",
+        "glossMap": "warden_west_leather_g.png,bc4",
+        "normalMap": "warden_west_leather_n.png,linear",
+        "aoMap": "warden_west_leather_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            14
+        ]
+    }
+}

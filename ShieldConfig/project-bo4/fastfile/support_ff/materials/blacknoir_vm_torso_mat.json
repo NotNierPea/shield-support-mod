@@ -1,0 +1,16 @@
+{
+    "name": "blacknoir_vm_torso_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "blacknoir_vm_torso.png",
+        "glossMap": "blacknoir_vm_torso_g.png,bc4",
+        "normalMap": "blacknoir_vm_torso_n.png,linear",
+        "aoMap": "blacknoir_vm_torso_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            10
+        ]
+    }
+}

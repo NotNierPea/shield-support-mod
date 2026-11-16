@@ -1,0 +1,16 @@
+{
+    "name": "warden_vest_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_vest.png",
+        "glossMap": "warden_vest_g.png,bc4",
+        "normalMap": "warden_vest_n.png,linear",
+        "aoMap": "warden_vest_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            6
+        ]
+    }
+}

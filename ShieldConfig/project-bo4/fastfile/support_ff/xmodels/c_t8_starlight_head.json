@@ -1,0 +1,21 @@
+{
+    "name": "c_t8_starlight_head",
+    "templateModel": "../templates/xmodel_head.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/starlight/starlight_head.gltf",
+    "skeleton": "../skeletons/kagan_head.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "starlight_brows": "materials/starlight_brows_mat.json",
+        "starlight_collar": "materials/starlight_collar_mat.json",
+        "starlight_eyes": "materials/starlight_eyes_mat.json",
+        "starlight_face": "materials/starlight_face_mat.json",
+        "starlight_face_paint": "materials/starlight_face_paint_mat.json",
+        "starlight_hair": "materials/starlight_hair_mat.json",
+        "starlight_lashes": "materials/starlight_lashes_mat.json",
+        "starlight_mouth": "materials/starlight_mouth_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf",
+    "physConstraints": "#hash_1e78a9fa3e465439"
+}

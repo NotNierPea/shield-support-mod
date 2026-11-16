@@ -1,0 +1,17 @@
+{
+    "name": "warden_coat_mat",
+    "template": "../templates/material_clip.json",
+    "textures": {
+        "colorMap": "warden_coat.png",
+        "glossMap": "warden_coat_g.png,bc4",
+        "normalMap": "warden_coat_n.png,linear",
+        "aoMap": "warden_coat_o.png,bc4",
+        "specColorMap": "#hash_26c8688ba5b9e6b2"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            6
+        ]
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "name": "starlight_brows_mat",
+    "template": "../templates/material_clip.json",
+    "textures": {
+        "colorMap": "starlight_brows.png",
+        "glossMap": "starlight_brows_g.png,bc4",
+        "normalMap": "starlight_brows_n.png,linear",
+        "aoMap": "starlight_brows_o.png,bc4",
+        "specColorMap": "#hash_26c8688ba5b9e6b2"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            2
+        ]
+    }
+}

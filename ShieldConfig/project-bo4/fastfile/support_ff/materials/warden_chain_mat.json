@@ -1,0 +1,17 @@
+{
+    "name": "warden_chain_mat",
+    "template": "../templates/material_clip.json",
+    "textures": {
+        "colorMap": "warden_chain.png",
+        "glossMap": "warden_chain_g.png,bc4",
+        "normalMap": "warden_chain_n.png,linear",
+        "aoMap": "warden_chain_o.png,bc4",
+        "specColorMap": "#hash_26c8688ba5b9e6b2"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            13
+        ]
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "name": "blacknoir_back_knife_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "blacknoir_back_knife.png",
+        "glossMap": "blacknoir_back_knife_g.png,bc4",
+        "normalMap": "blacknoir_back_knife_n.png,linear",
+        "aoMap": "blacknoir_back_knife_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            10
+        ]
+    }
+}

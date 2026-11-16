@@ -1,0 +1,23 @@
+{
+    "name": "blacknoir_mask_paint_mat",
+    "template": "../templates/material_spectre_mask.json",
+    "textures": {
+        "colorMap": "blacknoir_mask_paint.png",
+        "normalMap": "blacknoir_mask_paint_n.png,linear",
+        "glossMap": "blacknoir_mask_paint_g.png,bc4",
+        "aoMap": "blacknoir_mask_paint_o.png,bc4",
+        "specColorMap": "#hash_26c8688ba5b9e6b2",
+        "detailNormalMask": "#hash_903dd7f6bd2ee1ed"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            10
+        ],
+        "colorTint": [
+            1,
+            1,
+            1
+        ]
+    }
+}

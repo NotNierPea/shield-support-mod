@@ -1,0 +1,20 @@
+{
+    "name": "starlight_hair_mat",
+    "template": "../templates/material_hair.json",
+    "textures": {
+        "colorMap": "starlight_hair.png",
+        "glossMap": "starlight_hair_g.png,bc4",
+        "aoMap": "starlight_hair_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            1,
+            11
+        ],
+        "colorTint": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

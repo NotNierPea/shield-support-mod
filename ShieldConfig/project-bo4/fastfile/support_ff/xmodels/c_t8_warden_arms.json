@@ -1,0 +1,14 @@
+{
+    "name": "c_t8_warden_arms",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/warden/warden_arms.gltf",
+    "skeleton": "../skeletons/zm_viewarms.json",
+    "hitboxes": "mesh",
+    "materials": {
+        "warden_vm_coat": "materials/warden_vm_coat_mat.json",
+        "warden_vm_gear": "materials/warden_vm_gear_mat.json",
+        "warden_vm_skin": "materials/warden_vm_skin_mat.json"
+    },
+    "collision": "none"
+}

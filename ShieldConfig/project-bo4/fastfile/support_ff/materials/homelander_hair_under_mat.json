@@ -1,0 +1,20 @@
+{
+    "name": "homelander_hair_under_mat",
+    "template": "../templates/material_hair.json",
+    "textures": {
+        "colorMap": "homelander_hair_under.png",
+        "glossMap": "homelander_hair_under_g.png,bc4",
+        "aoMap": "homelander_hair_under_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            1,
+            11
+        ],
+        "colorTint": [
+            1.0,
+            1.0,
+            1.0
+        ]
+    }
+}

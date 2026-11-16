@@ -1,0 +1,17 @@
+{
+    "name": "starlight_cape_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "starlight_cape.png",
+        "glossMap": "starlight_cape_g.png,bc4",
+        "normalMap": "starlight_cape_n.png,linear",
+        "aoMap": "starlight_cape_o.png,bc4",
+        "specColorMap": "starlight_cape_s.png"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            7
+        ]
+    }
+}

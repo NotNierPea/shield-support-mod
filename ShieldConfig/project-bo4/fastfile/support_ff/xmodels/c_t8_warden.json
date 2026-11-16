@@ -1,0 +1,24 @@
+{
+    "name": "c_t8_warden",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/warden/warden_body.gltf",
+    "skeleton": "../skeletons/warden_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "warden_belts": "materials/warden_belts_mat.json",
+        "warden_boots": "materials/warden_boots_mat.json",
+        "warden_chain": "materials/warden_chain_mat.json",
+        "warden_coat": "materials/warden_coat_mat.json",
+        "warden_fur": "materials/warden_fur_mat.json",
+        "warden_gear": "materials/warden_gear_mat.json",
+        "warden_holster": "materials/warden_holster_mat.json",
+        "warden_medallion": "materials/warden_medallion_mat.json",
+        "warden_pants": "materials/warden_pants_mat.json",
+        "warden_skin": "materials/warden_skin_mat.json",
+        "warden_trinkets": "materials/warden_trinkets_mat.json",
+        "warden_vest": "materials/warden_vest_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

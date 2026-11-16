@@ -1,0 +1,17 @@
+{
+    "name": "homelander_boots_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "homelander_boots.png",
+        "glossMap": "homelander_boots_g.png,bc4",
+        "normalMap": "homelander_boots_n.png,linear",
+        "aoMap": "homelander_boots_o.png,bc4",
+        "specColorMap": "homelander_boots_s.png"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            9
+        ]
+    }
+}

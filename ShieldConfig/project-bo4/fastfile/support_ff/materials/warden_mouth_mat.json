@@ -1,0 +1,16 @@
+{
+    "name": "warden_mouth_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "warden_mouth.png",
+        "glossMap": "warden_mouth_g.png,bc4",
+        "normalMap": "warden_mouth_n.png,linear",
+        "aoMap": "warden_mouth_o.png,bc4"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            10
+        ]
+    }
+}

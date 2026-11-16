@@ -1,0 +1,17 @@
+{
+    "name": "warden_west_sash_mat",
+    "template": "../templates/material_clip.json",
+    "textures": {
+        "colorMap": "warden_west_sash.png",
+        "glossMap": "warden_west_sash_g.png,bc4",
+        "normalMap": "warden_west_sash_n.png,linear",
+        "aoMap": "warden_west_sash_o.png,bc4",
+        "specColorMap": "#hash_26c8688ba5b9e6b2"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            6
+        ]
+    }
+}

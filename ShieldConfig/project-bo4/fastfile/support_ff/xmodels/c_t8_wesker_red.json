@@ -3,7 +3,7 @@
     "templateModel": "../templates/xmodel_rigid.json",
     "templateMesh": "../templates/xmodelmesh_rigid.json",
     "gltf": "../characters/wesker/wesker_body.gltf",
-    "skeleton": "../skeletons/mp_body.json",
+    "skeleton": "../skeletons/wesker_body.json",
     "hitboxes": "skeleton",
     "materials": {
         "wesker_em8001": "materials/wesker_em8001_mat.json",
