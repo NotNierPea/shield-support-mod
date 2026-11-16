@@ -8,13 +8,15 @@
         {
             "nodes": [
                 0,
-                8,
-                9,
                 10,
                 11,
                 12,
                 13,
-                14
+                14,
+                15,
+                16,
+                17,
+                18
             ]
         }
     ],
@@ -27,7 +29,9 @@
                 -0.0
             ],
             "children": [
-                1
+                1,
+                8,
+                9
             ]
         },
         {
@@ -95,6 +99,22 @@
             ]
         },
         {
+            "name": "tag_mc_clock_hand_1",
+            "translation": [
+                8.501705000000001,
+                3.01,
+                -0.0
+            ]
+        },
+        {
+            "name": "tag_mc_clock_hand_2",
+            "translation": [
+                8.17,
+                3.01,
+                -0.0
+            ]
+        },
+        {
             "name": "part0",
             "mesh": 0,
             "skin": 0
@@ -128,6 +148,16 @@
             "name": "part6",
             "mesh": 6,
             "skin": 0
+        },
+        {
+            "name": "part7",
+            "mesh": 7,
+            "skin": 0
+        },
+        {
+            "name": "part8",
+            "mesh": 8,
+            "skin": 0
         }
     ],
     "skins": [
@@ -140,15 +170,21 @@
                 4,
                 5,
                 6,
-                7
+                7,
+                8,
+                9
             ],
-            "inverseBindMatrices": 42,
+            "inverseBindMatrices": 54,
             "skeleton": 0
         }
     ],
     "materials": [
         {
             "name": "ferriswheel",
+            "doubleSided": true
+        },
+        {
+            "name": "clockhands",
             "doubleSided": true
         }
     ],
@@ -262,6 +298,38 @@
                     },
                     "indices": 41,
                     "material": 0
+                }
+            ]
+        },
+        {
+            "name": "part7",
+            "primitives": [
+                {
+                    "attributes": {
+                        "POSITION": 42,
+                        "NORMAL": 43,
+                        "TEXCOORD_0": 44,
+                        "JOINTS_0": 45,
+                        "WEIGHTS_0": 46
+                    },
+                    "indices": 47,
+                    "material": 1
+                }
+            ]
+        },
+        {
+            "name": "part8",
+            "primitives": [
+                {
+                    "attributes": {
+                        "POSITION": 48,
+                        "NORMAL": 49,
+                        "TEXCOORD_0": 50,
+                        "JOINTS_0": 51,
+                        "WEIGHTS_0": 52
+                    },
+                    "indices": 53,
+                    "material": 1
                 }
             ]
         }
@@ -592,7 +660,99 @@
         {
             "bufferView": 42,
             "componentType": 5126,
-            "count": 8,
+            "count": 68,
+            "type": "VEC3",
+            "min": [
+                8.418773801879883,
+                3.638947566986084,
+                -0.8195787489414216
+            ],
+            "max": [
+                8.584628351287844,
+                5.484080347061157,
+                -0.1040065884590149
+            ]
+        },
+        {
+            "bufferView": 43,
+            "componentType": 5126,
+            "count": 68,
+            "type": "VEC3"
+        },
+        {
+            "bufferView": 44,
+            "componentType": 5126,
+            "count": 68,
+            "type": "VEC2"
+        },
+        {
+            "bufferView": 45,
+            "componentType": 5123,
+            "count": 68,
+            "type": "VEC4"
+        },
+        {
+            "bufferView": 46,
+            "componentType": 5126,
+            "count": 68,
+            "type": "VEC4"
+        },
+        {
+            "bufferView": 47,
+            "componentType": 5125,
+            "count": 144,
+            "type": "SCALAR"
+        },
+        {
+            "bufferView": 48,
+            "componentType": 5126,
+            "count": 76,
+            "type": "VEC3",
+            "min": [
+                8.087064703063966,
+                1.1718594398498532,
+                -1.7696797966957094
+            ],
+            "max": [
+                8.252919252471925,
+                2.6127219524383545,
+                -0.4480254709720612
+            ]
+        },
+        {
+            "bufferView": 49,
+            "componentType": 5126,
+            "count": 76,
+            "type": "VEC3"
+        },
+        {
+            "bufferView": 50,
+            "componentType": 5126,
+            "count": 76,
+            "type": "VEC2"
+        },
+        {
+            "bufferView": 51,
+            "componentType": 5123,
+            "count": 76,
+            "type": "VEC4"
+        },
+        {
+            "bufferView": 52,
+            "componentType": 5126,
+            "count": 76,
+            "type": "VEC4"
+        },
+        {
+            "bufferView": 53,
+            "componentType": 5125,
+            "count": 144,
+            "type": "SCALAR"
+        },
+        {
+            "bufferView": 54,
+            "componentType": 5126,
+            "count": 10,
             "type": "MAT4"
         }
     ],
@@ -852,12 +1012,84 @@
         {
             "buffer": 0,
             "byteOffset": 187912,
-            "byteLength": 512
+            "byteLength": 816,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 188728,
+            "byteLength": 816,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 189544,
+            "byteLength": 544,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 190088,
+            "byteLength": 544,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 190632,
+            "byteLength": 1088,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 191720,
+            "byteLength": 576,
+            "target": 34963
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 192296,
+            "byteLength": 912,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 193208,
+            "byteLength": 912,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 194120,
+            "byteLength": 608,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 194728,
+            "byteLength": 608,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 195336,
+            "byteLength": 1216,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 196552,
+            "byteLength": 576,
+            "target": 34963
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 197128,
+            "byteLength": 640
         }
     ],
     "buffers": [
         {
-            "byteLength": 188424,
+            "byteLength": 197768,
             "uri": "ferris_world.bin"
         }
     ]

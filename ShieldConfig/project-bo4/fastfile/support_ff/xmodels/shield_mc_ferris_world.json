@@ -5,7 +5,8 @@
     "gltf": "../models/mastercraft/ferris_world.gltf",
     "hitboxes": "mesh",
     "materials": {
-        "ferriswheel": "materials/shield_mc_ferris_mat.json"
+        "ferriswheel": "materials/shield_mc_ferris_mat.json",
+        "clockhands": "materials/shield_mc_clock_mat.json"
     },
     "stream": false,
     "collision": "none"

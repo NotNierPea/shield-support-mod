@@ -50,7 +50,11 @@ PodiumGesture(localclientnum, place, value, binitialsnap)
     character = podium.byplace[place];
     item = int(value / 2) - 1;
     if(!isgesture(item))
-     item = -1;
+    {
+        // the spray's picture: PodiumHud.lua draws it (the lobby's sprayGestureIndex model and widget)
+        setuimodelvalue(createuimodel(getuimodelforcontroller(localclientnum), "ShieldPodium.spray" + (place + 1)), value);
+        item = -1;
+    }
 
     gesture = character [[ @namespace_7da27482<scripts\core_common\character_customization.csc>::get_gesture ]](item);
     if(!isdefined(gesture) || !isdefined(gesture.animation))

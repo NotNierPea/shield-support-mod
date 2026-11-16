@@ -247,6 +247,46 @@ local function MakeCard( self, menu, controller, index, place, client, score, ki
 	return card
 end
 
+---------------------------
+-- a spray's picture over a place's character for SPRAY_MS (the lobby's sprayGestureIndex widget does it there)
+
+local SPRAY_SIZE = 280
+local SPRAY_MS = 5000
+
+local function ShowSpray( self, index, item )
+	local info = ItemInfo( item )
+	local place = PLACES[index]
+	if not info or not info.icon or not place then
+		Log( "spray " .. tostring( item ) .. " of place " .. tostring( index ) .. ": no picture" )
+		return
+	end
+
+	self.sprays = self.sprays or {}
+	if self.sprays[index] then
+		self.sprays[index]:close()
+	end
+
+	local bottom = -CARD_H - 70
+	local spray = LUI.UIImage.new( 0.5, 0.5, place.x - SPRAY_SIZE / 2, place.x + SPRAY_SIZE / 2, 1, 1, bottom - SPRAY_SIZE, bottom )
+	spray:setImage( Image( info.icon ) )
+	spray:setAlpha( 0 )
+	self:addElement( spray )
+	self.sprays[index] = spray
+
+	-- in as the can sprays, held, out
+	Sequence( spray, {
+		{ 500, function () end },
+		{ 200, function ( element )
+			element:setAlpha( 1 )
+		end },
+		{ SPRAY_MS - 1000, function () end },
+		{ 300, function ( element )
+			element:setAlpha( 0 )
+		end }
+	} )
+	Log( "spray " .. tostring( item ) .. " shown over place " .. tostring( index ) )
+end
+
 local function ShowPodium( menu, controller, data )
 	if menu.ShieldPodium then
 		return
@@ -302,6 +342,20 @@ local function ShowPodium( menu, controller, data )
 		end
 	end
 	Log( "shown, " .. tostring( count ) .. " players, " .. tostring( seconds ) .. " s" )
+
+	-- the places' sprays (Podium.csc: (item + 1) * 2 + toggle on a spray pick)
+	local controllerModel = Engine[@"getmodelforcontroller"]( controller )
+	for i = 1, #PLACES do
+		self:subscribeToModel( Engine[@"createmodel"]( controllerModel, "ShieldPodium.spray" .. i ), function ( model )
+			local value = Engine[@"getmodelvalue"]( model )
+			if value and value >= 2 then
+				local ok, err = pcall( ShowSpray, self, i, math.floor( value / 2 ) - 1 )
+				if not ok then
+					Log( "spray not shown: " .. tostring( err ) )
+				end
+			end
+		end, false )
+	end
 
 	-- the end: a fade to black over the last FADE_MS, held until the next map
 	if seconds > 0 then

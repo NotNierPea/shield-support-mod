@@ -37,19 +37,20 @@ image,mm_prev_zm_nacht_1.png
 image,shield_public_banner.png
 image,loading_shield.png
 
-// custom camos (camo index 399 and up)
-weaponcamo,tables/weaponcamo/shield_camos.json
-stringtable,gamedata/shield/custom_camos.csv
-
 // mastercrafts: begin (build_mastercraft.py writes this)
 // our Mastercrafts: the variant list (shield-client custom_camos.cpp adds them to the weapons), their riders
 // (the Strife's Ferris wheel), pictures
 stringtable,gamedata/shield/custom_mastercrafts.csv
-image,shield_mc_ferris_color.png
 image,shield_mc_strife_ferris.png
 xmodel,xmodels/shield_mc_ferris_view.json
 xmodel,xmodels/shield_mc_ferris_world.json
+// (the riders cached as the weapon models are: our variants come after the weapon was cached)
+bgcache,models/mastercraft/bgcache.csv
 // mastercrafts: end
+
+// custom camos (camo index 399 and up)
+weaponcamo,tables/weaponcamo/shield_camos.json
+stringtable,gamedata/shield/custom_camos.csv
 image,shield_camo_circuit_prev.png
 image,shield_camo_digital_prev.png
 

@@ -121,8 +121,62 @@ local function WrapVariantCamo( original, utility )
 	return wrapper
 end
 
+--[[
+	Our Mastercrafts (the support fastfile's custom_mastercrafts.csv; the client adds them to the weapons' variant lists)
+	are always shown and kept in classes: the game hides a variant whose loot isn't owned and resets a class's to the
+	base weapon. Ours are known by their name (column 1, a localize key) as the menus show it.
+]]
+local MASTERCRAFT_TABLE = "gamedata/shield/custom_mastercrafts.csv"
+local MastercraftNames = nil
+
+local function IsShieldMastercraft( variant )
+	if not MastercraftNames then
+		local rows = tonumber( Engine[@"gettablerowcount"]( MASTERCRAFT_TABLE ) ) or 0
+		if rows <= 0 then
+			return false
+		end
+
+		MastercraftNames = {}
+		for row = 0, rows - 1 do
+			local key = Engine[@"tablelookupgetcolumnvalueforrow"]( MASTERCRAFT_TABLE, row, 1 )
+			if key and key ~= "" then
+				MastercraftNames[Engine[@"hash_4F9F1239CFD921FE"]( key )] = true
+			end
+		end
+	end
+
+	local name = variant and variant[@"displayname"]
+	if not name or name == @"hash_0" then
+		return false
+	end
+
+	return MastercraftNames[Engine[@"hash_4F9F1239CFD921FE"]( name )] == true
+end
+
+local function WrapFilterSignatureWeapon( original )
+	local wrapper = function ( controller, variant, baseOnly, ownedOnly )
+		if not baseOnly then
+			local ok, ours = pcall( IsShieldMastercraft, variant )
+			if ok and ours then
+				return true
+			end
+		end
+
+		return original( controller, variant, baseOnly, ownedOnly )
+	end
+
+	Wrapped[wrapper] = true
+	return wrapper
+end
+
 -- wraps each function once; a utility the game reloads gets wrapped again
 InstallCamoKeep = function()
+	local cac = CoD.CACUtility
+
+	if cac and cac.FilterSignatureWeapon and not IsWrapped( cac.FilterSignatureWeapon ) then
+		cac.FilterSignatureWeapon = WrapFilterSignatureWeapon( cac.FilterSignatureWeapon )
+	end
+
 	local options = CoD.WeaponOptionsUtility
 
 	if options then

@@ -419,11 +419,31 @@ TargetRangeRespawn()
 TargetRangeLeave()
 {
     ShieldLog("^2Target range: leaving");
+    // the client loads the menus without the streamer waits (target_range.cpp)
+    setdvar(#"shield_targetrange_leaving", 1);
     changeadvertisedstatus(0);
     setmatchflag("game_ended", 1);
     game.state = "postgame";
     waitframe(1);
     exitlevel(0);
+}
+
+// ---- no weapon progress ----
+
+// every weapon stat (kills, hits, headshots, camo and weapon challenges): addweaponstat without the stat tracking check
+detour stats<scripts\core_common\player\player_stats.gsc>::function_eec52333(weapon, statname, value, classnum, pickedup, var_9ade9f55)
+{
+    if(isdefined(level.shield_targetrange))
+     return;
+    self [[ @stats<scripts\core_common\player\player_stats.gsc>::function_eec52333 ]](weapon, statname, value, classnum, pickedup, var_9ade9f55);
+}
+
+// a gametype stat with its global one (addgametypestat without the check)
+detour stats<scripts\core_common\player\player_stats.gsc>::function_bb7eedf0(statname, value)
+{
+    if(isdefined(level.shield_targetrange))
+     return false;
+    return self [[ @stats<scripts\core_common\player\player_stats.gsc>::function_bb7eedf0 ]](statname, value);
 }
 
 // ---- no announcer ----
