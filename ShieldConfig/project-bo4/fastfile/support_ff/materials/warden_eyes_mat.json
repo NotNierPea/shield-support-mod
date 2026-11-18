@@ -1,16 +1,18 @@
 {
     "name": "warden_eyes_mat",
-    "template": "../templates/material_model.json",
+    "template": "../templates/material_emissive_lit.json",
     "textures": {
         "colorMap": "warden_eyes.png",
+        "emissiveMap": "warden_eyes_em.png",
         "glossMap": "warden_eyes_g.png,bc4",
         "normalMap": "warden_eyes_n.png,linear",
         "aoMap": "warden_eyes_o.png,bc4"
     },
     "values": {
-        "glossRange": [
-            0,
-            14
+        "emissiveTint1": [
+            1.6,
+            0.7,
+            0.15
         ]
     }
 }

@@ -1,0 +1,22 @@
+{
+    "name": "stan_face_glow_mat",
+    "template": "../templates/material_emissive_lit.json",
+    "textures": {
+        "colorMap": "stan_face.png",
+        "emissiveMap": "stan_face.png",
+        "glossMap": "#hash_903dd7f6bd2ee1ed",
+        "normalMap": "#hash_8c3c2dcaa1919434",
+        "aoMap": "#hash_bfd1eb9d1e41b805"
+    },
+    "values": {
+        "emissiveTint1": [
+            0.8,
+            0.8,
+            0.8
+        ],
+        "glossRange": [
+            0,
+            0
+        ]
+    }
+}

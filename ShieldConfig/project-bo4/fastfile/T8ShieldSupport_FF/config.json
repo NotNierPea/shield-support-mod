@@ -150,154 +150,6 @@
                     }
                 },
                 {
-                    "name": "kagan",
-                    "mode": "mp",
-                    "base_role": 2,
-                    "role_slot": 72,
-                    "display_name": "Kagan",
-                    "title": "The Guild",
-                    "description": "Emma Kagan, head of The Guild, turns every fight into a market she owns: flatten positions with the War Machine and flush cover with the Cluster Grenade.",
-                    "body": "c_t8_kagan",
-                    "head": "c_t8_kagan_head",
-                    "arms": "c_t8_kagan_arms",
-                    "legs": "c_t8_kagan_legs",
-                    "portrait": "kagan_portrait",
-                    "icon": "kagan_icon",
-                    "dialog": "kagan",
-                    "images": {
-                        "0x50": "",
-                        "0x58": "kagan_render",
-                        "0x60": "kagan_action"
-                    },
-                    "bundle": {
-                        "hash_215ac9daad709de1": "kagan_bio_header",
-                        "hash_38ea74cad0150cdf": "kagan_card",
-                        "hash_39baaa080c62d5e5": "kagan_story",
-                        "hash_5b2781a0b1bf2b7a": "kagan_emblem",
-                        "hash_32ca7e775f99d218": "kagan",
-                        "hash_3db969b978e2aba8": 0
-                    },
-                    "texts": {
-                        "hash_10cb98543e7ec137": "KAGAN",
-                        "hash_13c8379c2b98a9c6": "KAGAN - The Guild",
-                        "hash_16d4e2fc988858de": "Emma Kagan",
-                        "hash_541919134fdff1": "Kagan's Bio",
-                        "hash_438e8b2f52f5538b": "The head of The Guild: a market in every war, a lesson in every fight.",
-                        "hash_2299bc20d2a6cd8": "Emma Kagan runs The Guild, a private defense giant whose technology reaches every battlefield. She does not ask for loyalty; she buys it, and she collects on every debt.\n\nWhere others see a war, she sees a market and a test of who is worth keeping. Every operator who stands against her is a lesson, and every lesson has a cost."
-                    },
-                    "outfits": [
-                        {
-                            "index": 0,
-                            "name": "Emma Kagan",
-                            "icon": "kagan_outfit_default"
-                        },
-                        {
-                            "index": 1,
-                            "body": "c_t8_kagan_jsoc",
-                            "arms": "c_t8_kagan_jsoc_arms",
-                            "legs": "c_t8_kagan_jsoc_legs",
-                            "name": "JSOC",
-                            "icon": "kagan_outfit_jsoc"
-                        },
-                        {
-                            "index": 2,
-                            "body": "c_t8_kagan_beta",
-                            "head": "c_t8_kagan_beta_head",
-                            "arms": "c_t8_kagan_beta_arms",
-                            "legs": "c_t8_kagan_beta_legs",
-                            "name": "Speedrun",
-                            "icon": "kagan_outfit_beta",
-                            "loot": "shield_kagan_speedrun"
-                        }
-                    ],
-                    "outfit_count": 3,
-                    "war_paints": {
-                        "face": "kagan_7445742a_paint_mat",
-                        "over": "hash_5005645bad4e94b3"
-                    },
-                    "role_bundle": {
-                        "characterint4": 0,
-                        "characterint5": 0,
-                        "characterint6": 0,
-                        "characterint7": 0,
-                        "characterint8": 0
-                    }
-                },
-                {
-                    "name": "kagan",
-                    "mode": "wz",
-                    "base_role": 1,
-                    "role_slot": 5,
-                    "display_name": "Kagan",
-                    "title": "The Guild",
-                    "description": "Emma Kagan, head of The Guild, turns every fight into a market she owns: flatten positions with the War Machine and flush cover with the Cluster Grenade.",
-                    "body": "c_t8_kagan",
-                    "head": "c_t8_kagan_head",
-                    "arms": "c_t8_kagan_arms",
-                    "legs": "c_t8_kagan_legs",
-                    "portrait": "kagan_portrait",
-                    "icon": "kagan_icon",
-                    "dialog": "kagan",
-                    "images": {
-                        "0x50": "",
-                        "0x58": "kagan_render",
-                        "0x60": "kagan_action"
-                    },
-                    "bundle": {
-                        "hash_215ac9daad709de1": "kagan_bio_header",
-                        "hash_38ea74cad0150cdf": "kagan_card",
-                        "hash_39baaa080c62d5e5": "kagan_story",
-                        "hash_5b2781a0b1bf2b7a": "kagan_emblem",
-                        "hash_32ca7e775f99d218": "kagan",
-                        "hash_3db969b978e2aba8": 0
-                    },
-                    "texts": {
-                        "hash_10cb98543e7ec137": "KAGAN",
-                        "hash_13c8379c2b98a9c6": "KAGAN - The Guild",
-                        "hash_16d4e2fc988858de": "Emma Kagan",
-                        "hash_541919134fdff1": "Kagan's Bio",
-                        "hash_438e8b2f52f5538b": "The head of The Guild: a market in every war, a lesson in every fight.",
-                        "hash_2299bc20d2a6cd8": "Emma Kagan runs The Guild, a private defense giant whose technology reaches every battlefield. She does not ask for loyalty; she buys it, and she collects on every debt.\n\nWhere others see a war, she sees a market and a test of who is worth keeping. Every operator who stands against her is a lesson, and every lesson has a cost."
-                    },
-                    "outfits": [
-                        {
-                            "index": 0,
-                            "name": "Emma Kagan",
-                            "icon": "kagan_outfit_default"
-                        },
-                        {
-                            "index": 1,
-                            "body": "c_t8_kagan_jsoc",
-                            "arms": "c_t8_kagan_jsoc_arms",
-                            "legs": "c_t8_kagan_jsoc_legs",
-                            "name": "JSOC",
-                            "icon": "kagan_outfit_jsoc"
-                        },
-                        {
-                            "index": 2,
-                            "body": "c_t8_kagan_beta",
-                            "head": "c_t8_kagan_beta_head",
-                            "arms": "c_t8_kagan_beta_arms",
-                            "legs": "c_t8_kagan_beta_legs",
-                            "name": "Speedrun",
-                            "icon": "kagan_outfit_beta",
-                            "loot": "shield_kagan_speedrun"
-                        }
-                    ],
-                    "outfit_count": 3,
-                    "war_paints": {
-                        "face": "kagan_7445742a_paint_mat",
-                        "over": "hash_5005645bad4e94b3"
-                    },
-                    "role_bundle": {
-                        "characterint4": 0,
-                        "characterint5": 0,
-                        "characterint6": 0,
-                        "characterint7": 0,
-                        "characterint8": 0
-                    }
-                },
-                {
                     "name": "jacket",
                     "mode": "mp",
                     "base_role": 13,
@@ -2168,6 +2020,154 @@
                     }
                 },
                 {
+                    "name": "kagan",
+                    "mode": "mp",
+                    "base_role": 2,
+                    "role_slot": 72,
+                    "display_name": "Kagan",
+                    "title": "The Guild",
+                    "description": "Emma Kagan, head of The Guild, turns every fight into a market she owns: flatten positions with the War Machine and flush cover with the Cluster Grenade.",
+                    "body": "c_t8_kagan",
+                    "head": "c_t8_kagan_head",
+                    "arms": "c_t8_kagan_arms",
+                    "legs": "c_t8_kagan_legs",
+                    "portrait": "kagan_portrait",
+                    "icon": "kagan_icon",
+                    "dialog": "kagan",
+                    "images": {
+                        "0x50": "",
+                        "0x58": "kagan_render",
+                        "0x60": "kagan_action"
+                    },
+                    "bundle": {
+                        "hash_215ac9daad709de1": "kagan_bio_header",
+                        "hash_38ea74cad0150cdf": "kagan_card",
+                        "hash_39baaa080c62d5e5": "kagan_story",
+                        "hash_5b2781a0b1bf2b7a": "kagan_emblem",
+                        "hash_32ca7e775f99d218": "kagan",
+                        "hash_3db969b978e2aba8": 0
+                    },
+                    "texts": {
+                        "hash_10cb98543e7ec137": "KAGAN",
+                        "hash_13c8379c2b98a9c6": "KAGAN - The Guild",
+                        "hash_16d4e2fc988858de": "Emma Kagan",
+                        "hash_541919134fdff1": "Kagan's Bio",
+                        "hash_438e8b2f52f5538b": "The head of The Guild: a market in every war, a lesson in every fight.",
+                        "hash_2299bc20d2a6cd8": "Emma Kagan runs The Guild, a private defense giant whose technology reaches every battlefield. She does not ask for loyalty; she buys it, and she collects on every debt.\n\nWhere others see a war, she sees a market and a test of who is worth keeping. Every operator who stands against her is a lesson, and every lesson has a cost."
+                    },
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "Emma Kagan",
+                            "icon": "kagan_outfit_default"
+                        },
+                        {
+                            "index": 1,
+                            "body": "c_t8_kagan_jsoc",
+                            "arms": "c_t8_kagan_jsoc_arms",
+                            "legs": "c_t8_kagan_jsoc_legs",
+                            "name": "JSOC",
+                            "icon": "kagan_outfit_jsoc"
+                        },
+                        {
+                            "index": 2,
+                            "body": "c_t8_kagan_beta",
+                            "head": "c_t8_kagan_beta_head",
+                            "arms": "c_t8_kagan_beta_arms",
+                            "legs": "c_t8_kagan_beta_legs",
+                            "name": "Speedrun",
+                            "icon": "kagan_outfit_beta",
+                            "loot": "shield_kagan_speedrun"
+                        }
+                    ],
+                    "outfit_count": 3,
+                    "war_paints": {
+                        "face": "kagan_7445742a_paint_mat",
+                        "over": "hash_5005645bad4e94b3"
+                    },
+                    "role_bundle": {
+                        "characterint4": 0,
+                        "characterint5": 0,
+                        "characterint6": 0,
+                        "characterint7": 0,
+                        "characterint8": 0
+                    }
+                },
+                {
+                    "name": "kagan",
+                    "mode": "wz",
+                    "base_role": 1,
+                    "role_slot": 5,
+                    "display_name": "Kagan",
+                    "title": "The Guild",
+                    "description": "Emma Kagan, head of The Guild, turns every fight into a market she owns: flatten positions with the War Machine and flush cover with the Cluster Grenade.",
+                    "body": "c_t8_kagan",
+                    "head": "c_t8_kagan_head",
+                    "arms": "c_t8_kagan_arms",
+                    "legs": "c_t8_kagan_legs",
+                    "portrait": "kagan_portrait",
+                    "icon": "kagan_icon",
+                    "dialog": "kagan",
+                    "images": {
+                        "0x50": "",
+                        "0x58": "kagan_render",
+                        "0x60": "kagan_action"
+                    },
+                    "bundle": {
+                        "hash_215ac9daad709de1": "kagan_bio_header",
+                        "hash_38ea74cad0150cdf": "kagan_card",
+                        "hash_39baaa080c62d5e5": "kagan_story",
+                        "hash_5b2781a0b1bf2b7a": "kagan_emblem",
+                        "hash_32ca7e775f99d218": "kagan",
+                        "hash_3db969b978e2aba8": 0
+                    },
+                    "texts": {
+                        "hash_10cb98543e7ec137": "KAGAN",
+                        "hash_13c8379c2b98a9c6": "KAGAN - The Guild",
+                        "hash_16d4e2fc988858de": "Emma Kagan",
+                        "hash_541919134fdff1": "Kagan's Bio",
+                        "hash_438e8b2f52f5538b": "The head of The Guild: a market in every war, a lesson in every fight.",
+                        "hash_2299bc20d2a6cd8": "Emma Kagan runs The Guild, a private defense giant whose technology reaches every battlefield. She does not ask for loyalty; she buys it, and she collects on every debt.\n\nWhere others see a war, she sees a market and a test of who is worth keeping. Every operator who stands against her is a lesson, and every lesson has a cost."
+                    },
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "Emma Kagan",
+                            "icon": "kagan_outfit_default"
+                        },
+                        {
+                            "index": 1,
+                            "body": "c_t8_kagan_jsoc",
+                            "arms": "c_t8_kagan_jsoc_arms",
+                            "legs": "c_t8_kagan_jsoc_legs",
+                            "name": "JSOC",
+                            "icon": "kagan_outfit_jsoc"
+                        },
+                        {
+                            "index": 2,
+                            "body": "c_t8_kagan_beta",
+                            "head": "c_t8_kagan_beta_head",
+                            "arms": "c_t8_kagan_beta_arms",
+                            "legs": "c_t8_kagan_beta_legs",
+                            "name": "Speedrun",
+                            "icon": "kagan_outfit_beta",
+                            "loot": "shield_kagan_speedrun"
+                        }
+                    ],
+                    "outfit_count": 3,
+                    "war_paints": {
+                        "face": "kagan_7445742a_paint_mat",
+                        "over": "hash_5005645bad4e94b3"
+                    },
+                    "role_bundle": {
+                        "characterint4": 0,
+                        "characterint5": 0,
+                        "characterint6": 0,
+                        "characterint7": 0,
+                        "characterint8": 0
+                    }
+                },
+                {
                     "name": "warden",
                     "mode": "mp",
                     "base_role": 4,
@@ -3056,6 +3056,133 @@
                     },
                     "voice": 99,
                     "role_slot": 83
+                },
+                {
+                    "name": "zm_stan",
+                    "mode": "zm",
+                    "base_role": 13,
+                    "display_name": "Stan Smith",
+                    "description": "Langley Falls' finest CIA agent pushes forward behind a ballistic shield and clears rooms with the 9-Bang.",
+                    "body": "c_t8_stan",
+                    "head": "c_t8_stan_head",
+                    "arms": "c_t8_stan_arms",
+                    "legs": "c_t8_stan_legs",
+                    "portrait": "stan_portrait",
+                    "icon": "stan_icon",
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "Stan Smith",
+                            "icon": "stan_outfit_default"
+                        }
+                    ],
+                    "outfit_count": 1,
+                    "voice": 100,
+                    "role_slot": 84
+                },
+                {
+                    "name": "stan",
+                    "mode": "mp",
+                    "base_role": 1,
+                    "role_slot": 78,
+                    "display_name": "Stan Smith",
+                    "title": "CIA",
+                    "description": "Langley Falls' finest CIA agent pushes forward behind a ballistic shield and clears rooms with the 9-Bang.",
+                    "body": "c_t8_stan",
+                    "head": "c_t8_stan_head",
+                    "arms": "c_t8_stan_arms",
+                    "legs": "c_t8_stan_legs",
+                    "portrait": "stan_portrait",
+                    "icon": "stan_icon",
+                    "dialog": "stan",
+                    "images": {
+                        "0x50": "",
+                        "0x58": "stan_render",
+                        "0x60": "stan_action"
+                    },
+                    "bundle": {
+                        "hash_215ac9daad709de1": "stan_bio_header",
+                        "hash_38ea74cad0150cdf": "stan_card",
+                        "hash_39baaa080c62d5e5": "stan_story",
+                        "hash_5b2781a0b1bf2b7a": "stan_emblem",
+                        "hash_32ca7e775f99d218": "stan",
+                        "hash_3db969b978e2aba8": 0
+                    },
+                    "texts": {
+                        "hash_10cb98543e7ec137": "STAN SMITH",
+                        "hash_13c8379c2b98a9c6": "STAN SMITH - CIA",
+                        "hash_16d4e2fc988858de": "Stan Smith",
+                        "hash_541919134fdff1": "Stan Smith's Bio",
+                        "hash_438e8b2f52f5538b": "A CIA agent who never met a problem he couldn't shoot.",
+                        "hash_2299bc20d2a6cd8": "CIA agent, proud patriot and the most dangerous father in Langley Falls. Stan Smith keeps his family safe, his country free and his chin pointed at the enemy.\n\nHe'll defend the American way with any weapon he can carry, and a few he probably shouldn't."
+                    },
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "Stan Smith",
+                            "icon": "stan_outfit_default"
+                        }
+                    ],
+                    "outfit_count": 1,
+                    "role_bundle": {
+                        "characterint4": 0,
+                        "characterint5": 0,
+                        "characterint6": 0,
+                        "characterint7": 0,
+                        "characterint8": 0
+                    }
+                },
+                {
+                    "name": "stan",
+                    "mode": "wz",
+                    "base_role": 7,
+                    "role_slot": 11,
+                    "display_name": "Stan Smith",
+                    "title": "CIA",
+                    "description": "Langley Falls' finest CIA agent.",
+                    "body": "c_t8_stan",
+                    "head": "c_t8_stan_head",
+                    "arms": "c_t8_stan_arms",
+                    "legs": "c_t8_stan_legs",
+                    "portrait": "stan_portrait",
+                    "icon": "stan_icon",
+                    "dialog": "stan",
+                    "images": {
+                        "0x50": "",
+                        "0x58": "stan_render",
+                        "0x60": "stan_action"
+                    },
+                    "bundle": {
+                        "hash_215ac9daad709de1": "stan_bio_header",
+                        "hash_38ea74cad0150cdf": "stan_card",
+                        "hash_39baaa080c62d5e5": "stan_story",
+                        "hash_5b2781a0b1bf2b7a": "stan_emblem",
+                        "hash_32ca7e775f99d218": "stan",
+                        "hash_3db969b978e2aba8": 0
+                    },
+                    "texts": {
+                        "hash_10cb98543e7ec137": "STAN SMITH",
+                        "hash_13c8379c2b98a9c6": "STAN SMITH - CIA",
+                        "hash_16d4e2fc988858de": "Stan Smith",
+                        "hash_541919134fdff1": "Stan Smith's Bio",
+                        "hash_438e8b2f52f5538b": "A CIA agent who never met a problem he couldn't shoot.",
+                        "hash_2299bc20d2a6cd8": "CIA agent, proud patriot and the most dangerous father in Langley Falls. Stan Smith keeps his family safe, his country free and his chin pointed at the enemy.\n\nHe'll defend the American way with any weapon he can carry, and a few he probably shouldn't."
+                    },
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "Stan Smith",
+                            "icon": "stan_outfit_default"
+                        }
+                    ],
+                    "outfit_count": 1,
+                    "role_bundle": {
+                        "characterint4": 0,
+                        "characterint5": 0,
+                        "characterint6": 0,
+                        "characterint7": 0,
+                        "characterint8": 0
+                    }
                 }
             ],
             "outfit_adds": [

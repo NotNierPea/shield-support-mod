@@ -1,0 +1,15 @@
+{
+    "name": "c_t8_stan_arms",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/stan/stan_arms.gltf",
+    "skeleton": "../skeletons/zm_viewarms.json",
+    "hitboxes": "mesh",
+    "materials": {
+        "stan_outline_skin": "materials/stan_outline_skin_mat.json",
+        "stan_outline_sleeves": "materials/stan_outline_sleeves_mat.json",
+        "stan_skin": "materials/stan_skin_mat.json",
+        "stan_vm_sleeves": "materials/stan_vm_sleeves_mat.json"
+    },
+    "collision": "none"
+}

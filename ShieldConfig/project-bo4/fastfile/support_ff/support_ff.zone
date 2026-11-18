@@ -696,6 +696,37 @@ scriptbundle,mpdialog_player/warden
 bgcache,characters/warden/bgcache.csv
 // warden: end
 
+
+// stan: begin
+// Stan Smith (American Dad; BO6's operator, carried into BO7), a specialist of multiplayer and a Blackout character
+// (shield-client makes his roles from the config's characters). BO4 Custom Maps/Stan Smith (BO4)/tools/build_stan.py
+// writes these lines and his files here: edit them there and run it again
+// his body (tag_stowed_back, outline shells), his head on Ruin's head rig, his first person arms and legs
+xmodel,xmodels/c_t8_stan.json
+xmodel,xmodels/c_t8_stan_head.json
+xmodel,xmodels/c_t8_stan_arms.json
+xmodel,xmodels/c_t8_stan_legs.json
+
+// his pictures (the config's portrait, icon, images and bundle values name them), his game's icon (Outfits.lua)
+image,stan_icon.png,nomips
+image,stan_portrait.png,nomips
+image,stan_render.png,nomips
+image,stan_action.png,nomips
+image,stan_bio_header.png,nomips
+image,stan_card.png,nomips
+image,stan_story.png,nomips
+image,stan_emblem.png,nomips
+image,stan_outfit_default.png,nomips
+image,stan_game_bo6.png,nomips
+
+// his battle chatter: the bundle his body type names (getmpdialogname "stan"); its lines are in support.all
+// (sounds/support_sounds.json, the aliases vox_stan_*), their subtitles in gamedata/shield/subtitles.csv
+scriptbundle,mpdialog_player/stan
+
+// his models cached (the frontend spawns them), his lines (the player entity plays them)
+bgcache,characters/stan/bgcache.csv
+// stan: end
+
 // zm vox: begin
 // the zombies copies of the MP specialists: their lines (vox_zmc_<specialist>_<line> in support.all; the
 // others play their crew lines, ZombiesVoxTable.gsc). BO4 Custom Maps/Core/tools/build_zm_vox.py writes these lines

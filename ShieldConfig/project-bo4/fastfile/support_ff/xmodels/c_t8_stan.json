@@ -1,0 +1,21 @@
+{
+    "name": "c_t8_stan",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/stan/stan_body.gltf",
+    "skeleton": "../skeletons/stan_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "stan_jacket": "materials/stan_jacket_mat.json",
+        "stan_outline_body": "materials/stan_outline_body_mat.json",
+        "stan_outline_shoes": "materials/stan_outline_shoes_mat.json",
+        "stan_outline_skin": "materials/stan_outline_skin_mat.json",
+        "stan_outline_sleeves": "materials/stan_outline_sleeves_mat.json",
+        "stan_pants": "materials/stan_pants_mat.json",
+        "stan_pin": "materials/stan_pin_mat.json",
+        "stan_shoes": "materials/stan_shoes_mat.json",
+        "stan_skin": "materials/stan_skin_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

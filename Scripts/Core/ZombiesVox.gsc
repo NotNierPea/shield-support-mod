@@ -66,12 +66,14 @@ ZombiesVoxKind(category, subcategory)
         case #"challenge":
         case #"trap_activate":
             return "success";
-        // the specialist weapon ready / out, an elixir (their characters have no lines of these: a kill line)
+        // the specialist weapon ready / out (their characters have no lines of these: a kill line)
         case #"hero_ready":
         case #"hero_activate":
+            return "kill";
+        // an elixir: BO7 characters' gum lines (Kagan's, The Warden's), a kill line for the others
         case #"elixir":
         case #"bgb":
-            return "kill";
+            return "elixir";
         case #"boss":
         case #"blight_father":
         case #"stoker":
@@ -98,6 +100,9 @@ ZombiesVoxAlias(voice, kind)
     // (the box, perks... as pickups for a table without them)
     if(!isdefined(level.shield_zm_vox[voice][kind]) && isinarray(array("box", "perk", "pap", "wonder"), kind))
      kind = "pickup";
+    // (an elixir as a kill for a table without gum lines)
+    if(!isdefined(level.shield_zm_vox[voice][kind]) && kind == "elixir")
+     kind = "kill";
     if(!isdefined(level.shield_zm_vox[voice][kind]))
      return undefined;
     return array::random(level.shield_zm_vox[voice][kind]);
@@ -181,7 +186,9 @@ detour zm_audio<scripts\zm_common\zm_audio.gsc>::zmbvoxgetlinevariant(prefix, su
     return suffix + "_" + prefix + "_" + variation;
 }
 
-// zm_vo's quest line of the player (<line>_plr_<voice>): ours an "unsure" one
+// zm_vo's line of the player (<line>_plr_<voice>): ours a kind's. Solo, the game start and the ends of rounds 1-4 come
+// here too (zm_vo function_d74752d8: vox_solo_game_start, vox_solo_end_round<n>): "ready" and "success" for those (all
+// "unsure" had every round end with "I'm not following"), the quests' lines "unsure"
 detour zm_vo<scripts\zm_common\zm_vo.gsc>::function_a2bd5a0c(var_cadd3b0c, n_delay = 0, b_wait_if_busy = 0, n_priority = 0, var_34e7887 = 0, var_d7714e4e = 0, var_67fee570 = 0)
 {
     if(!isdefined(self) || !isplayer(self))
@@ -189,7 +196,16 @@ detour zm_vo<scripts\zm_common\zm_vo.gsc>::function_a2bd5a0c(var_cadd3b0c, n_del
 
     voice = self ZombiesVoxVoice();
     if(isdefined(voice))
-     str_vo_alias = ZombiesVoxAlias(voice, "unsure");
+    {
+        kind = "unsure";
+        if(var_cadd3b0c === #"vox_solo_game_start")
+         kind = "ready";
+        else if(isinarray(array(#"vox_solo_end_round1", #"vox_solo_end_round2", #"vox_solo_end_round3", #"vox_solo_end_round4", #"vox_solo_end_round5"), var_cadd3b0c))
+         kind = "success";
+        str_vo_alias = ZombiesVoxAlias(voice, kind);
+        if(!isdefined(str_vo_alias))
+         str_vo_alias = ZombiesVoxAlias(voice, "unsure");
+    }
     else
      str_vo_alias = var_cadd3b0c + "_" + "plr_" + self [[ @zm_characters<scripts\zm_common\zm_characters.gsc>::function_dc232a80 ]]();
 

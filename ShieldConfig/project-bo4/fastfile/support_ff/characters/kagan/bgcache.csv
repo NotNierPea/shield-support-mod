@@ -45,6 +45,7 @@ soundalias,vox_kagan_sgc_flanking
 soundalias,vox_kagan_sgc_defending
 soundalias,vox_kagan_sgc_attacking
 soundalias,vox_kagan_sgc_item
+soundalias,vox_kagan_zm_elixir
 soundalias,vox_kagan_zm_perk
 soundalias,vox_kagan_zm_kill
 soundalias,vox_kagan_zm_taunt

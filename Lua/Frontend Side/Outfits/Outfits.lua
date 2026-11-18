@@ -158,7 +158,8 @@ local GameIcons = {
 	[@"homelander_portrait"] = @"homelander_game_mw3",
 	[@"starlight_portrait"] = @"starlight_game_mw3",
 	[@"blacknoir_portrait"] = @"blacknoir_game_mw3",
-	[@"warden_portrait"] = @"warden_game_bo7"
+	[@"warden_portrait"] = @"warden_game_bo7",
+	[@"stan_portrait"] = @"stan_game_bo6"
 }
 
 local function GameIconOf( model )

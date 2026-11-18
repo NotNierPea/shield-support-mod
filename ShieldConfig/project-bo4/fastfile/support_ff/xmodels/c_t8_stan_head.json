@@ -1,0 +1,18 @@
+{
+    "name": "c_t8_stan_head",
+    "templateModel": "../templates/xmodel_head.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/stan/stan_head.gltf",
+    "skeleton": "../skeletons/ruin_head.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "stan_face": "materials/stan_face_mat.json",
+        "stan_face_glow": "materials/stan_face_glow_mat.json",
+        "stan_mouth": "materials/stan_mouth_mat.json",
+        "stan_outline_face": "materials/stan_outline_face_mat.json",
+        "stan_outline_skin": "materials/stan_outline_skin_mat.json",
+        "stan_skin": "materials/stan_skin_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}
