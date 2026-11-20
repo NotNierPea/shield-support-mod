@@ -3364,7 +3364,8 @@
         },
         "support_zm": {
             "hook": "zm_common",
-            "type": "mode_common"
+            "type": "mode_common",
+            "freerun_only": true
         }
     }
 }
