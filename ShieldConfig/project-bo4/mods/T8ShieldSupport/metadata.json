@@ -617,6 +617,14 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/EmblemImport",
+            "path": "Lua\\Frontend\\EmblemImport.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/Mastercraft",
             "path": "Lua\\Frontend\\Mastercraft.luac",
             "hooks_post": [
@@ -1611,6 +1619,16 @@
             "type": "localizeentry",
             "name": "shield/mastercraft/strife_ferris",
             "value": "Ferris Wheel"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/emblem_import/tab",
+            "value": "IMPORTED"
+        },
+        {
+            "type": "localizeentry",
+            "name": "shield/emblem_import/button",
+            "value": "Import Image"
         },
         {
             "type": "localizeentry",
