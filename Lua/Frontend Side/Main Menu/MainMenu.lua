@@ -738,7 +738,14 @@ CoD.DirectorSelectOverride = function()
 			end )
 			self:addElement( SafeAreaContainer )
 			self.SafeAreaContainer = SafeAreaContainer
-			
+
+			-- the community event's ad beside BO4's featured cards, in their safe area (CommunityAd.lua)
+			if CoD.ShieldCommunityAd then
+				local CommunityAd = CoD.ShieldCommunityAd.new( f1_arg0, f1_arg1, 0, 0, 476, 916, 0, 0, 26, 168 )
+				SafeAreaContainer:addElement( CommunityAd )
+				self.CommunityAd = CommunityAd
+			end
+
 			IGRPerksDirectorButton = nil
 			
 			IGRPerksDirectorButton = CoD.IGRPerksDirectorButton.new( f1_arg0, f1_arg1, 0.5, 0.5, 265, 985, 0.5, 0.5, 239, 303 )
@@ -1306,6 +1313,9 @@ CoD.DirectorSelectOverride = function()
 			f76_arg0.PurchaseButton2:close()
 			f76_arg0.PathNotesButton:close()
 			f76_arg0.sizePathNotesButton:close()
+			if f76_arg0.CommunityAd then
+				f76_arg0.CommunityAd:close()
+			end
 			f76_arg0.Shield_Master:close()
 			f76_arg0.DirectorTierSkipNotification:close()
 			f76_arg0.DirectorTierSkipNotification2:close()
@@ -1539,22 +1549,6 @@ CoD.DirectorSelectOverride = function()
 				properties = {
 					action = CoD.DirectorUtility.DirectorSelectOpenPopup,
 					actionParam = "ShieldLobbyServerBrowserOverlay"
-				}
-			} )
-
-			-- freerun (Freerun.lua), on the right as in the normal menu (the left holds 4)
-			table.insert( f85_local0, {
-				models = {
-					subtitle = @"shield/freerun",
-					iconBackground = @"blacktransparent",
-					iconBackgroundFocus = @"blacktransparent",
-					showOnLeft = false,
-					small = true,
-					locked = false
-				},
-				properties = {
-					action = CoD.DirectorUtility.DirectorSelectOpenPopup,
-					actionParam = "ShieldFreerun"
 				}
 			} )
 
@@ -2348,6 +2342,13 @@ CoD.DirectorSelectOverride = function()
 			SafeAreaContainer.CRMFeatureList:setTopBottom(0, 0, 26 + 800, 168 + 800)
 			SafeAreaContainer.CRMFeatureList:setLeftRight(0, 0, 26 + 350, 466 + 350)
 			--self:addElement(SafeAreaContainer) -- reset anchors
+
+			-- the community event's ad beside this menu's BO4 featured cards, in their safe area (CommunityAd.lua)
+			if CoD.ShieldCommunityAd then
+				local CommunityAd = CoD.ShieldCommunityAd.new( f1_arg0, f1_arg1, 0, 0, 826, 1266, 0, 0, 826, 968 )
+				SafeAreaContainer:addElement( CommunityAd )
+				self.CommunityAd = CommunityAd
+			end
 			
 			IGRPerksDirectorButton = nil
 			
@@ -2483,6 +2484,38 @@ CoD.DirectorSelectOverride = function()
 			end, false )
 
 			FeaturedModsButton.id = "FeaturedModsButton"
+
+			-- freerun (Freerun.lua) on top of this column, opened as the main menu's tile does
+			local FreerunButton = CoD.DirectorSelectButtonMiniInternal.new( f1_arg0, f1_arg1, 1, 1, -380, -50, 0.88, 0.88, 15 - 165, 55 - 165 )
+
+			FreerunButton.MiddleText:setTTF( "ttmussels_regular" )
+			FreerunButton.MiddleText:setText( LocalizeToUpperString( @"shield/freerun" ) )
+
+			FreerunButton.MiddleTextFocus:setText( LocalizeToUpperString( @"shield/freerun" ) )
+			FreerunButton.MiddleTextFocus:setTTF( "ttmussels_regular" )
+
+			FreerunButton:linkToElementModel( self, nil, false, function ( model )
+				FreerunButton:setModel( model, f1_arg1 )
+			end )
+			self:addElement( FreerunButton )
+			self.FreerunButton = FreerunButton
+
+			f1_arg0:AddButtonCallbackFunction( FreerunButton, f1_arg0, Enum[@"luibutton"][@"lui_key_xba_pscross"], "ui_confirm", function ( element, menu, controller, model )
+				PlaySoundAlias( "uin_paint_image_flip_toggle" )
+				OpenPopup( menu, "ShieldFreerun", controller, "", "" )
+			end, function ( element, menu, controller )
+				if IsGamepad( controller ) then
+					CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/join", nil, "ui_confirm" )
+					return true
+				elseif IsMouseOrKeyboard( controller ) then
+					CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"hash_0", nil, "ui_confirm" )
+					return false
+				else
+					return false
+				end
+			end, false )
+
+			FreerunButton.id = "FreerunButton"
 
 			local Shield_Master = CreateShieldMasterLine( 0, 385, 1500 )
 			self:addElement( Shield_Master )
@@ -2920,6 +2953,9 @@ CoD.DirectorSelectOverride = function()
 			f76_arg0.PurchaseButton2:close()
 			f76_arg0.PathNotesButton:close()
 			f76_arg0.sizePathNotesButton:close()
+			if f76_arg0.CommunityAd then
+				f76_arg0.CommunityAd:close()
+			end
 			f76_arg0.Shield_Master:close()
 			f76_arg0.DirectorTierSkipNotification:close()
 			f76_arg0.DirectorTierSkipNotification2:close()

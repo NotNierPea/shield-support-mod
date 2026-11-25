@@ -98,7 +98,8 @@ local ModsCatalog = {
 		icon = "ui_menu_ftue_zm_custom_mutations",
 		desc = "Improves the zombies experience with a lot of mods and a config in a menu.",
 		asset = "EnhancementModT8",
-		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/EnhancementModT8.zip"
+		restart = true,
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/EnhancementModT8_1.0.0.zip"
 	},
 	{
 		folder = "RushModT8",
@@ -212,6 +213,19 @@ local ModsCatalog = {
 		asset = "wz_open_skyscrapers_night",
 		restart = true,
 		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/wz_open_skyscrapers_night_1.0.0.zip"
+	},
+	{
+		folder = "fnaf",
+		title = "Five Nights at Freddy's 4",
+		-- played from the main menu: no MP/ZM/WZ pills, shown under every filter
+		tags = false,
+		author = "peawhatever",
+		icon = "mod_manager_fnaf",
+		previews = { "mm_prev_fnaf_1" },
+		desc = "The original classic horror FNAF game. to play it, press the PLAY FNAF button in main menu. Original game by Scott Cawthon.",
+		asset = "fnaf",
+		restart = true,
+		link = "github.com/NotNierPea/shield-MM-mods/releases/download/release/fnaf_1.0.0.zip"
 	}
 }
 
@@ -500,6 +514,7 @@ local function ModRow( entry, installed )
 		author = entry and entry.author or "",
 		desc = entry and entry.desc or "A mod in project-bo4\\mods that isn't in the list of downloads.",
 		modes = entry and entry.modes or {},
+		noTags = entry ~= nil and entry.tags == false,
 		version = release and release.version or "",
 		installedVersion = "",
 		link = LinkOf( entry, release ),
@@ -615,8 +630,14 @@ local function FindManagerRow( key )
 	return nil
 end
 
--- "MP", "ZM", "WZ" of a row, "ALL" for none
+local MM_NO_TAG_COLOR = { r = 1, g = 1, b = 1 }
+
+-- "MP", "ZM", "WZ" of a row, "ALL" for none, nothing for a catalog entry with tags = false
 local function RowTags( row )
+	if row.noTags then
+		return {}
+	end
+
 	if #row.modes == 0 then
 		return { { tag = "ALL", color = { r = 1, g = 1, b = 1 } } }
 	end
@@ -1048,7 +1069,7 @@ CoD.ShieldModManagerBody.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 		end
 
 		local tags = RowTags( row )
-		local color = tags[1].color
+		local color = tags[1] and tags[1].color or MM_NO_TAG_COLOR
 		local look = StatusLooks[row.status] or StatusLooks.get
 
 		FadeInPicture()
@@ -1536,7 +1557,7 @@ CoD.ShieldModManagerRow.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_
 		end
 
 		local tags = RowTags( row )
-		local color = tags[1].color
+		local color = tags[1] and tags[1].color or MM_NO_TAG_COLOR
 		local look = StatusLooks[row.status] or StatusLooks.get
 
 		-- what the click reads of the row

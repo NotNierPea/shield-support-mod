@@ -1,0 +1,26 @@
+{
+    "name": "shield_camo_space",
+    "template": "../templates/camo_layers.json",
+    "textures": {
+        "colorMap": "shield_camo_space_col.png",
+        "unk_c089ac16": "shield_camo_space_stars.png",
+        "unk_c089ac15": "shield_camo_space_stars.png",
+        "unk_c089ac14": "shield_camo_clear.png"
+    },
+    "values": {
+        "layer1Scroll": [ 0.008, 0.004 ],
+        "layer1Tile": [ 2, 2 ],
+        "layer1Parallax": 0.25,
+        "layer1Tint": [ 0.75, 0.85, 1.0 ],
+        "layer2Scroll": [ -0.005, 0.003 ],
+        "layer2Tile": [ 1, 1 ],
+        "layer2Parallax": 0.1,
+        "layer2Pulse": [ 0.97, 1.03 ],
+        "layer2PulseSpeed": 0.4,
+        "layer2Tint": [ 1.0, 0.92, 0.85 ],
+        "layer3Scroll": [ 0, 0 ],
+        "layer3Tint": [ 0, 0, 0 ],
+        "layerAlpha": 6,
+        "distortionAmount": [ 2, 0, 2 ]
+    }
+}

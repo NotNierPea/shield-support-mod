@@ -609,6 +609,14 @@
         },
         {
             "type": "luafile",
+            "name": "ui/shield/CommunityAd",
+            "path": "Lua\\Frontend\\CommunityAd.luac",
+            "hooks_post": [
+                "x64:4ed0bcba9d999e0f"
+            ]
+        },
+        {
+            "type": "luafile",
             "name": "ui/shield/Mastercraft",
             "path": "Lua\\Frontend\\Mastercraft.luac",
             "hooks_post": [

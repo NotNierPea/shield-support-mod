@@ -1,4 +1,5 @@
-INT,STRING,STRING,STRING
-399,Shield Circuit,shield_camo_circuit_prev,Glowing circuit traces that scroll over a dark base
-400,Shield Digital,shield_camo_digital_prev,Digital camo in four tones of slate
-401,Ate47,ate47_cred,Scrolling over a dark base
+INT,STRING,STRING,STRING,STRING
+399,Shield Circuit,shield_camo_circuit_prev,Glowing circuit traces that scroll over a dark base,
+400,Shield Digital,shield_camo_digital_prev,Digital camo in four tones of slate,
+401,Ate47,ate47_cred,Scrolling over a dark base,
+402,Chaos Space,shield_camo_space_prev,Deep space from the Chaos wall buys: drifting stars at two depths,chaos_space

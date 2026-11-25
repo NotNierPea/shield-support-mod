@@ -99,6 +99,109 @@ end
 
 ---------------------------
 
+CoD.ShieldPostLoadHud = CoD.ShieldPostLoadHud or { names = {}, hooks = {} }
+
+local function RunPostLoadHudHooks( hud, controller, menu )
+	local state = CoD.ShieldPostLoadHud
+	local target = menu or hud
+
+	if target ~= nil then
+		state.done = state.done or setmetatable( {}, { __mode = "k" } )
+		if state.done[target] then
+			return
+		end
+		state.done[target] = true
+	end
+
+	for _, name in ipairs( state.names ) do
+		local ok, err = pcall( state.hooks[name], hud, controller, menu )
+		if not ok then
+			CoD.EnhPrintInfo( name .. " failed: " .. tostring( err ), "CommonPostLoadHud" )
+		end
+	end
+end
+
+local function PostLoadHudFor( inner )
+	local state = CoD.ShieldPostLoadHud
+	state.wrappers = state.wrappers or setmetatable( {}, { __mode = "k" } )
+
+	local wrapper = state.wrappers[inner]
+	if not wrapper then
+		wrapper = function ( hud, controller, menu, ... )
+			local result = inner( hud, controller, menu, ... )
+			RunPostLoadHudHooks( hud, controller, menu )
+			return result
+		end
+		state.wrappers[inner] = wrapper
+	end
+
+	return wrapper
+end
+
+local function GuardPostLoadHud()
+	local utility = CoD.ZombieUtility
+	if type( utility ) ~= "table" then
+		return
+	end
+
+	local meta = getmetatable( utility )
+	if meta and meta.shieldPostLoadHud then
+		return
+	end
+
+	meta = meta or {}
+	local index = meta.__index
+	local newindex = meta.__newindex
+	local slot = { inner = rawget( utility, "CommonPostLoadHud" ) }
+	rawset( utility, "CommonPostLoadHud", nil )
+
+	meta.shieldPostLoadHud = slot
+	meta.__index = function ( t, key )
+		if key == "CommonPostLoadHud" then
+			return slot.inner and PostLoadHudFor( slot.inner ) or nil
+		elseif type( index ) == "function" then
+			return index( t, key )
+		elseif index ~= nil then
+			return index[key]
+		end
+		return nil
+	end
+	meta.__newindex = function ( t, key, value )
+		if key == "CommonPostLoadHud" then
+			slot.inner = value
+		elseif newindex then
+			newindex( t, key, value )
+		else
+			rawset( t, key, value )
+		end
+	end
+
+	setmetatable( utility, meta )
+	CoD.EnhPrintInfo( "guarded", "CommonPostLoadHud" )
+end
+
+CoD.ShieldOnPostLoadHud = function ( name, hook )
+	local state = CoD.ShieldPostLoadHud
+	if not state.hooks[name] then
+		table.insert( state.names, name )
+	end
+	state.hooks[name] = hook
+
+	GuardPostLoadHud()
+
+	if not CoD.ShieldPostLoadHudRequire then
+		CoD.ShieldPostLoadHudRequire = true
+		local GameRequire = require
+		require = function ( ... )
+			local result = GameRequire( ... )
+			GuardPostLoadHud()
+			return result
+		end
+	end
+end
+
+---------------------------
+
 --[[
 	A subscription to a UI model made with no function (subscribeToModel( model, nil ), also through
 	linkToElementModel and subscribeToGlobalModel, which end there) is called with the rest when the model changes:

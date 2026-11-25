@@ -26,6 +26,7 @@ image,mod_manager_timers.png
 image,mod_manager_vod_day.png
 image,mod_manager_tag_space.png
 image,mod_manager_blackout_night.png
+image,mod_manager_fnaf.png
 image,mm_icon.png
 image,shield_freerun_tile.png
 image,mm_unknown_mod.png
@@ -39,6 +40,7 @@ image,mm_prev_mp_room_1.png
 image,mm_prev_wz_room_1.png
 image,mm_prev_mp_bully_1.png
 image,mm_prev_zm_nacht_1.png
+image,mm_prev_fnaf_1.png
 image,shield_public_banner.png
 image,loading_shield.png
 
@@ -58,6 +60,11 @@ weaponcamo,tables/weaponcamo/shield_camos.json
 stringtable,gamedata/shield/custom_camos.csv
 image,shield_camo_circuit_prev.png
 image,shield_camo_digital_prev.png
+image,shield_camo_space_prev.png
+// the community event's ad on the main menu (CommunityAd.lua)
+image,shield_ad_chaos_space.png
+// its message of the day's big picture (shield-client bdMarketingComms.cpp)
+image,shield_motd_chaos_space.png
 
 // black market items of our own: shield-client's
 stringtable,gamedata/shield/loot_items.csv
@@ -473,6 +480,11 @@ xmodel,xmodels/c_t8_misty_bo2_legs.json
 image,misty_outfit.png,nomips
 image,misty_hud.png,nomips
 image,misty_portrait.png,nomips
+
+// Richtofen's Great War outfit (Blood of the Dead's outfit 2, shown by the config's outfit_shows): its pictures, renders of its stock models
+image,richtofen_greatwar_outfit.png,nomips
+image,richtofen_greatwar_hud.png,nomips
+image,richtofen_greatwar_portrait.png,nomips
 
 // its models cached (the frontend spawns them)
 bgcache,characters/misty/bgcache.csv

@@ -30,6 +30,16 @@
                     ]
                 }
             ]
+        },
+        "401": {
+            "materials": [
+                {
+                    "template": 2,
+                    "camoMaterialChannels": [
+                        { "camoMaterial": "materials/shield_camo_space.json", "scaleX": 1, "scaleY": 1 }
+                    ]
+                }
+            ]
         }
     }
 }

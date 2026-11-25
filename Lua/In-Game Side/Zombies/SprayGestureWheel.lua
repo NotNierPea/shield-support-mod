@@ -142,7 +142,10 @@ local OutfitPictures = {
 	[@"shield/outfits/support/zm/1/name"] = { portrait = @"peaks_hud", icon = @"peaks_portrait" },
 	[@"shield/outfits/support/zm/15/name"] = { portrait = @"peaks_hud", icon = @"peaks_portrait" },
 	-- BO2 Misty on Misty
-	[@"shield/outfits/support/zm/26/name"] = { portrait = @"misty_hud", icon = @"misty_portrait" }
+	[@"shield/outfits/support/zm/26/name"] = { portrait = @"misty_hud", icon = @"misty_portrait" },
+	-- Richtofen's Great War outfit (shield-client "outfit_shows": "shield/outfits/<zone>/<mode>/<role>/shown_<outfit>")
+	[@"shield/outfits/support/zm/5/shown_2"] = { portrait = @"richtofen_greatwar_hud", icon = @"richtofen_greatwar_portrait" },
+	[@"shield/outfits/support/zm/29/shown_2"] = { portrait = @"richtofen_greatwar_hud", icon = @"richtofen_greatwar_portrait" }
 }
 
 -- client number: { character, outfit }
@@ -583,56 +586,41 @@ local function AddWheel( menu, controller )
 	end
 end
 
--- every zombies HUD (T7Hud_zm_factory and those of the maps) ends with this
-local function HookHud()
-	local utility = CoD.ZombieUtility
-	if not utility or utility.ShieldSprayWheel or not utility.CommonPostLoadHud then
-		return
+CoD.ShieldOnPostLoadHud( "SprayGestureWheel", function ( hud, controller, menu )
+	-- a HUD with an error in it would not show at all
+	local ok, err = pcall( AddWheel, menu or hud, controller )
+	if not ok then
+		Log( "no wheel: " .. tostring( err ) )
 	end
 
-	utility.ShieldSprayWheel = true
-	local GamePostLoadHud = utility.CommonPostLoadHud
-	utility.CommonPostLoadHud = function ( hud, controller, menu, ... )
-		GamePostLoadHud( hud, controller, menu, ... )
-
-		-- a HUD with an error in it would not show at all
-		local ok, err = pcall( AddWheel, menu or hud, controller )
-		if not ok then
-			Log( "no wheel: " .. tostring( err ) )
-		end
-
-		ok, err = pcall( SendItems, controller )
-		if not ok then
-			Log( "not sent to the server: " .. tostring( err ) )
-		end
-
-		ok, err = pcall( SendOutfits, controller )
-		if not ok then
-			Log( "outfits not sent to the server: " .. tostring( err ) )
-		end
-
-		ok, err = pcall( SendForcedCharacter, controller )
-		if not ok then
-			Log( "forced character not sent to the server: " .. tostring( err ) )
-		end
-
-		ok, err = pcall( ListenOutfits, menu or hud, controller )
-		if not ok then
-			Log( "no outfit pictures: " .. tostring( err ) )
-		end
+	ok, err = pcall( SendItems, controller )
+	if not ok then
+		Log( "not sent to the server: " .. tostring( err ) )
 	end
-end
 
-HookHud()
+	ok, err = pcall( SendOutfits, controller )
+	if not ok then
+		Log( "outfits not sent to the server: " .. tostring( err ) )
+	end
+
+	ok, err = pcall( SendForcedCharacter, controller )
+	if not ok then
+		Log( "forced character not sent to the server: " .. tostring( err ) )
+	end
+
+	ok, err = pcall( ListenOutfits, menu or hud, controller )
+	if not ok then
+		Log( "no outfit pictures: " .. tostring( err ) )
+	end
+end )
+
 HookPortraits()
 
--- the zombies utility may be read after this file: hooked once it is
 if not CoD.ShieldSprayWheelRequire then
 	CoD.ShieldSprayWheelRequire = true
 	local GameRequire = require
 	require = function ( ... )
 		local result = GameRequire( ... )
-		HookHud()
 		HookPortraits()
 		return result
 	end

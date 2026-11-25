@@ -3289,6 +3289,32 @@
                     }
                 }
             ],
+            "outfit_shows": [
+                {
+                    "mode": "zm",
+                    "role": 5,
+                    "outfit": 2,
+                    "name": "Great War",
+                    "default_name": "Default",
+                    "icon": "richtofen_greatwar_outfit"
+                },
+                {
+                    "mode": "zm",
+                    "role": 29,
+                    "outfit": 2,
+                    "name": "Great War",
+                    "default_name": "Default",
+                    "icon": "richtofen_greatwar_outfit"
+                },
+                {
+                    "mode": "wz",
+                    "role": 17,
+                    "outfit": 2,
+                    "name": "Great War",
+                    "default_name": "Default",
+                    "icon": "richtofen_greatwar_outfit"
+                }
+            ],
             "role_names": [
                 {
                     "mode": "zm",

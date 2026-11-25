@@ -148,36 +148,12 @@ local function AddWheel( menu, controller )
 	end )
 end
 
-local function HookHud()
-	local utility = CoD.ZombieUtility
-	if not utility or utility.ShieldCalloutWheel or not utility.CommonPostLoadHud then
-		return
+CoD.ShieldOnPostLoadHud( "CalloutWheel", function ( hud, controller, menu )
+	local ok, err = pcall( AddWheel, menu or hud, controller )
+	if not ok then
+		Log( "no wheel: " .. tostring( err ) )
 	end
-
-	utility.ShieldCalloutWheel = true
-	local GamePostLoadHud = utility.CommonPostLoadHud
-	utility.CommonPostLoadHud = function ( hud, controller, menu, ... )
-		GamePostLoadHud( hud, controller, menu, ... )
-
-		local ok, err = pcall( AddWheel, menu or hud, controller )
-		if not ok then
-			Log( "no wheel: " .. tostring( err ) )
-		end
-	end
-end
-
-HookHud()
-
--- the zombies utility may be read after this file: hooked once it is
-if not CoD.ShieldCalloutWheelRequire then
-	CoD.ShieldCalloutWheelRequire = true
-	local GameRequire = require
-	require = function ( ... )
-		local result = GameRequire( ... )
-		HookHud()
-		return result
-	end
-end
+end )
 
 ---------------------------
 

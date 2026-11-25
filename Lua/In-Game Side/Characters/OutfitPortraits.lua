@@ -28,7 +28,10 @@ local OutfitPictures = {
 	[@"shield/outfits/support/wz/22/name"] = PEEKS,
 	[@"shield/outfits/support/wz/26/name"] = PEEKS,
 	-- BO2 Misty on Misty
-	[@"shield/outfits/support/wz/49/name"] = { portrait = @"misty_hud", icon = @"misty_portrait" }
+	[@"shield/outfits/support/wz/49/name"] = { portrait = @"misty_hud", icon = @"misty_portrait" },
+	-- Richtofen's Great War outfit ("outfit_shows"; crew_richtofen's MP copy keeps the zombies name)
+	[@"shield/outfits/support/zm/5/shown_2"] = { portrait = @"richtofen_greatwar_hud", icon = @"richtofen_greatwar_portrait" },
+	[@"shield/outfits/support/wz/17/shown_2"] = { portrait = @"richtofen_greatwar_hud", icon = @"richtofen_greatwar_portrait" }
 }
 
 -- client number: { character, outfit }

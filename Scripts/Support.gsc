@@ -76,6 +76,72 @@ Init()
             PodiumRegisterFields();
         }
     }
+
+    level thread CommunityKills();
+}
+
+// community events (shield-client community.cpp): a kill of a player 1, ten zombies 1, handed over every 30 seconds
+CommunityKills()
+{
+    if (TargetRangeIsMatch())
+        return;
+
+    level.shield_community_kills = 0;
+    level.shield_community_zombies = 0;
+    level.shield_community_sent = 0;
+
+    if (SessionModeIsZombiesGame())
+        callback::on_ai_killed(&CommunityZombieKilled);
+    else
+        callback::on_player_killed_with_params(&CommunityPlayerKilled);
+
+    level thread CommunityFlushAtEnd();
+    level endon(#"game_ended", #"end_game");
+
+    while (true)
+    {
+        wait 30;
+        CommunityFlush();
+    }
+}
+
+CommunityFlushAtEnd()
+{
+    level waittill(#"game_ended", #"end_game");
+    CommunityFlush();
+}
+
+CommunityFlush()
+{
+    total = level.shield_community_kills + int(level.shield_community_zombies / 10);
+    if (total > level.shield_community_sent)
+    {
+        ShieldCommunityAdd(total - level.shield_community_sent);
+        level.shield_community_sent = total;
+    }
+}
+
+// self is the player killed: by another real player, not a teammate
+CommunityPlayerKilled(params)
+{
+    attacker = params.eattacker;
+    if (!isplayer(attacker) || isbot(attacker) || attacker == self)
+        return;
+
+    if (isdefined(level.teambased) && level.teambased && attacker.team === self.team)
+        return;
+
+    level.shield_community_kills++;
+}
+
+// self is the AI killed: a zombie of a real player
+CommunityZombieKilled(params)
+{
+    attacker = params.eattacker;
+    if (!isplayer(attacker) || isbot(attacker) || self.team !== level.zombie_team)
+        return;
+
+    level.shield_community_zombies++;
 }
 
 // enemies' kill lines for our characters' dialog bundles (shield-client "dialog"): a key no bundle has (no line), not

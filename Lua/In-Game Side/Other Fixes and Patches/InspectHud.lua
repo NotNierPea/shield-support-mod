@@ -87,26 +87,15 @@ local function WrapMenu( name )
 	CoD["ShieldInspectWrapped" .. name] = wrapped
 end
 
-local function WrapZombies()
-	local utility = CoD.ZombieUtility
-	if not utility or not utility.CommonPostLoadHud or utility.CommonPostLoadHud == utility.shieldInspectHud then
-		return
-	end
-	local game = utility.CommonPostLoadHud
-	utility.CommonPostLoadHud = function ( hud, controller, menu, ... )
-		local result = game( hud, controller, menu, ... )
-		Watch( menu or hud, controller )
-		return result
-	end
-	utility.shieldInspectHud = utility.CommonPostLoadHud
-end
-
 local function Hook()
 	for _, name in ipairs( OWN_MENUS ) do
 		WrapMenu( name )
 	end
-	WrapZombies()
 end
+
+CoD.ShieldOnPostLoadHud( "InspectHud", function ( hud, controller, menu )
+	Watch( menu or hud, controller )
+end )
 
 Hook()
 

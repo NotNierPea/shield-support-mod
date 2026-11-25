@@ -12,7 +12,7 @@ CoD.ShieldInitLuaFile()
 	The camos of our own, camo index 399 and up, a category of the Shield tab of a weapon's camos in every mode
 	(ExtraCamos.lua adds them).
 	They are assets of the support fastfile (support_ff: tables/weaponcamo/shield_camos.json), drawn by the client's
-	custom_camos.cpp; the list is the fastfile's gamedata/shield/custom_camos.csv: camo index, name, picture, words.
+	custom_camos.cpp; the list is the fastfile's gamedata/shield/custom_camos.csv: camo index, name, picture, words, event.
 ]]
 local CAMO_TABLE = "gamedata/shield/custom_camos.csv"
 
@@ -34,6 +34,37 @@ local CARD_TEXT_RIGHT = CARD_RIGHT - 20
 local CARD_IMAGE_HEIGHT = 180
 local CARD_BOTTOM = LIST_TOP + LIST_ROWS * TILE_HEIGHT + ( LIST_ROWS - 1 ) * 10
 
+-- the community events' listeners (as CommunityAd.lua): community.cpp calls CoD.ShieldCommunityChanged after each answer
+CoD.ShieldCommunityListeners = CoD.ShieldCommunityListeners or {}
+CoD.ShieldCommunityChanged = function ()
+	for _, listener in pairs( CoD.ShieldCommunityListeners ) do
+		listener()
+	end
+end
+
+-- a community event's progress (shield-client community.cpp: CoD.ShieldCommunity[event]), nil before the client told
+local function EventState( event )
+	if event == nil or event == "" then
+		return nil
+	end
+	return CoD.ShieldCommunity and CoD.ShieldCommunity[event]
+end
+
+-- a camo of a community event not done yet can't be put on
+local function IsLocked( event )
+	if event == nil or event == "" then
+		return false
+	end
+	local state = EventState( event )
+	return not ( state ~= nil and state.done )
+end
+
+-- 12345 as "12,345"
+local function Thousands( value )
+	local text = tostring( math.floor( value or 0 ) ):reverse():gsub( "(%d%d%d)", "%1," ):reverse()
+	return ( text:gsub( "^,", "" ) )
+end
+
 -- the camos of the table, nothing when the support fastfile is not there
 local function ReadCamos()
 	local camos = {}
@@ -47,7 +78,8 @@ local function ReadCamos()
 				camoIndex = index,
 				name = Engine[@"tablelookupgetcolumnvalueforrow"]( CAMO_TABLE, row, 1 ) or "",
 				image = Engine[@"tablelookupgetcolumnvalueforrow"]( CAMO_TABLE, row, 2 ),
-				description = Engine[@"tablelookupgetcolumnvalueforrow"]( CAMO_TABLE, row, 3 ) or ""
+				description = Engine[@"tablelookupgetcolumnvalueforrow"]( CAMO_TABLE, row, 3 ) or "",
+				event = Engine[@"tablelookupgetcolumnvalueforrow"]( CAMO_TABLE, row, 4 ) or ""
 			} )
 		end
 	end
@@ -78,6 +110,8 @@ DataSources.ShieldCustomCamosList = DataSourceHelpers.ListSetup( "ShieldCustomCa
 			models = {
 				name = camo.name,
 				shieldAbout = camo.description,
+				shieldEvent = camo.event,
+				shieldLocked = IsLocked( camo.event ),
 				image = camo.image,
 				camoIndex = camo.camoIndex,
 				weaponOptionSubIndex = camo.camoIndex,
@@ -160,9 +194,9 @@ CoD.ShieldCustomCamos.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_ar
 
 	Add( UI.NewBox( CARD_LEFT, CARD_RIGHT, LIST_TOP + CARD_IMAGE_HEIGHT, CARD_BOTTOM, 0, 0, 0, 0.5 ) )
 
-	Add( UI.NewCaption( CARD_TEXT_LEFT, CARD_TEXT_LEFT + 200, LIST_TOP + CARD_IMAGE_HEIGHT + 14, "CAMO INDEX" ) )
+	local IndexCaption = Add( UI.NewCaption( CARD_TEXT_LEFT, CARD_TEXT_LEFT + 260, LIST_TOP + CARD_IMAGE_HEIGHT + 14, "CAMO INDEX" ) )
 
-	local Index = Add( UI.NewText( CARD_TEXT_LEFT, CARD_TEXT_LEFT + 200, LIST_TOP + CARD_IMAGE_HEIGHT + 34, 26, "notosans_bold" ) )
+	local Index = Add( UI.NewText( CARD_TEXT_LEFT, CARD_TEXT_LEFT + 260, LIST_TOP + CARD_IMAGE_HEIGHT + 34, 26, "notosans_bold" ) )
 	Index:setRGB( ColorSet.T8__OFF__WHITE.r, ColorSet.T8__OFF__WHITE.g, ColorSet.T8__OFF__WHITE.b )
 
 	-- EQUIPPED, dark on the colour of the mode, when the camo in focus is the weapon's
@@ -172,6 +206,11 @@ CoD.ShieldCustomCamos.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_ar
 	PillText:setRGB( 0.04, 0.04, 0.04 )
 	PillText:setText( "EQUIPPED" )
 	PillText:setAlpha( 0 )
+
+	-- a community event's progress, over the line
+	local BAR_TOP = LIST_TOP + CARD_IMAGE_HEIGHT + 64
+	local ProgressBack = Add( UI.NewBox( CARD_TEXT_LEFT, CARD_TEXT_RIGHT, BAR_TOP, BAR_TOP + 5, 1, 1, 1, 0 ) )
+	local ProgressFill = Add( UI.NewBox( CARD_TEXT_LEFT, CARD_TEXT_LEFT, BAR_TOP, BAR_TOP + 5, color.r, color.g, color.b, 0 ) )
 
 	Add( UI.NewBox( CARD_TEXT_LEFT, CARD_TEXT_RIGHT, LIST_TOP + CARD_IMAGE_HEIGHT + 74, LIST_TOP + CARD_IMAGE_HEIGHT + 75, 1, 1, 1, 0.1 ) )
 
@@ -190,6 +229,11 @@ CoD.ShieldCustomCamos.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_ar
 	local function ShowCamo( element )
 		local model = element and element:getModel()
 
+		IndexCaption:setText( "CAMO INDEX" )
+		ProgressBack:setAlpha( 0 )
+		ProgressFill:setAlpha( 0 )
+		PillText:setText( "EQUIPPED" )
+
 		if model == nil or model.camoIndex == nil then
 			Image:setAlpha( 0 )
 			Title:setText( "NO CUSTOM CAMOS" )
@@ -199,12 +243,34 @@ CoD.ShieldCustomCamos.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_ar
 			PillText:setAlpha( 0 )
 			return
 		end
+		self.LastShown = element
 
 		UI.SetPreviewImage( Image, model.image:get(), CARD_RIGHT - CARD_LEFT, CARD_IMAGE_HEIGHT )
 		Image:setAlpha( 1 )
 		Title:setText( ToUpper( model.name:get() or "" ) )
 		Index:setText( tostring( model.camoIndex:get() ) )
 		About:setText( model.shieldAbout:get() or "" )
+
+		-- a community event's camo: its progress until the goal, LOCKED where EQUIPPED goes
+		local event = model.shieldEvent and model.shieldEvent:get() or ""
+		if IsLocked( event ) then
+			local state = EventState( event )
+			local current = state and state.current or 0
+			local goal = state and state.goal or 0
+			IndexCaption:setText( "COMMUNITY EVENT" )
+			Index:setText( state and ( Thousands( current ) .. " / " .. Thousands( goal ) ) or "-" )
+			About:setText( "Kills in any mode unlock it for everyone. 10 zombie kills count as 1." )
+			ProgressBack:setAlpha( 0.1 )
+			ProgressFill:setAlpha( 1 )
+			local share = goal > 0 and math.min( 1, current / goal ) or 0
+			ProgressFill:setLeftRight( 0, 0, CARD_TEXT_LEFT, CARD_TEXT_LEFT + ( CARD_TEXT_RIGHT - CARD_TEXT_LEFT ) * share )
+			PillText:setText( "LOCKED" )
+			Pill:setAlpha( 1 )
+			PillText:setAlpha( 1 )
+			return
+		elseif event ~= "" then
+			About:setText( ( model.shieldAbout:get() or "" ) .. ". Unlocked by the community." )
+		end
 
 		local equipped = CoD.ShieldIsCamoEquipped( f1_arg0, element, f1_arg1, "camoIndex" ) and 1 or 0
 		Pill:setAlpha( equipped )
@@ -244,10 +310,18 @@ CoD.ShieldCustomCamos.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_ar
 		UpdateAllMenuButtonPrompts( menu, controller )
 	end
 
+	-- the community event of the camo in focus, "" for none
+	local function EventOf( element, controller )
+		local event = element:getModel( controller, "shieldEvent" )
+		return event and event:get() or ""
+	end
+
 	f1_arg0:AddButtonCallbackFunction( Camos, f1_arg1, Enum[@"luibutton"][@"lui_key_xba_pscross"], nil, function ( element, menu, controller, model )
 		local index = element:getModel( controller, "camoIndex" )
 
-		if index ~= nil then
+		if IsLocked( EventOf( element, controller ) ) then
+			PlaySoundAlias( "uin_unavailable_click" )
+		elseif index ~= nil then
 			PlaySoundAlias( "cac_equipment_add" )
 			CoD.ShieldApplyExtraCamo( controller, index:get(), menu )
 			Changed( menu, controller, element )
@@ -255,6 +329,9 @@ CoD.ShieldCustomCamos.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_ar
 
 		return true
 	end, function ( element, menu, controller )
+		if IsLocked( EventOf( element, controller ) ) then
+			return false
+		end
 		CoD.Menu.SetButtonLabel( menu, Enum[@"luibutton"][@"lui_key_xba_pscross"], @"menu/select", nil, nil )
 		return true
 	end, false )
@@ -282,6 +359,17 @@ CoD.ShieldCustomCamos.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_ar
 		UpdateSelfState( self, f1_arg1 )
 	end )
 
+	-- the community events' progress: asked of the client now, the tiles and the card again when it answers
+	self.CommunityChanged = function ()
+		CoD.GridAndListUtility.UpdateDataSource( Camos, true, false, true )
+		local shown = self.LastShown
+		if shown ~= nil and shown:getModel() ~= nil then
+			ShowCamo( shown )
+		end
+	end
+	CoD.ShieldCommunityListeners.camos = self.CommunityChanged
+	Engine[@"exec"]( f1_arg1, "community_status" )
+
 	Camos.id = "Camos"
 	self.__defaultFocus = Camos
 	LUI.OverrideFunction_CallOriginalSecond( self, "close", self.__onClose )
@@ -294,6 +382,9 @@ CoD.ShieldCustomCamos.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1_ar
 end
 
 CoD.ShieldCustomCamos.__onClose = function ( f2_arg0 )
+	if CoD.ShieldCommunityListeners.camos == f2_arg0.CommunityChanged then
+		CoD.ShieldCommunityListeners.camos = nil
+	end
 	f2_arg0.Camos:close()
 	f2_arg0.Image:close()
 	for _, element in ipairs( f2_arg0.Parts ) do
@@ -359,6 +450,17 @@ CoD.ShieldCustomCamoTile.new = function ( f1_arg0, f1_arg1, f1_arg2, f1_arg3, f1
 	EquippedTick:setImage( RegisterImage( @"uie_ui_menu_cac_equipped_marker_tick" ) )
 	Add( EquippedTick )
 	self.EquippedTick = EquippedTick
+
+	-- a camo of a community event not done yet
+	local LockIcon = LUI.UIImage.new( 0, 0, 10, 34, 0, 0, 6, 30 )
+	LockIcon:setAlpha( 0 )
+	LockIcon:setImage( RegisterImage( @"uie_icon_locks_lock_01" ) )
+	Add( LockIcon )
+	self.LockIcon = LockIcon
+
+	LockIcon:linkToElementModel( self, "shieldLocked", true, function ( model )
+		LockIcon:setAlpha( model:get() and 1 or 0 )
+	end )
 
 	local FocusFrame = LUI.UIImage.new( 0, 1, -4, 4, 0, 1, -4, 4 )
 	FocusFrame:setAlpha( 0 )
