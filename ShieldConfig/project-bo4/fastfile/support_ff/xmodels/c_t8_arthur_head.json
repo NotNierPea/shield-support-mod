@@ -1,0 +1,18 @@
+{
+    "name": "c_t8_arthur_head",
+    "templateModel": "../templates/xmodel_head.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/arthur/arthur_head.gltf",
+    "skeleton": "../skeletons/ruin_head.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "arthur_eyebrows": "materials/arthur_eyebrows_mat.json",
+        "arthur_eyes": "materials/arthur_eyes_mat.json",
+        "arthur_head": "materials/arthur_head_mat.json",
+        "arthur_head_paint": "materials/arthur_head_paint_mat.json",
+        "arthur_mouth": "materials/arthur_mouth_mat.json",
+        "arthur_teeth": "materials/arthur_teeth_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

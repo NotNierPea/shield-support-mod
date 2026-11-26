@@ -2478,7 +2478,7 @@
         {
             "type": "localizeentry",
             "name": "shield/bm_case_minutes_desc",
-            "value": "Time played in matches, of any mode, for one Reserve Case. The original game filled a bar with time played, about one case an hour."
+            "value": "Time played in matches, of any mode, for one Reserve Case, at most one a match, from Grand Heist on: the original game's rules, except that its Zombies earned none."
         },
         {
             "type": "localizeentry",
@@ -2498,7 +2498,7 @@
         {
             "type": "localizeentry",
             "name": "shield/bm_tier_per_match_desc",
-            "value": "The season pass and the active contract go up one tier at the end of every match."
+            "value": "The season pass and the active contract go up one tier at the end of every match, the most the original game gave for one. Daily tier skips come on top."
         },
         {
             "type": "localizeentry",

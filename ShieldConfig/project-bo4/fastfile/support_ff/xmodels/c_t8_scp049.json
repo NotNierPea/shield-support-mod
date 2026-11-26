@@ -1,0 +1,15 @@
+{
+    "name": "c_t8_scp049",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/scp049/scp049_body.gltf",
+    "skeleton": "../skeletons/scp049_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "scp049_boots": "materials/scp049_boots_mat.json",
+        "scp049_cloth": "materials/scp049_cloth_mat.json",
+        "scp049_mask": "materials/scp049_mask_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

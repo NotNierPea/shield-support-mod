@@ -1,0 +1,14 @@
+{
+    "name": "c_t8_arthur_arms",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/arthur/arthur_arms.gltf",
+    "skeleton": "../skeletons/zm_viewarms.json",
+    "hitboxes": "mesh",
+    "materials": {
+        "arthur_nude_upper": "materials/arthur_nude_upper_mat.json",
+        "arthur_shirt": "materials/arthur_shirt_mat.json",
+        "arthur_suspenders": "materials/arthur_suspenders_mat.json"
+    },
+    "collision": "none"
+}

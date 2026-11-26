@@ -1,0 +1,10 @@
+{
+    "name": "c_t8_scp049_head",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "obj": "../characters/scp049/scp049_head.obj",
+    "upAxis": "z",
+    "bone": "tag_origin",
+    "material": "materials/scp049_cloth_mat.json",
+    "collision": "none"
+}

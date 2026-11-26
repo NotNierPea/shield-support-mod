@@ -25,6 +25,50 @@ GetBotCamoRandom()
     return randomscamo_data;
 }
 
+/*
+    A bot's look, picked once a match: half of them one of ours (ShieldBotLook: our characters in any outfit, our outfits on
+    the game's; the table's rows are the game's only). It was kept on the entity, which a round's restart clears: each round
+    a new look, while the game kept the last character elsewhere (a Scarlett bot spoke with a Blackout Default Character's
+    voice). Now in pers, which lasts the match
+*/
+BotPickLook()
+{
+    if(!isDefined(self.pers[#"shield_bot_look"]))
+    {
+        look = undefined;
+        if(randomint(2) == 0)
+         look = ShieldBotLook();
+        if(!isDefined(look))
+         look = GetBotSkinRandom();
+        self.pers[#"shield_bot_look"] = look;
+    }
+    self.random_data = self.pers[#"shield_bot_look"];
+}
+
+// bots take their look's character in the draft, where the game gives them theirs, and the same way (player_role::set)
+BotTakeLook()
+{
+    if(!isbot(self))
+     return;
+    self BotPickLook();
+    role = int(self.random_data[0]);
+    if(self getspecialistindex() != role)
+     self [[ @player_role<scripts\core_common\player\player_role.gsc>::set ]](role, true);
+}
+
+detour draft<scripts\mp_common\draft.gsc>::assign_remaining_players(only_assign_player)
+{
+    result = [[ @draft<scripts\mp_common\draft.gsc>::assign_remaining_players ]](only_assign_player);
+    if(isDefined(only_assign_player))
+     only_assign_player BotTakeLook();
+    else
+    {
+        foreach(player in level.players)
+         player BotTakeLook();
+    }
+    return result;
+}
+
 SetRandomSkin()
 {
     self endon(#"disconnect", #"spawned_player");
@@ -42,18 +86,18 @@ SetRandomSkin()
 
     */
 
-    // half of them one of our characters (ShieldBotRoles: the table's rows are the game's specialists only)
-    if(!isDefined(self.random_data))
+    self BotPickLook();
+
+    // the char id: a bot without a draft (in mid-match) takes it here, with what player_role::set keeps beside it (no class)
+    role = int(self.random_data[0]);
+    if(self getspecialistindex() != role)
     {
-        ours = ShieldBotRoles();
-        if(ours.size > 0 && randomint(2) == 0)
-         self.random_data = array(array::random(ours), 0, 0);
-        else
-         self.random_data = GetBotSkinRandom();
+        self.pers[#"characterindex"] = role;
+        self setspecialistindex(role);
+        self.playerrole = self getrolefields();
+        if(isDefined(world.playerroles))
+         world.playerroles[self getentitynumber()] = role;
     }
-    
-    // the char id
-    self setspecialistindex(int(self.random_data[0]));
 
     // skin id
     self setcharacteroutfit(int(self.random_data[1]));

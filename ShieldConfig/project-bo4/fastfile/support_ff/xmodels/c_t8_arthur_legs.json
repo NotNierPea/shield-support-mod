@@ -1,0 +1,24 @@
+{
+    "name": "c_t8_arthur_legs",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/arthur/arthur_legs.gltf",
+    "skeleton": "../skeletons/mp_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "arthur_boot": "materials/arthur_boot_mat.json",
+        "arthur_holster_belt": "materials/arthur_holster_belt_mat.json",
+        "arthur_holster_cup": "materials/arthur_holster_cup_mat.json",
+        "arthur_knife_holster": "materials/arthur_knife_holster_mat.json",
+        "arthur_nude_upper": "materials/arthur_nude_upper_mat.json",
+        "arthur_pants": "materials/arthur_pants_mat.json",
+        "arthur_satchel": "materials/arthur_satchel_mat.json",
+        "arthur_satchel_strap": "materials/arthur_satchel_strap_mat.json",
+        "arthur_scarf": "materials/arthur_scarf_mat.json",
+        "arthur_shirt": "materials/arthur_shirt_mat.json",
+        "arthur_spurs": "materials/arthur_spurs_mat.json",
+        "arthur_suspenders": "materials/arthur_suspenders_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

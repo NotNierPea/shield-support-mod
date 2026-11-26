@@ -113,3 +113,53 @@ detour zm_characters<scripts\zm_common\zm_characters.gsc>::set_character(charact
     }
     self [[ @zm_audio<scripts\zm_common\zm_audio.gsc>::setexertvoice ]](voice);
 }
+
+// Dead of the Night's stick man step, as stock: a forced character gets a crew portrait no player has (stock left it unset: script error, no trigger, quest stuck)
+detour mansion_stick_man<scripts\zm\zm_mansion_stick_man.gsc>::function_8a51807c()
+{
+    level flag::wait_till(#"all_players_spawned");
+    player = undefined;
+    a_players = getplayers();
+    if(a_players.size > 1)
+     player = array::random(util::get_active_players());
+    if(!isdefined(player))
+     player = a_players[0];
+
+    pics = [];
+    pics[9] = "pic_gypsy";
+    pics[10] = "pic_brigadier";
+    pics[11] = "pic_gunslinger";
+    pics[12] = "pic_butler";
+    if(isdefined(player.characterindex) && isdefined(pics[player.characterindex]))
+    {
+        player.str_name = pics[player.characterindex];
+        return player;
+    }
+
+    free = [];
+    foreach(index, pic in pics)
+    {
+        taken = 0;
+        foreach(other in a_players)
+        {
+            if(other.characterindex === index)
+             taken = 1;
+        }
+        if(!taken)
+         free[free.size] = pic;
+    }
+    player.str_name = free.size > 0 ? array::random(free) : pics[9];
+    return player;
+}
+
+// Voyage's boss fight respawns a player at its character's spot: a forced character had none and never came back, it gets one by entity number
+detour zodt8_eye<scripts\zm\zm_zodt8_eye.gsc>::function_9bc4f8cb()
+{
+    locs = level.a_s_respawn_locs;
+    self.spectator_respawn = undefined;
+    if(isdefined(locs) && isdefined(self.characterindex))
+     self.spectator_respawn = locs[self.characterindex];
+    if(!isdefined(self.spectator_respawn) && isdefined(locs) && locs.size > 0)
+     self.spectator_respawn = locs[self getentitynumber() % locs.size];
+    self [[ @zm_player<scripts\zm_common\zm_player.gsc>::spectator_respawn ]]();
+}

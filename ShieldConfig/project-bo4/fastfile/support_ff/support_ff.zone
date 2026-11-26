@@ -816,6 +816,68 @@ scriptbundle,mpdialog_player/stan
 bgcache,characters/stan/bgcache.csv
 // stan: end
 
+
+// arthur: begin
+// Red Dead Redemption 2's Arthur Morgan, a specialist of multiplayer, a Blackout and a zombies character (shield-client
+// makes his roles from the config's "characters"). BO4 Custom Maps/Arthur Morgan (BO4)/tools/build_arthur.py writes
+// these lines and his files here: edit them there and run it again
+// his body (his face and hat on it) on the MP body skeleton, the empty head slot, his first person arms and legs
+xmodel,xmodels/c_t8_arthur.json
+xmodel,xmodels/c_t8_arthur_head.json
+xmodel,xmodels/c_t8_arthur_arms.json
+xmodel,xmodels/c_t8_arthur_legs.json
+
+// his pictures (the config's portrait, icon, images and bundle values name them), his game's icon (Outfits.lua)
+image,arthur_icon.png,nomips
+image,arthur_portrait.png,nomips
+image,arthur_render.png,nomips
+image,arthur_action.png,nomips
+image,arthur_bio_header.png,nomips
+image,arthur_card.png,nomips
+image,arthur_story.png,nomips
+image,arthur_emblem.png,nomips
+image,arthur_outfit_default.png,nomips
+image,arthur_game_rdr2.png,nomips
+
+// his battle chatter: the bundle his body type names (getmpdialogname "arthur"); its lines are in support.all
+// (sounds/support_sounds.json, the aliases vox_arthur_*), their subtitles in gamedata/shield/subtitles.csv
+scriptbundle,mpdialog_player/arthur
+
+// his models cached (the frontend spawns them), his lines (the player entity plays them)
+bgcache,characters/arthur/bgcache.csv
+// arthur: end
+
+
+// scp049: begin
+// SCP-049, the Plague Doctor, a specialist of multiplayer, a Blackout and a zombies character (shield-client makes
+// his roles from the config's "characters"). BO4 Custom Maps/SCP-049 (BO4)/tools/build_scp049.py writes these
+// lines and his files here: edit them there and run it again
+// his body (his mask and hood on it) on the MP body skeleton, the empty head slot, his first person arms and legs
+xmodel,xmodels/c_t8_scp049.json
+xmodel,xmodels/c_t8_scp049_head.json
+xmodel,xmodels/c_t8_scp049_arms.json
+xmodel,xmodels/c_t8_scp049_legs.json
+
+// his pictures (the config's portrait, icon, images and bundle values name them), his game's icon (Outfits.lua)
+image,scp049_icon.png,nomips
+image,scp049_portrait.png,nomips
+image,scp049_render.png,nomips
+image,scp049_action.png,nomips
+image,scp049_bio_header.png,nomips
+image,scp049_card.png,nomips
+image,scp049_story.png,nomips
+image,scp049_emblem.png,nomips
+image,scp049_outfit_default.png,nomips
+image,scp049_game_scp.png,nomips
+
+// his battle chatter: the bundle his body type names (getmpdialogname "scp049"); its lines are in support.all
+// (sounds/support_sounds.json, the aliases vox_scp049_*), their subtitles in gamedata/shield/subtitles.csv
+scriptbundle,mpdialog_player/scp049
+
+// his models cached (the frontend spawns them), his lines (the player entity plays them)
+bgcache,characters/scp049/bgcache.csv
+// scp049: end
+
 // zm vox: begin
 // the zombies copies of the MP specialists: their lines (vox_zmc_<specialist>_<line> in support.all; the
 // others play their crew lines, ZombiesVoxTable.gsc). BO4 Custom Maps/Core/tools/build_zm_vox.py writes these lines

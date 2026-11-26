@@ -367,3 +367,47 @@ detour zm_orange_util<scripts\zm\zm_orange_util.gsc>::function_8123b826(str_cate
     }
     return 1;
 }
+
+// zm_white_toast's Avogadro taunt lines, as stock, but a voice without a list (a forced character: Kagan) is skipped, not a script error
+detour zm_white_toast<scripts\zm\zm_white_toast.gsc>::function_1fba7fc2()
+{
+    level endon(#"game_ended", #"avog_captured");
+    a_taunts = [];
+    foreach(crew in array(#"niko", #"demp", #"rich", #"take", #"unik", #"udem", #"uric", #"utak"))
+     a_taunts[crew] = array::randomize(array(0, 1, 2, 3));
+    base_alias = "vox_boss_taunt_";
+
+    while(true)
+    {
+        b_spoke = 0;
+        wait randomintrangeinclusive(30, 60);
+
+        if(isdefined(level.e_avogadro))
+        {
+            valid_players = [];
+            foreach(player in getplayers())
+            {
+                str_name = player [[ @zm_vo<scripts\zm_common\zm_vo.gsc>::function_82f9bc9f ]]();
+                if(isdefined(a_taunts[str_name]) && a_taunts[str_name].size > 0 && [[ @zm_utility<scripts\zm_common\zm_utility.gsc>::is_player_valid ]](player))
+                 valid_players[valid_players.size] = player;
+            }
+
+            if(valid_players.size > 0)
+            {
+                speaker = array::random(valid_players);
+                str_name = speaker [[ @zm_vo<scripts\zm_common\zm_vo.gsc>::function_82f9bc9f ]]();
+                if(speaker [[ @zm_audio<scripts\zm_common\zm_audio.gsc>::can_speak ]]())
+                {
+                    alias = base_alias + str_name + "_avog_" + a_taunts[str_name][0];
+                    [[ @zm_hms_util<scripts\zm\zm_hms_util.gsc>::function_3c173d37 ]]();
+                    speaker [[ @zm_audio<scripts\zm_common\zm_audio.gsc>::do_player_or_npc_playvox ]](alias, 1);
+                    arrayremoveindex(a_taunts[str_name], 0);
+                    b_spoke = 1;
+                }
+            }
+        }
+
+        if(b_spoke)
+         wait 60;
+    }
+}

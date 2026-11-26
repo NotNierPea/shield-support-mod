@@ -78,6 +78,22 @@ Init()
     }
 
     level thread CommunityKills();
+    // daily tier skips and gauntlet plasma (LiveRewards.gsc, shield-client live_rewards.cpp)
+    level thread LiveRewards();
+    if(SessionModeIsMultiplayerGame() || sessionmodeiswarzonegame())
+     level thread BotsInBestPlay();
+    // a dedicated server's time before the match and its bots through it (Dedicated.gsc; Blackout's bots come with the first player, Blackout/main.gsc)
+    if(SessionModeIsMultiplayerGame() && getDvarInt(#"shield_dedicated", 0) && !TargetRangeIsMatch())
+    {
+        DedicatedPrematch();
+        level thread DedicatedBots();
+    }
+    // the server's console ends the match (Dedicated.gsc; Blackout's globallogic is multiplayer's)
+    if((SessionModeIsMultiplayerGame() || sessionmodeiswarzonegame()) && getDvarInt(#"shield_dedicated", 0) && !TargetRangeIsMatch())
+    {
+        level thread DedicatedEndMatch();
+        level thread DedicatedUncapAtEnd();
+    }
 }
 
 // community events (shield-client community.cpp): a kill of a player 1, ten zombies 1, handed over every 30 seconds
@@ -390,9 +406,11 @@ CustomCharacterStreakDialog(dialogkey, futzkey)
     self [[level.shield_stock_streak_dialog]](dialogkey, futzkey);
 }
 
-// the game's own roles of this mode's table (multiplayer 17, Blackout 76): ours come after them (shield-client custom_zones)
+// the game's own roles of this mode's table (zombies 30, multiplayer 17, Blackout 76): ours come after them (shield-client custom_zones)
 ShieldStockRoleCount()
 {
+    if(sessionmodeiszombiesgame())
+     return 30;
     return sessionmodeiswarzonegame() ? 76 : 17;
 }
 
@@ -417,6 +435,102 @@ ShieldBotRoles()
     level.shield_bot_roles = roles;
     ShieldLog("^3Bot characters of ours: " + roles.size);
     return roles;
+}
+
+/*
+    Outfits past the game's own that bots wear on its roles, as [role, outfit]: ours on them (the support fastfile config's
+    "outfit_adds", appended: the role's last outfit) and its unlisted ones ("outfit_shows"); keep in step with the config
+*/
+ShieldBotAddedOutfits()
+{
+    if(isdefined(level.shield_bot_added_outfits))
+     return level.shield_bot_added_outfits;
+    mode = currentsessionmode();
+    adds = [];
+    shows = [];
+    if(sessionmodeiszombiesgame())
+    {
+        // Peeks on Scarlett and Scarlett (IX), Black Ops II on Misty; Great War on Richtofen and Richtofen (Ultimis)
+        adds = array(1, 15, 26);
+        shows = array(array(5, 2), array(29, 2));
+    }
+    else if(sessionmodeiswarzonegame())
+    {
+        // Peeks on Scarlett and Scarlett (IX), School Mascot on Spectre, Black Ops II on Misty; Great War on Richtofen
+        adds = array(22, 26, 57, 49);
+        shows = array(array(17, 2));
+    }
+    else
+    {
+        // School Mascot on Spectre
+        adds = array(13);
+    }
+
+    outfits = [];
+    foreach(role in adds)
+    {
+        count = function_d299ef16(role, mode);
+        if(isdefined(count) && count > 1)
+         outfits[outfits.size] = array(role, count - 1);
+    }
+    foreach(show in shows)
+    {
+        count = function_d299ef16(show[0], mode);
+        if(isdefined(count) && show[1] < count)
+         outfits[outfits.size] = show;
+    }
+    level.shield_bot_added_outfits = outfits;
+    ShieldLog("^3Bot outfits of ours on the game's characters: " + outfits.size);
+    return outfits;
+}
+
+// a bot's outfit on a role: any of one of our characters' (players can pick them all), else 0 or one of ours on it
+ShieldBotOutfit(role)
+{
+    if(!isdefined(role))
+     return 0;
+    mode = currentsessionmode();
+    ours = sessionmodeiszombiesgame() ? role >= ShieldStockRoleCount() : isinarray(ShieldBotRoles(), role);
+    if(ours)
+    {
+        count = function_d299ef16(role, mode);
+        return (isdefined(count) && count > 1) ? randomint(count) : 0;
+    }
+
+    choices = array(0);
+    foreach(added in ShieldBotAddedOutfits())
+    {
+        if(added[0] == role)
+         choices[choices.size] = added[1];
+    }
+    return array::random(choices);
+}
+
+// a bot look of ours as [role, outfit, palette]: one of our characters in any of its outfits, or an outfit of ours on a game role
+ShieldBotLook()
+{
+    ours = ShieldBotRoles();
+    added = ShieldBotAddedOutfits();
+    if(ours.size + added.size == 0)
+     return undefined;
+    pick = randomint(ours.size + added.size);
+    if(pick < ours.size)
+     return array(ours[pick], ShieldBotOutfit(ours[pick]), 0);
+    return array(added[pick - ours.size][0], added[pick - ours.size][1], 0);
+}
+
+// Best Play with bots: potm_shared's bookmarks skip them unless the gametype setting hash_6881c7cab0dcef39 is on
+BotsInBestPlay()
+{
+    level endon(#"game_ended");
+    // (after potm_shared's start of gametype init: game.potm_enabled)
+    for(i = 0; i < 600 && !isdefined(game.potm_enabled); i++)
+     waitframe(1);
+    if(isdefined(game.potm_enabled) && game.potm_enabled)
+    {
+        game.var_659f084a = 1;
+        ShieldLog("^3Best Play: bots included");
+    }
 }
 
 /*

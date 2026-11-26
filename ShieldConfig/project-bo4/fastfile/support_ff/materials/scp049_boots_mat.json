@@ -1,0 +1,16 @@
+{
+    "name": "scp049_boots_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "scp049_cloth.png",
+        "glossMap": "#hash_903dd7f6bd2ee1ed",
+        "aoMap": "#hash_bfd1eb9d1e41b805",
+        "normalMap": "scp049_cloth_n.png,linear"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            10
+        ]
+    }
+}

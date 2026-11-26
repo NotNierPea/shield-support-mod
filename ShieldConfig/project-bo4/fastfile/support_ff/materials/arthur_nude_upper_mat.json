@@ -1,0 +1,16 @@
+{
+    "name": "arthur_nude_upper_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "arthur_nude_upper.png",
+        "normalMap": "arthur_nude_upper_n.png,linear",
+        "glossMap": "#hash_903dd7f6bd2ee1ed",
+        "aoMap": "#hash_bfd1eb9d1e41b805"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            7
+        ]
+    }
+}

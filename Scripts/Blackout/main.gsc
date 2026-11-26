@@ -83,6 +83,9 @@ onPlayerSpawned()
     
     map = util::get_map_name(); 
     bots = getDvarInt(#"shield_wz_bots_num", 0);
+    // a dedicated server's own fill of bots (Dedicated.gsc)
+    if (getDvarInt(#"shield_dedicated", 0))
+        bots = DedicatedBotsWanted(DedicatedHumans());
 
     if(Blackout()){
         if ( !self isTestClient() )
@@ -286,7 +289,8 @@ SetBotCharacterByIndex(index)
         self setspecialistindex(index);
         self player_role::update_fields();
 
-        self setcharacteroutfit(0);
+        // any outfit of one of our characters, or ours on a game character (ShieldBotOutfit)
+        self setcharacteroutfit(ShieldBotOutfit(index));
         self setcharacterwarpaintoutfit(0);
 
         slots = array("head", "headgear", "arms", "torso", "legs", "palette", "warpaint", "decal");

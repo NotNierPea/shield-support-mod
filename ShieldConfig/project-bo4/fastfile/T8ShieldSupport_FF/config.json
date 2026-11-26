@@ -150,113 +150,6 @@
                     }
                 },
                 {
-                    "name": "jacket",
-                    "mode": "mp",
-                    "base_role": 13,
-                    "role_slot": 73,
-                    "display_name": "Jacket",
-                    "title": "Midnight Animal",
-                    "description": "Jacket never says a word of his own: strike unseen with Active Camo and carve through the fight with the Ripper.",
-                    "body": "c_t8_jacket",
-                    "head": "c_t8_jacket_head",
-                    "arms": "c_t8_jacket_arms",
-                    "legs": "c_t8_jacket_legs",
-                    "portrait": "jacket_portrait",
-                    "icon": "jacket_icon",
-                    "dialog": "jacket",
-                    "images": {
-                        "0x50": "",
-                        "0x58": "jacket_render",
-                        "0x60": "jacket_action"
-                    },
-                    "bundle": {
-                        "hash_215ac9daad709de1": "jacket_bio_header",
-                        "hash_38ea74cad0150cdf": "jacket_card",
-                        "hash_39baaa080c62d5e5": "jacket_story",
-                        "hash_5b2781a0b1bf2b7a": "jacket_emblem",
-                        "hash_32ca7e775f99d218": "jacket",
-                        "hash_3db969b978e2aba8": 0
-                    },
-                    "texts": {
-                        "hash_10cb98543e7ec137": "JACKET",
-                        "hash_13c8379c2b98a9c6": "JACKET - Midnight Animal",
-                        "hash_16d4e2fc988858de": "Jacket",
-                        "hash_541919134fdff1": "Jacket's Bio",
-                        "hash_438e8b2f52f5538b": "A silent killer in a rooster mask, speaking only through his tapes.",
-                        "hash_2299bc20d2a6cd8": "Nobody knows his name. In Miami, 1989, the phone rang with a message on the machine, and a man in a letterman jacket put on a rooster mask and went to work.\n\nYears later he turned up with the Payday crew: he never says a word of his own, only what his cassette tapes say for him - ads, nature shows, self-help, airline greetings. The crew stopped asking. The job always gets done."
-                    },
-                    "outfits": [
-                        {
-                            "index": 0,
-                            "name": "Jacket",
-                            "icon": "jacket_outfit_default"
-                        }
-                    ],
-                    "outfit_count": 1,
-                    "role_bundle": {
-                        "characterint4": 0,
-                        "characterint5": 0,
-                        "characterint6": 0,
-                        "characterint7": 0,
-                        "characterint8": 0
-                    },
-                    "specialist_weapon": "jacket_the_punch",
-                    "lend_war_paints": true
-                },
-                {
-                    "name": "jacket",
-                    "mode": "wz",
-                    "base_role": 9,
-                    "role_slot": 6,
-                    "display_name": "Jacket",
-                    "title": "Midnight Animal",
-                    "description": "Jacket never says a word of his own: strike unseen with Active Camo and carve through the fight with the Ripper.",
-                    "body": "c_t8_jacket",
-                    "head": "c_t8_jacket_head",
-                    "arms": "c_t8_jacket_arms",
-                    "legs": "c_t8_jacket_legs",
-                    "portrait": "jacket_portrait",
-                    "icon": "jacket_icon",
-                    "dialog": "jacket",
-                    "images": {
-                        "0x50": "",
-                        "0x58": "jacket_render",
-                        "0x60": "jacket_action"
-                    },
-                    "bundle": {
-                        "hash_215ac9daad709de1": "jacket_bio_header",
-                        "hash_38ea74cad0150cdf": "jacket_card",
-                        "hash_39baaa080c62d5e5": "jacket_story",
-                        "hash_5b2781a0b1bf2b7a": "jacket_emblem",
-                        "hash_32ca7e775f99d218": "jacket",
-                        "hash_3db969b978e2aba8": 0
-                    },
-                    "texts": {
-                        "hash_10cb98543e7ec137": "JACKET",
-                        "hash_13c8379c2b98a9c6": "JACKET - Midnight Animal",
-                        "hash_16d4e2fc988858de": "Jacket",
-                        "hash_541919134fdff1": "Jacket's Bio",
-                        "hash_438e8b2f52f5538b": "A silent killer in a rooster mask, speaking only through his tapes.",
-                        "hash_2299bc20d2a6cd8": "Nobody knows his name. In Miami, 1989, the phone rang with a message on the machine, and a man in a letterman jacket put on a rooster mask and went to work.\n\nYears later he turned up with the Payday crew: he never says a word of his own, only what his cassette tapes say for him - ads, nature shows, self-help, airline greetings. The crew stopped asking. The job always gets done."
-                    },
-                    "outfits": [
-                        {
-                            "index": 0,
-                            "name": "Jacket",
-                            "icon": "jacket_outfit_default"
-                        }
-                    ],
-                    "outfit_count": 1,
-                    "role_bundle": {
-                        "characterint4": 0,
-                        "characterint5": 0,
-                        "characterint6": 0,
-                        "characterint7": 0,
-                        "characterint8": 0
-                    },
-                    "lend_war_paints": true
-                },
-                {
                     "name": "crew_scarlett",
                     "mode": "mp",
                     "base_role": 1,
@@ -2302,6 +2195,434 @@
                     }
                 },
                 {
+                    "name": "stan",
+                    "mode": "mp",
+                    "base_role": 1,
+                    "role_slot": 78,
+                    "display_name": "Stan Smith",
+                    "title": "CIA",
+                    "description": "Langley Falls' finest CIA agent pushes forward behind a ballistic shield and clears rooms with the 9-Bang.",
+                    "body": "c_t8_stan",
+                    "head": "c_t8_stan_head",
+                    "arms": "c_t8_stan_arms",
+                    "legs": "c_t8_stan_legs",
+                    "portrait": "stan_portrait",
+                    "icon": "stan_icon",
+                    "dialog": "stan",
+                    "images": {
+                        "0x50": "",
+                        "0x58": "stan_render",
+                        "0x60": "stan_action"
+                    },
+                    "bundle": {
+                        "hash_215ac9daad709de1": "stan_bio_header",
+                        "hash_38ea74cad0150cdf": "stan_card",
+                        "hash_39baaa080c62d5e5": "stan_story",
+                        "hash_5b2781a0b1bf2b7a": "stan_emblem",
+                        "hash_32ca7e775f99d218": "stan",
+                        "hash_3db969b978e2aba8": 0
+                    },
+                    "texts": {
+                        "hash_10cb98543e7ec137": "STAN SMITH",
+                        "hash_13c8379c2b98a9c6": "STAN SMITH - CIA",
+                        "hash_16d4e2fc988858de": "Stan Smith",
+                        "hash_541919134fdff1": "Stan Smith's Bio",
+                        "hash_438e8b2f52f5538b": "A CIA agent who never met a problem he couldn't shoot.",
+                        "hash_2299bc20d2a6cd8": "CIA agent, proud patriot and the most dangerous father in Langley Falls. Stan Smith keeps his family safe, his country free and his chin pointed at the enemy.\n\nHe'll defend the American way with any weapon he can carry, and a few he probably shouldn't."
+                    },
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "Stan Smith",
+                            "icon": "stan_outfit_default"
+                        }
+                    ],
+                    "outfit_count": 1,
+                    "role_bundle": {
+                        "characterint4": 0,
+                        "characterint5": 0,
+                        "characterint6": 0,
+                        "characterint7": 0,
+                        "characterint8": 0
+                    }
+                },
+                {
+                    "name": "stan",
+                    "mode": "wz",
+                    "base_role": 7,
+                    "role_slot": 11,
+                    "display_name": "Stan Smith",
+                    "title": "CIA",
+                    "description": "Langley Falls' finest CIA agent.",
+                    "body": "c_t8_stan",
+                    "head": "c_t8_stan_head",
+                    "arms": "c_t8_stan_arms",
+                    "legs": "c_t8_stan_legs",
+                    "portrait": "stan_portrait",
+                    "icon": "stan_icon",
+                    "dialog": "stan",
+                    "images": {
+                        "0x50": "",
+                        "0x58": "stan_render",
+                        "0x60": "stan_action"
+                    },
+                    "bundle": {
+                        "hash_215ac9daad709de1": "stan_bio_header",
+                        "hash_38ea74cad0150cdf": "stan_card",
+                        "hash_39baaa080c62d5e5": "stan_story",
+                        "hash_5b2781a0b1bf2b7a": "stan_emblem",
+                        "hash_32ca7e775f99d218": "stan",
+                        "hash_3db969b978e2aba8": 0
+                    },
+                    "texts": {
+                        "hash_10cb98543e7ec137": "STAN SMITH",
+                        "hash_13c8379c2b98a9c6": "STAN SMITH - CIA",
+                        "hash_16d4e2fc988858de": "Stan Smith",
+                        "hash_541919134fdff1": "Stan Smith's Bio",
+                        "hash_438e8b2f52f5538b": "A CIA agent who never met a problem he couldn't shoot.",
+                        "hash_2299bc20d2a6cd8": "CIA agent, proud patriot and the most dangerous father in Langley Falls. Stan Smith keeps his family safe, his country free and his chin pointed at the enemy.\n\nHe'll defend the American way with any weapon he can carry, and a few he probably shouldn't."
+                    },
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "Stan Smith",
+                            "icon": "stan_outfit_default"
+                        }
+                    ],
+                    "outfit_count": 1,
+                    "role_bundle": {
+                        "characterint4": 0,
+                        "characterint5": 0,
+                        "characterint6": 0,
+                        "characterint7": 0,
+                        "characterint8": 0
+                    }
+                },
+                {
+                    "name": "jacket",
+                    "mode": "mp",
+                    "base_role": 13,
+                    "role_slot": 73,
+                    "display_name": "Jacket",
+                    "title": "Midnight Animal",
+                    "description": "Jacket never says a word of his own: strike unseen with Active Camo and carve through the fight with the Ripper.",
+                    "body": "c_t8_jacket",
+                    "head": "c_t8_jacket_head",
+                    "arms": "c_t8_jacket_arms",
+                    "legs": "c_t8_jacket_legs",
+                    "portrait": "jacket_portrait",
+                    "icon": "jacket_icon",
+                    "dialog": "jacket",
+                    "images": {
+                        "0x50": "",
+                        "0x58": "jacket_render",
+                        "0x60": "jacket_action"
+                    },
+                    "bundle": {
+                        "hash_215ac9daad709de1": "jacket_bio_header",
+                        "hash_38ea74cad0150cdf": "jacket_card",
+                        "hash_39baaa080c62d5e5": "jacket_story",
+                        "hash_5b2781a0b1bf2b7a": "jacket_emblem",
+                        "hash_32ca7e775f99d218": "jacket",
+                        "hash_3db969b978e2aba8": 0
+                    },
+                    "texts": {
+                        "hash_10cb98543e7ec137": "JACKET",
+                        "hash_13c8379c2b98a9c6": "JACKET - Midnight Animal",
+                        "hash_16d4e2fc988858de": "Jacket",
+                        "hash_541919134fdff1": "Jacket's Bio",
+                        "hash_438e8b2f52f5538b": "A silent killer in a rooster mask, speaking only through his tapes.",
+                        "hash_2299bc20d2a6cd8": "Nobody knows his name. In Miami, 1989, the phone rang with a message on the machine, and a man in a letterman jacket put on a rooster mask and went to work.\n\nYears later he turned up with the Payday crew: he never says a word of his own, only what his cassette tapes say for him - ads, nature shows, self-help, airline greetings. The crew stopped asking. The job always gets done."
+                    },
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "Jacket",
+                            "icon": "jacket_outfit_default"
+                        }
+                    ],
+                    "outfit_count": 1,
+                    "lend_war_paints": true,
+                    "role_bundle": {
+                        "characterint4": 0,
+                        "characterint5": 0,
+                        "characterint6": 0,
+                        "characterint7": 0,
+                        "characterint8": 0
+                    },
+                    "specialist_weapon": "jacket_the_punch"
+                },
+                {
+                    "name": "jacket",
+                    "mode": "wz",
+                    "base_role": 9,
+                    "role_slot": 6,
+                    "display_name": "Jacket",
+                    "title": "Midnight Animal",
+                    "description": "Jacket never says a word of his own: strike unseen with Active Camo and carve through the fight with the Ripper.",
+                    "body": "c_t8_jacket",
+                    "head": "c_t8_jacket_head",
+                    "arms": "c_t8_jacket_arms",
+                    "legs": "c_t8_jacket_legs",
+                    "portrait": "jacket_portrait",
+                    "icon": "jacket_icon",
+                    "dialog": "jacket",
+                    "images": {
+                        "0x50": "",
+                        "0x58": "jacket_render",
+                        "0x60": "jacket_action"
+                    },
+                    "bundle": {
+                        "hash_215ac9daad709de1": "jacket_bio_header",
+                        "hash_38ea74cad0150cdf": "jacket_card",
+                        "hash_39baaa080c62d5e5": "jacket_story",
+                        "hash_5b2781a0b1bf2b7a": "jacket_emblem",
+                        "hash_32ca7e775f99d218": "jacket",
+                        "hash_3db969b978e2aba8": 0
+                    },
+                    "texts": {
+                        "hash_10cb98543e7ec137": "JACKET",
+                        "hash_13c8379c2b98a9c6": "JACKET - Midnight Animal",
+                        "hash_16d4e2fc988858de": "Jacket",
+                        "hash_541919134fdff1": "Jacket's Bio",
+                        "hash_438e8b2f52f5538b": "A silent killer in a rooster mask, speaking only through his tapes.",
+                        "hash_2299bc20d2a6cd8": "Nobody knows his name. In Miami, 1989, the phone rang with a message on the machine, and a man in a letterman jacket put on a rooster mask and went to work.\n\nYears later he turned up with the Payday crew: he never says a word of his own, only what his cassette tapes say for him - ads, nature shows, self-help, airline greetings. The crew stopped asking. The job always gets done."
+                    },
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "Jacket",
+                            "icon": "jacket_outfit_default"
+                        }
+                    ],
+                    "outfit_count": 1,
+                    "lend_war_paints": true,
+                    "role_bundle": {
+                        "characterint4": 0,
+                        "characterint5": 0,
+                        "characterint6": 0,
+                        "characterint7": 0,
+                        "characterint8": 0
+                    }
+                },
+                {
+                    "name": "arthur",
+                    "mode": "mp",
+                    "base_role": 8,
+                    "role_slot": 79,
+                    "display_name": "Arthur Morgan",
+                    "title": "Van der Linde Gang",
+                    "description": "Arthur Morgan rides for the Van der Linde gang: close the distance with the Grapple Gun and settle it with the Annihilator.",
+                    "body": "c_t8_arthur",
+                    "head": "c_t8_arthur_head",
+                    "arms": "c_t8_arthur_arms",
+                    "legs": "c_t8_arthur_legs",
+                    "portrait": "arthur_portrait",
+                    "icon": "arthur_icon",
+                    "dialog": "arthur",
+                    "images": {
+                        "0x50": "",
+                        "0x58": "arthur_render",
+                        "0x60": "arthur_action"
+                    },
+                    "bundle": {
+                        "hash_215ac9daad709de1": "arthur_bio_header",
+                        "hash_38ea74cad0150cdf": "arthur_card",
+                        "hash_39baaa080c62d5e5": "arthur_story",
+                        "hash_5b2781a0b1bf2b7a": "arthur_emblem",
+                        "hash_32ca7e775f99d218": "arthur",
+                        "hash_3db969b978e2aba8": 0
+                    },
+                    "texts": {
+                        "hash_10cb98543e7ec137": "ARTHUR",
+                        "hash_13c8379c2b98a9c6": "ARTHUR - Van der Linde Gang",
+                        "hash_16d4e2fc988858de": "Arthur Morgan",
+                        "hash_541919134fdff1": "Arthur's Bio",
+                        "hash_438e8b2f52f5538b": "An outlaw of the Van der Linde gang, its enforcer and its best gun.",
+                        "hash_2299bc20d2a6cd8": "Taken in as a boy by Dutch van der Linde, Arthur Morgan grew up an outlaw: the gang's enforcer, its best gun and the one sent to collect what was owed.\n\nIn 1899 the law closed in, the gang ran, and the West they knew was dying around them. Arthur kept riding, kept fighting, and kept his word to the people he chose to stand by."
+                    },
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "Arthur Morgan",
+                            "icon": "arthur_outfit_default"
+                        }
+                    ],
+                    "outfit_count": 1,
+                    "war_paints": {
+                        "face": "arthur_head_paint_mat",
+                        "over": "hash_5ddabd25dfe13d0a"
+                    },
+                    "role_bundle": {
+                        "characterint4": 0,
+                        "characterint5": 0,
+                        "characterint6": 0,
+                        "characterint7": 0,
+                        "characterint8": 0
+                    },
+                    "specialist_weapon": "hero_annihilator"
+                },
+                {
+                    "name": "arthur",
+                    "mode": "wz",
+                    "base_role": 5,
+                    "role_slot": 12,
+                    "display_name": "Arthur Morgan",
+                    "title": "Van der Linde Gang",
+                    "description": "Arthur Morgan rides for the Van der Linde gang: close the distance with the Grapple Gun and settle it with the Annihilator.",
+                    "body": "c_t8_arthur",
+                    "head": "c_t8_arthur_head",
+                    "arms": "c_t8_arthur_arms",
+                    "legs": "c_t8_arthur_legs",
+                    "portrait": "arthur_portrait",
+                    "icon": "arthur_icon",
+                    "dialog": "arthur",
+                    "images": {
+                        "0x50": "",
+                        "0x58": "arthur_render",
+                        "0x60": "arthur_action"
+                    },
+                    "bundle": {
+                        "hash_215ac9daad709de1": "arthur_bio_header",
+                        "hash_38ea74cad0150cdf": "arthur_card",
+                        "hash_39baaa080c62d5e5": "arthur_story",
+                        "hash_5b2781a0b1bf2b7a": "arthur_emblem",
+                        "hash_32ca7e775f99d218": "arthur",
+                        "hash_3db969b978e2aba8": 0
+                    },
+                    "texts": {
+                        "hash_10cb98543e7ec137": "ARTHUR",
+                        "hash_13c8379c2b98a9c6": "ARTHUR - Van der Linde Gang",
+                        "hash_16d4e2fc988858de": "Arthur Morgan",
+                        "hash_541919134fdff1": "Arthur's Bio",
+                        "hash_438e8b2f52f5538b": "An outlaw of the Van der Linde gang, its enforcer and its best gun.",
+                        "hash_2299bc20d2a6cd8": "Taken in as a boy by Dutch van der Linde, Arthur Morgan grew up an outlaw: the gang's enforcer, its best gun and the one sent to collect what was owed.\n\nIn 1899 the law closed in, the gang ran, and the West they knew was dying around them. Arthur kept riding, kept fighting, and kept his word to the people he chose to stand by."
+                    },
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "Arthur Morgan",
+                            "icon": "arthur_outfit_default"
+                        }
+                    ],
+                    "outfit_count": 1,
+                    "war_paints": {
+                        "face": "arthur_head_paint_mat",
+                        "over": "hash_5ddabd25dfe13d0a"
+                    },
+                    "role_bundle": {
+                        "characterint4": 0,
+                        "characterint5": 0,
+                        "characterint6": 0,
+                        "characterint7": 0,
+                        "characterint8": 0
+                    }
+                },
+                {
+                    "name": "scp049",
+                    "mode": "mp",
+                    "base_role": 3,
+                    "role_slot": 80,
+                    "display_name": "SCP-049",
+                    "title": "The Plague Doctor",
+                    "description": "SCP-049 believes he is the cure: keep the squad standing with the Tak-5 and resupply it with the Assault Pack.",
+                    "body": "c_t8_scp049",
+                    "head": "c_t8_scp049_head",
+                    "arms": "c_t8_scp049_arms",
+                    "legs": "c_t8_scp049_legs",
+                    "portrait": "scp049_portrait",
+                    "icon": "scp049_icon",
+                    "dialog": "scp049",
+                    "images": {
+                        "0x50": "",
+                        "0x58": "scp049_render",
+                        "0x60": "scp049_action"
+                    },
+                    "bundle": {
+                        "hash_215ac9daad709de1": "scp049_bio_header",
+                        "hash_38ea74cad0150cdf": "scp049_card",
+                        "hash_39baaa080c62d5e5": "scp049_story",
+                        "hash_5b2781a0b1bf2b7a": "scp049_emblem",
+                        "hash_32ca7e775f99d218": "scp049",
+                        "hash_3db969b978e2aba8": 0
+                    },
+                    "texts": {
+                        "hash_10cb98543e7ec137": "SCP-049",
+                        "hash_13c8379c2b98a9c6": "SCP-049 - The Plague Doctor",
+                        "hash_16d4e2fc988858de": "SCP-049",
+                        "hash_541919134fdff1": "Containment File",
+                        "hash_438e8b2f52f5538b": "A Euclid-class humanoid who believes he is the cure for a pestilence only he can see.",
+                        "hash_2299bc20d2a6cd8": "Object Class: Euclid.\n\nA tall humanoid in the robes and beaked mask of a plague doctor, soft-spoken and courteous to the last. He is certain the world is sick with \"the Pestilence\", and that he alone is its cure: his touch stops a heart, his surgery raises what is left.\n\nIt was only a matter of time before the containment breach."
+                    },
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "SCP-049",
+                            "icon": "scp049_outfit_default"
+                        }
+                    ],
+                    "outfit_count": 1,
+                    "role_bundle": {
+                        "characterint4": 0,
+                        "characterint5": 0,
+                        "characterint6": 0,
+                        "characterint7": 0,
+                        "characterint8": 0
+                    }
+                },
+                {
+                    "name": "scp049",
+                    "mode": "wz",
+                    "base_role": 8,
+                    "role_slot": 13,
+                    "display_name": "SCP-049",
+                    "title": "The Plague Doctor",
+                    "description": "SCP-049 believes he is the cure: keep the squad standing with the Tak-5 and resupply it with the Assault Pack.",
+                    "body": "c_t8_scp049",
+                    "head": "c_t8_scp049_head",
+                    "arms": "c_t8_scp049_arms",
+                    "legs": "c_t8_scp049_legs",
+                    "portrait": "scp049_portrait",
+                    "icon": "scp049_icon",
+                    "dialog": "scp049",
+                    "images": {
+                        "0x50": "",
+                        "0x58": "scp049_render",
+                        "0x60": "scp049_action"
+                    },
+                    "bundle": {
+                        "hash_215ac9daad709de1": "scp049_bio_header",
+                        "hash_38ea74cad0150cdf": "scp049_card",
+                        "hash_39baaa080c62d5e5": "scp049_story",
+                        "hash_5b2781a0b1bf2b7a": "scp049_emblem",
+                        "hash_32ca7e775f99d218": "scp049",
+                        "hash_3db969b978e2aba8": 0
+                    },
+                    "texts": {
+                        "hash_10cb98543e7ec137": "SCP-049",
+                        "hash_13c8379c2b98a9c6": "SCP-049 - The Plague Doctor",
+                        "hash_16d4e2fc988858de": "SCP-049",
+                        "hash_541919134fdff1": "Containment File",
+                        "hash_438e8b2f52f5538b": "A Euclid-class humanoid who believes he is the cure for a pestilence only he can see.",
+                        "hash_2299bc20d2a6cd8": "Object Class: Euclid.\n\nA tall humanoid in the robes and beaked mask of a plague doctor, soft-spoken and courteous to the last. He is certain the world is sick with \"the Pestilence\", and that he alone is its cure: his touch stops a heart, his surgery raises what is left.\n\nIt was only a matter of time before the containment breach."
+                    },
+                    "outfits": [
+                        {
+                            "index": 0,
+                            "name": "SCP-049",
+                            "icon": "scp049_outfit_default"
+                        }
+                    ],
+                    "outfit_count": 1,
+                    "role_bundle": {
+                        "characterint4": 0,
+                        "characterint5": 0,
+                        "characterint6": 0,
+                        "characterint7": 0,
+                        "characterint8": 0
+                    }
+                },
+                {
                     "name": "zm_wesker",
                     "mode": "zm",
                     "base_role": 13,
@@ -3081,108 +3402,53 @@
                     "role_slot": 84
                 },
                 {
-                    "name": "stan",
-                    "mode": "mp",
-                    "base_role": 1,
-                    "role_slot": 78,
-                    "display_name": "Stan Smith",
-                    "title": "CIA",
-                    "description": "Langley Falls' finest CIA agent pushes forward behind a ballistic shield and clears rooms with the 9-Bang.",
-                    "body": "c_t8_stan",
-                    "head": "c_t8_stan_head",
-                    "arms": "c_t8_stan_arms",
-                    "legs": "c_t8_stan_legs",
-                    "portrait": "stan_portrait",
-                    "icon": "stan_icon",
-                    "dialog": "stan",
-                    "images": {
-                        "0x50": "",
-                        "0x58": "stan_render",
-                        "0x60": "stan_action"
-                    },
-                    "bundle": {
-                        "hash_215ac9daad709de1": "stan_bio_header",
-                        "hash_38ea74cad0150cdf": "stan_card",
-                        "hash_39baaa080c62d5e5": "stan_story",
-                        "hash_5b2781a0b1bf2b7a": "stan_emblem",
-                        "hash_32ca7e775f99d218": "stan",
-                        "hash_3db969b978e2aba8": 0
-                    },
-                    "texts": {
-                        "hash_10cb98543e7ec137": "STAN SMITH",
-                        "hash_13c8379c2b98a9c6": "STAN SMITH - CIA",
-                        "hash_16d4e2fc988858de": "Stan Smith",
-                        "hash_541919134fdff1": "Stan Smith's Bio",
-                        "hash_438e8b2f52f5538b": "A CIA agent who never met a problem he couldn't shoot.",
-                        "hash_2299bc20d2a6cd8": "CIA agent, proud patriot and the most dangerous father in Langley Falls. Stan Smith keeps his family safe, his country free and his chin pointed at the enemy.\n\nHe'll defend the American way with any weapon he can carry, and a few he probably shouldn't."
-                    },
+                    "name": "zm_arthur",
+                    "mode": "zm",
+                    "base_role": 13,
+                    "display_name": "Arthur Morgan",
+                    "description": "Arthur Morgan rides for the Van der Linde gang: close the distance with the Grapple Gun and settle it with the Annihilator.",
+                    "body": "c_t8_arthur",
+                    "head": "c_t8_arthur_head",
+                    "arms": "c_t8_arthur_arms",
+                    "legs": "c_t8_arthur_legs",
+                    "portrait": "arthur_portrait",
+                    "icon": "arthur_icon",
                     "outfits": [
                         {
                             "index": 0,
-                            "name": "Stan Smith",
-                            "icon": "stan_outfit_default"
+                            "name": "Arthur Morgan",
+                            "icon": "arthur_outfit_default"
                         }
                     ],
                     "outfit_count": 1,
-                    "role_bundle": {
-                        "characterint4": 0,
-                        "characterint5": 0,
-                        "characterint6": 0,
-                        "characterint7": 0,
-                        "characterint8": 0
-                    }
+                    "war_paints": {
+                        "face": "arthur_head_paint_mat"
+                    },
+                    "voice": 101,
+                    "role_slot": 85
                 },
                 {
-                    "name": "stan",
-                    "mode": "wz",
-                    "base_role": 7,
-                    "role_slot": 11,
-                    "display_name": "Stan Smith",
-                    "title": "CIA",
-                    "description": "Langley Falls' finest CIA agent.",
-                    "body": "c_t8_stan",
-                    "head": "c_t8_stan_head",
-                    "arms": "c_t8_stan_arms",
-                    "legs": "c_t8_stan_legs",
-                    "portrait": "stan_portrait",
-                    "icon": "stan_icon",
-                    "dialog": "stan",
-                    "images": {
-                        "0x50": "",
-                        "0x58": "stan_render",
-                        "0x60": "stan_action"
-                    },
-                    "bundle": {
-                        "hash_215ac9daad709de1": "stan_bio_header",
-                        "hash_38ea74cad0150cdf": "stan_card",
-                        "hash_39baaa080c62d5e5": "stan_story",
-                        "hash_5b2781a0b1bf2b7a": "stan_emblem",
-                        "hash_32ca7e775f99d218": "stan",
-                        "hash_3db969b978e2aba8": 0
-                    },
-                    "texts": {
-                        "hash_10cb98543e7ec137": "STAN SMITH",
-                        "hash_13c8379c2b98a9c6": "STAN SMITH - CIA",
-                        "hash_16d4e2fc988858de": "Stan Smith",
-                        "hash_541919134fdff1": "Stan Smith's Bio",
-                        "hash_438e8b2f52f5538b": "A CIA agent who never met a problem he couldn't shoot.",
-                        "hash_2299bc20d2a6cd8": "CIA agent, proud patriot and the most dangerous father in Langley Falls. Stan Smith keeps his family safe, his country free and his chin pointed at the enemy.\n\nHe'll defend the American way with any weapon he can carry, and a few he probably shouldn't."
-                    },
+                    "name": "zm_scp049",
+                    "mode": "zm",
+                    "base_role": 13,
+                    "display_name": "SCP-049",
+                    "description": "SCP-049 believes he is the cure: keep the squad standing with the Tak-5 and resupply it with the Assault Pack.",
+                    "body": "c_t8_scp049",
+                    "head": "c_t8_scp049_head",
+                    "arms": "c_t8_scp049_arms",
+                    "legs": "c_t8_scp049_legs",
+                    "portrait": "scp049_portrait",
+                    "icon": "scp049_icon",
                     "outfits": [
                         {
                             "index": 0,
-                            "name": "Stan Smith",
-                            "icon": "stan_outfit_default"
+                            "name": "SCP-049",
+                            "icon": "scp049_outfit_default"
                         }
                     ],
                     "outfit_count": 1,
-                    "role_bundle": {
-                        "characterint4": 0,
-                        "characterint5": 0,
-                        "characterint6": 0,
-                        "characterint7": 0,
-                        "characterint8": 0
-                    }
+                    "voice": 102,
+                    "role_slot": 86
                 }
             ],
             "outfit_adds": [

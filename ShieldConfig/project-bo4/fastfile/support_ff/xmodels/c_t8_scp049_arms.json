@@ -1,0 +1,12 @@
+{
+    "name": "c_t8_scp049_arms",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/scp049/scp049_arms.gltf",
+    "skeleton": "../skeletons/zm_viewarms.json",
+    "hitboxes": "mesh",
+    "materials": {
+        "scp049_cloth": "materials/scp049_cloth_mat.json"
+    },
+    "collision": "none"
+}

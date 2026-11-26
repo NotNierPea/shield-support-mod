@@ -1,0 +1,14 @@
+{
+    "name": "c_t8_scp049_legs",
+    "templateModel": "../templates/xmodel_rigid.json",
+    "templateMesh": "../templates/xmodelmesh_rigid.json",
+    "gltf": "../characters/scp049/scp049_legs.gltf",
+    "skeleton": "../skeletons/mp_body.json",
+    "hitboxes": "skeleton",
+    "materials": {
+        "scp049_boots": "materials/scp049_boots_mat.json",
+        "scp049_cloth": "materials/scp049_cloth_mat.json"
+    },
+    "collision": "none",
+    "skeletonPositions": "gltf"
+}

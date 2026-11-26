@@ -256,6 +256,44 @@ end
 	process that hosts it now ends that one first, as the game does before hosting in its other processes. Each
 	deploy notes what was there, to see in project-bo4.log whether that was it.
 ]]
+--[[
+	A dedicated server of the client can host its public lobby without joining it (setting host_outside_lobby, an
+	experiment): the game's own dedicated servers do (Engine.IsDedicatedServer leaves LobbyInfoProbe and
+	LobbyJoinXUID of the host's own xuid out of CreateAsyncMatchmakingLobby). The server sets dvar
+	shield_dedicated_outside; while the process is made, those two actions are ones that do nothing.
+]]
+local function IsHostOutside()
+	local dvar = Dvar[@"shield_dedicated_outside"]
+	if dvar == nil or not dvar:exists() then
+		return false
+	end
+
+	local value = tostring( dvar:get() )
+	return value == "1" or value == "true"
+end
+
+local function HostOutside( create, ... )
+	local actions = Lobby.Actions
+	if not IsHostOutside() or type( actions ) ~= "table" or type( actions.ExecuteScript ) ~= "function" then
+		return create( ... )
+	end
+
+	local probe = actions.LobbyInfoProbe
+	local join = actions.LobbyJoinXUID
+	local skip = function ()
+		return actions.ExecuteScript( function () end )
+	end
+
+	actions.LobbyInfoProbe = skip
+	actions.LobbyJoinXUID = skip
+	local queued = create( ... )
+	actions.LobbyInfoProbe = probe
+	actions.LobbyJoinXUID = join
+
+	Note( "dedicated: the game lobby is hosted without the server joining it" )
+	return queued
+end
+
 local function WrapHostStart()
 	local process = Lobby.Process
 	local actions = Lobby.Actions
@@ -273,7 +311,7 @@ local function WrapHostStart()
 	local create = process.CreateAsyncMatchmakingLobby
 
 	process.CreateAsyncMatchmakingLobby = function ( ... )
-		local queued = create( ... )
+		local queued = HostOutside( create, ... )
 
 		local gameType = Enum[@"lobbytype"][@"lobby_type_game"]
 		local hosted = Engine[@"islobbyactive"]( Enum[@"lobbymodule"][@"lobby_module_host"], gameType )

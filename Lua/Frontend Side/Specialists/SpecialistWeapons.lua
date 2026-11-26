@@ -20,7 +20,7 @@ CoD.ShieldInitLuaFile()
 	Annihilator). The game gives the role's weapon, but the character select and Specialist HQ show the role's default class
 	(GetPositionRoleDefaultInfo: its herogadget, the base role's: Ruin's Grav Spikes). For a character of these, found by its
 	list picture (positionDraftIcon), the ability shown is the stock specialist's item whose weapon ours copies (its stats,
-	its item index) with our name, description and icon.
+	its item index) with our name, description and icon (none given: the stock one's, Arthur's Annihilator is Seraph's own).
 ]]
 local MODE = Enum[@"emodes"][@"mode_multiplayer"]
 
@@ -36,6 +36,9 @@ local Weapons = {
 		displayName = @"jacket/weapons/the_punch",
 		description = @"jacket/weapons/the_punch_desc",
 		image = @"jacket_bat_icon"
+	},
+	[@"arthur_portrait"] = {
+		from = 9 -- Seraph (her Annihilator, his own as it is)
 	}
 }
 
@@ -105,9 +108,9 @@ local function Install()
 			for k, v in pairs( stock and stock.ability or info.ability or {} ) do
 				ability[k] = v
 			end
-			ability.displayName = ours.displayName
-			ability.description = ours.description
-			ability.image = ours.image
+			ability.displayName = ours.displayName or ability.displayName
+			ability.description = ours.description or ability.description
+			ability.image = ours.image or ability.image
 			info.ability = ability
 		end
 		return info

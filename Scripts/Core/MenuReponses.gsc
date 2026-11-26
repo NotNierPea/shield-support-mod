@@ -147,6 +147,14 @@ ZombiesOutfitOnSpawned()
 
     // (after zm_characters' outfit 0)
     waitframe(1);
+    // bots: an outfit of their character's (ShieldBotOutfit), kept for the match
+    if(isbot(self) && isdefined(self.characterindex))
+    {
+        if(!isdefined(self.shield_outfits))
+         self.shield_outfits = [];
+        if(!isdefined(self.shield_outfits[self.characterindex]))
+         self.shield_outfits[self.characterindex] = ShieldBotOutfit(self.characterindex);
+    }
     self ApplyZombiesOutfit();
     BroadcastZombiesOutfits();
 }

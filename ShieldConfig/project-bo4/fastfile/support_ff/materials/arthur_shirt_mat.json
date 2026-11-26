@@ -1,0 +1,16 @@
+{
+    "name": "arthur_shirt_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "arthur_shirt.png",
+        "normalMap": "arthur_shirt_n.png,linear",
+        "glossMap": "#hash_903dd7f6bd2ee1ed",
+        "aoMap": "#hash_bfd1eb9d1e41b805"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            3
+        ]
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "name": "arthur_eyebrows_mat",
+    "template": "../templates/material_clip.json",
+    "textures": {
+        "colorMap": "arthur_eyebrows.png",
+        "specColorMap": "#hash_26c8688ba5b9e6b2",
+        "normalMap": "arthur_eyebrows_n.png,linear",
+        "glossMap": "#hash_903dd7f6bd2ee1ed",
+        "aoMap": "#hash_bfd1eb9d1e41b805"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            4
+        ]
+    }
+}

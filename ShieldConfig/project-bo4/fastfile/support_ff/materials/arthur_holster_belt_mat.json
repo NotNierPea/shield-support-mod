@@ -1,0 +1,16 @@
+{
+    "name": "arthur_holster_belt_mat",
+    "template": "../templates/material_model.json",
+    "textures": {
+        "colorMap": "arthur_holster_belt.png",
+        "normalMap": "arthur_holster_belt_n.png,linear",
+        "glossMap": "#hash_903dd7f6bd2ee1ed",
+        "aoMap": "#hash_bfd1eb9d1e41b805"
+    },
+    "values": {
+        "glossRange": [
+            0,
+            6
+        ]
+    }
+}
